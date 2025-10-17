@@ -6,8 +6,6 @@
  * @date  
  * @see    
  * @author 
- * @author 
- * @author 
  * @bug    
  * @brief  
  */
