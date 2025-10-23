@@ -26,10 +26,12 @@ Lion::Lion() : lion_props(PropsB1(), PropsB2(), PropsWeightDecay()) {
 
 Lion::~Lion() {}
 
-enum LionParams { exp_avg };
+enum LionParams { m };
 
 std::vector<TensorDim> Lion::getOptimizerVariableDim(const TensorDim &dim) {
-  return {dim};
+  TensorDim m_dim(dim);
+  m_dim.setDataType(ml::train::TensorDim::DataType::FP32);
+  return {m_dim};
 }
 
 void Lion::exportTo(Exporter &exporter,
@@ -44,37 +46,52 @@ void Lion::setProperty(const std::vector<std::string> &values) {
 }
 
 void Lion::applyGradient(RunOptimizerContext &context) {
-  Tensor &grad = context.getGradient();
-  if (grad.empty())
-    return;
+  // 1. Get Tensors and Properties
+  Tensor empty_tensor;
+  Tensor &x_grad =
+    context.getGradient().getDataType() == ml::train::TensorDim::DataType::FP32
+      ? context.getGradient()
+      : empty_tensor;
 
-  context.applyLossScale(grad);
+  if (x_grad.empty()) {
+    x_grad = context.getGradient().clone(ml::train::TensorDim::DataType::FP32);
+  }
+  
+  context.applyLossScale(x_grad);
+
+  Tensor &m = context.getOptimizerVariable(LionParams::m);
 
   auto &beta1 = std::get<PropsB1>(lion_props).get();
   auto &beta2 = std::get<PropsB2>(lion_props).get();
   auto &weight_decay = std::get<PropsWeightDecay>(lion_props).get();
-
-  Tensor &param = context.getWeight();
-  Tensor &exp_avg = context.getOptimizerVariable(LionParams::exp_avg);
-
   float lr = context.getLearningRate();
 
-  /** Weight decay */
-  if (weight_decay > 0.0f) {
-    param.multiply_i(1.0f - lr * weight_decay);
+  // 2. Calculate interpolated momentum: c_t = beta1 * m_t + (1 - beta1) * g_t
+  Tensor update_vec = m.clone();
+  update_vec.multiply_i(beta1);
+  update_vec.add_i(x_grad, 1.0 - beta1);
+
+  // 3. Update momentum for next iteration: m_{t+1} = beta2 * m_t + (1 - beta2) * g_t
+  m.multiply_i(beta2);
+  m.add_i(x_grad, 1.0 - beta2);
+
+  // 4. Take the sign of the interpolated momentum
+  std::function<float(float)> sign_func = [](float val) {
+    if (val > 0.0f) return 1.0f;
+    if (val < 0.0f) return -1.0f;
+    return 0.0f;
+  };
+  update_vec.apply_i<float>(sign_func);
+
+  // 5. Add decoupled weight decay term.
+  // Effective gradient becomes: sign(c_t) + weight_decay * weight_t
+  if (weight_decay > 0.0) {
+    Tensor &weight = context.getWeight();
+    update_vec.add_i(weight, weight_decay);
   }
 
-  /** update = beta1 * exp_avg + (1 - beta1) * grad */
-  Tensor update = exp_avg.multiply(beta1);
-  update.add_i(grad, 1.0f - beta1);
-
-  /** param = param - lr * sign(update) */
-  Tensor sign_update = update.apply<float>([](float v) { return (v > 0.f) - (v < 0.f); });
-  param.add_i(sign_update, -lr);
-
-  /** exp_avg = beta2 * exp_avg + (1 - beta2) * grad */
-  exp_avg.multiply_i(beta2);
-  exp_avg.add_i(grad, 1.0f - beta2);
+  // 6. Apply the final gradient update
+  context.applyGradient(lr, update_vec);
 }
 
 } // namespace nntrainer
