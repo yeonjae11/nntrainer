@@ -70,3 +70,7 @@ test/jni/googletest/
 ctre-unicode.hpp
 encoder.hpp
 json.hpp
+debian/*
+nntrainer-build-deps_0.6.0_all.deb
+nntrainer-build-deps_0.6.0_amd64.changes
+nntrainer-build-deps_0.6.0_amd64.buildinfo
