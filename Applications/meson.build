@@ -57,3 +57,7 @@ if get_option('enable-transformer')
     subdir('CausalLM')
   endif
 endif
+
+subdir('GELU_FFN/jni')
+subdir('SwiGLU_FFN/jni')
+subdir('MoE/jni')

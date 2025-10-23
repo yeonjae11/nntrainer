@@ -52,6 +52,7 @@
 #include <remap_realizer.h>
 #include <slice_realizer.h>
 #include <util_func.h>
+#include <iteration_profiler.h>
 
 #ifdef ENABLE_TFLITE_INTERPRETER
 #include <tflite_interpreter.h>
@@ -1355,20 +1356,68 @@ int NeuralNetwork::train_run(
     return stat;
   };
 
+  // Global iteration counter across all epochs
+  static unsigned int global_iteration = 0;
+  
   auto train_for_iteration =
-    [this, stop_cb, stop_user_data](RunStats &stat, DataBuffer &buffer) {
+    [this, stop_cb, stop_user_data, batch_size](RunStats &stat, DataBuffer &buffer) {
       ml_logi("train for iteration");
+      
+      // Measure forward pass time
+      auto iteration_start = std::chrono::high_resolution_clock::now();
+      auto forward_start = std::chrono::high_resolution_clock::now();
       forwarding(true, stop_cb, stop_user_data);
+      auto forward_end = std::chrono::high_resolution_clock::now();
+      auto forward_duration = std::chrono::duration_cast<std::chrono::microseconds>(forward_end - forward_start);
+      
+      // Measure backward pass time
+      auto backward_start = std::chrono::high_resolution_clock::now();
       backwarding(iter++, stop_cb, stop_user_data);
+      auto backward_end = std::chrono::high_resolution_clock::now();
+      auto backward_duration = std::chrono::duration_cast<std::chrono::microseconds>(backward_end - backward_start);
+      auto iteration_end = std::chrono::high_resolution_clock::now();
+      auto total_duration = std::chrono::duration_cast<std::chrono::microseconds>(iteration_end - iteration_start);
 
       // To avoid unconsidered memory leak, we need to clear the cache
       model_graph.flushCache();
+      
+      // Increment global iteration counter
+      global_iteration++;
 
-      if (!stop_cb(stop_user_data)) {
-        std::cout << "#" << epoch_idx << "/" << getEpochs();
-        ml_logi("# %d / %d", epoch_idx, getEpochs());
+      // Only print once per batch (not for every data load) and if profiling is enabled
+      if (nntrainer::g_enable_iteration_profile && !stop_cb(stop_user_data) && global_iteration > 0) {
         auto loss = getLoss();
-        buffer.displayProgress(stat.num_iterations, loss);
+        
+        // Get memory usage
+        size_t memory_mb = 0;
+        std::ifstream status_file("/proc/self/status");
+        std::string line;
+        while (std::getline(status_file, line)) {
+          if (line.substr(0, 6) == "VmRSS:") {
+            std::istringstream iss(line);
+            std::string label;
+            size_t memory_kb;
+            iss >> label >> memory_kb;
+            memory_mb = memory_kb / 1024;
+            break;
+          }
+        }
+        
+        // Calculate TPS (tokens per second)
+        // Assuming seq_len can be retrieved from input dimensions
+        auto in_dims = model_graph.getInputDimension();
+        size_t seq_len = in_dims[0].width(); // Assuming format is [batch, channel, height, width] where width is seq_len
+        float tps = 0.0f;
+        if (total_duration.count() > 0) {
+          tps = (static_cast<float>(batch_size * seq_len) * 1000000.0f) / static_cast<float>(total_duration.count());
+        }
+        
+        std::cout << "[ITER] #" << global_iteration 
+                  << " - Total: " << total_duration.count() << " μs"
+                  << ", Forward: " << forward_duration.count() << " μs"
+                  << ", Backward: " << backward_duration.count() << " μs"
+                  << ", Memory: " << memory_mb << " MB"
+                  << ", TPS: " << std::fixed << std::setprecision(2) << tps << std::endl;
       }
     };
 
