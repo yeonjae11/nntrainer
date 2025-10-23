@@ -16,30 +16,11 @@
 #ifdef __cplusplus
 
 #include <tuple>
+#include <adam.h>
 #include <base_properties.h>
 #include <optimizer_devel.h>
 
 namespace nntrainer {
-
-/**
- * @brief Beta 1 props
- *
- */
-class PropsB1 : public Property<double> {
-public:
-  static constexpr const char *key = "beta1"; /**< unique key to access */
-  using prop_tag = double_prop_tag;           /**< property type */
-};
-
-/**
- * @brief Beta 2 props
- *
- */
-class PropsB2 : public Property<double> {
-public:
-  static constexpr const char *key = "beta2"; /**< unique key to access */
-  using prop_tag = double_prop_tag;           /**< property type */
-};
 
 /**
  * @brief weight decay property
