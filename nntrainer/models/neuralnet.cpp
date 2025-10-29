@@ -202,6 +202,12 @@ int NeuralNetwork::compile(ExecutionMode mode) {
     model_graph.addLayer(node);
   }
 
+  // Apply checkpoint blocks before compiling
+  if (!checkpoint_blocks.empty()) {
+    ml_logi("Applying %zu checkpoint blocks to the model", checkpoint_blocks.size());
+    model_graph.applyCheckpointBlocks(checkpoint_blocks);
+  }
+
   int status = model_graph.compile(loss_type);
   NN_RETURN_STATUS();
 
@@ -1568,6 +1574,75 @@ int NeuralNetwork::addLayer(NodeType layer) {
   graph_representation.push_back(layer);
 
   return status;
+}
+
+int NeuralNetwork::addCheckpointBlock(const std::vector<std::string> &layer_names) {
+  if (initialized) {
+    ml_loge("Cannot add checkpoint block after initialization");
+    return ML_ERROR_NOT_SUPPORTED;
+  }
+
+  if (layer_names.empty()) {
+    ml_loge("Checkpoint block must contain at least one layer");
+    return ML_ERROR_INVALID_PARAMETER;
+  }
+
+  try {
+    // Create checkpoint block with auto-generated ID
+    std::string block_id = "checkpoint_block_" + std::to_string(checkpoint_blocks.size());
+    CheckpointBlock block(layer_names, block_id);
+    checkpoint_blocks.push_back(block);
+
+    ml_logi("Added checkpoint block '%s' with %zu layers", 
+            block_id.c_str(), layer_names.size());
+  } catch (const std::exception &e) {
+    ml_loge("Failed to create checkpoint block: %s", e.what());
+    return ML_ERROR_INVALID_PARAMETER;
+  }
+
+  return ML_ERROR_NONE;
+}
+
+int NeuralNetwork::setAutoCheckpointing(unsigned int layers_per_block) {
+  if (initialized) {
+    ml_loge("Cannot set auto checkpointing after initialization");
+    return ML_ERROR_NOT_SUPPORTED;
+  }
+
+  if (layers_per_block == 0) {
+    ml_loge("layers_per_block must be positive");
+    return ML_ERROR_INVALID_PARAMETER;
+  }
+
+  // Clear existing checkpoint blocks
+  checkpoint_blocks.clear();
+
+  // Get all layer names from the graph
+  std::vector<std::string> all_layers;
+  for (const auto &layer : graph_representation) {
+    all_layers.push_back(layer->getName());
+  }
+
+  if (all_layers.empty()) {
+    ml_loge("No layers found. Add layers before setting auto checkpointing");
+    return ML_ERROR_INVALID_PARAMETER;
+  }
+
+  // Create checkpoint blocks
+  for (size_t i = 0; i < all_layers.size(); i += layers_per_block) {
+    size_t end = std::min(i + layers_per_block, all_layers.size());
+    std::vector<std::string> block_layers(all_layers.begin() + i, 
+                                          all_layers.begin() + end);
+    
+    std::string block_id = "auto_checkpoint_block_" + std::to_string(checkpoint_blocks.size());
+    CheckpointBlock block(block_layers, block_id);
+    checkpoint_blocks.push_back(block);
+  }
+
+  ml_logi("Created %zu checkpoint blocks with %d layers per block",
+          checkpoint_blocks.size(), layers_per_block);
+
+  return ML_ERROR_NONE;
 }
 
 NeuralNetwork &NeuralNetwork::copyConfiguration(NeuralNetwork &from) {

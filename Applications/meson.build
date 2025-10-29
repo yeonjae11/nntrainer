@@ -60,4 +60,4 @@ endif
 
 subdir('GELU_FFN/jni')
 subdir('SwiGLU_FFN/jni')
-subdir('MoE/jni')
+subdir('SwiGLU_FFN_Checkpoint/jni')

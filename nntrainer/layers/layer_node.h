@@ -994,6 +994,50 @@ public:
     return "cpu";
   }
 
+  /**
+   * @brief Set if this layer is part of a checkpoint block
+   * 
+   * @param checkpointed true if this layer is checkpointed
+   */
+  void setCheckpointed(bool checkpointed) { is_checkpointed = checkpointed; }
+
+  /**
+   * @brief Check if this layer is part of a checkpoint block
+   * 
+   * @return true if checkpointed, false otherwise
+   */
+  bool isCheckpointed() const { return is_checkpointed; }
+
+  /**
+   * @brief Set if this layer is a checkpoint block boundary
+   * 
+   * @param boundary true if this is a boundary layer
+   */
+  void setCheckpointBoundary(bool boundary) { is_checkpoint_boundary = boundary; }
+
+  /**
+   * @brief Check if this layer is a checkpoint block boundary
+   * 
+   * @return true if boundary, false otherwise
+   */
+  bool isCheckpointBoundary() const { return is_checkpoint_boundary; }
+
+  /**
+   * @brief Set the checkpoint block ID this layer belongs to
+   * 
+   * @param block_id Checkpoint block identifier
+   */
+  void setCheckpointBlockId(const std::string &block_id) { 
+    checkpoint_block_id = block_id; 
+  }
+
+  /**
+   * @brief Get the checkpoint block ID this layer belongs to
+   * 
+   * @return std::string Block identifier
+   */
+  std::string getCheckpointBlockId() const { return checkpoint_block_id; }
+
 private:
   /**
    * @brief     Get the Input Layers object
@@ -1071,6 +1115,11 @@ properties in the context/graph unless intended. */
                                  output  */
 
   std::array<TensorDim::DataType, 2> data_type;
+
+  /** Gradient checkpointing related fields */
+  bool is_checkpointed;           /**< Whether this layer is in a checkpoint block */
+  bool is_checkpoint_boundary;    /**< Whether this is a block boundary layer */
+  std::string checkpoint_block_id; /**< ID of the checkpoint block this layer belongs to */
 
   /**
    * @brief   Get the effective layer managed by this layer node

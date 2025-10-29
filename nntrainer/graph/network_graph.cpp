@@ -44,6 +44,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <set>
 #include <stdexcept>
 #include <string>
 
@@ -107,6 +108,16 @@ void NetworkGraph::setExecutionOrder() {
     auto &node = *iter;
     auto order_idx = getBackwardingEndIter() - iter - 1;
     auto forward_order = order_idx;
+    
+    // Recompute order for checkpointed layers
+    // Will be set to 0 for non-checkpointed layers (no recomputation)
+    unsigned recompute_order = 0;
+    if (node->isCheckpointed() && !node->isCheckpointBoundary()) {
+      // Recomputation happens right before backward pass
+      recompute_order = backward_order;
+      backward_order++;
+    }
+    
     auto calc_gradient_order = backward_order;
     if (node->getTrainable())
       backward_order++;
@@ -115,7 +126,7 @@ void NetworkGraph::setExecutionOrder() {
       backward_order++;
     auto apply_gradient_order = backward_order++;
 
-    node->setExecutionOrder({forward_order, calc_gradient_order,
+    node->setExecutionOrder({forward_order, recompute_order, calc_gradient_order,
                              calc_derivative_order, apply_gradient_order});
   }
 
@@ -124,7 +135,7 @@ void NetworkGraph::setExecutionOrder() {
    * This set max execution order is used to extend gradient exec orders for
    * clipping.
    */
-  graph_exec_end = std::get<3>((*(cbegin()))->getExecutionOrder());
+  graph_exec_end = std::get<4>((*(cbegin()))->getExecutionOrder());
 }
 
 void NetworkGraph::addLayerNode(std::unique_ptr<Layer> layer) {
@@ -464,8 +475,25 @@ bool NetworkGraph::backwarding(
     throw std::runtime_error(
       "Error: last layer does not accept label, we can't train");
 
+  // Track which checkpoint blocks have been recomputed
+  std::set<std::string> recomputed_blocks;
+  
   for (iter_ = iter_begin; iter_ != iter_end && !stop_cb(userdata); iter_++) {
     auto &ln = *iter_;
+    
+    // Recompute checkpoint block if needed
+    if (ln->isCheckpointed()) {
+      const std::string &block_id = ln->getCheckpointBlockId();
+      
+      // Only recompute each block once (when we encounter the first layer in backward order)
+      if (recomputed_blocks.find(block_id) == recomputed_blocks.end()) {
+        ml_logd("Triggering recomputation for checkpoint block '%s' at layer '%s'",
+                block_id.c_str(), ln->getName().c_str());
+        recomputeCheckpointBlock(block_id);
+        recomputed_blocks.insert(block_id);
+      }
+    }
+    
     PROFILE_TIME_START(profile_keys.at(ln->getType()));
     is_valid = backwarding_op(ln, iteration);
     PROFILE_TIME_END(profile_keys.at(ln->getType()));
@@ -568,9 +596,9 @@ LayerNode *NetworkGraph::computeBackwardEnd() {
     int cur_order = std::get<0>(exec_order);
     if (ln->needsCalcDerivative() || ln->needsCalcGradient()) {
 #ifdef ENABLE_TEST
-      cur_order = std::get<2>(exec_order);
+      cur_order = std::get<3>(exec_order);
 #else
-      cur_order = std::get<1>(exec_order);
+      cur_order = std::get<2>(exec_order);
 #endif
     }
 
@@ -612,7 +640,7 @@ void NetworkGraph::allocateTensors(ExecutionMode exec_mode_) {
      * + 1
      */
     tensor_manager->allocateTensors(
-      std::get<3>(backward_iter_end->getExecutionOrder()));
+      std::get<4>(backward_iter_end->getExecutionOrder()));
   }
 }
 
@@ -1194,6 +1222,13 @@ int NetworkGraph::initialize(ExecutionMode mode,
     return node->getInputConnections().empty();
   };
 
+  // Register checkpoint recompute profiling event
+  if (profile_keys.find("checkpoint_recompute") == profile_keys.end()) {
+    int event_key = 0;
+    PROFILE_TIME_REGISTER_EVENT(event_key, "checkpoint_recompute");
+    profile_keys["checkpoint_recompute"] = event_key;
+  }
+
   for (unsigned int idx = 0; idx < graph.size(); ++idx) {
     std::vector<Var_Grad *> inputs = {};
     auto const &lnode = getSortedLayerNode(idx);
@@ -1251,8 +1286,8 @@ int NetworkGraph::initialize(ExecutionMode mode,
   for (unsigned int idx = 0; idx < graph.size(); ++idx) {
     auto const &lnode = getSortedLayerNode(idx);
     auto &rc = lnode->getRunContext();
-    auto first_grad_access = std::get<1>(lnode->getExecutionOrder());
-    auto last_grad_access = std::get<3>(lnode->getExecutionOrder());
+    auto first_grad_access = std::get<2>(lnode->getExecutionOrder());
+    auto last_grad_access = std::get<4>(lnode->getExecutionOrder());
     for (unsigned i = 0; i < rc.getNumWeights(); ++i) {
       if (!rc.weightHasGradient(i)) {
         /// @todo this is duck taping that MUST BE REMOVED. We will need to
@@ -1406,6 +1441,13 @@ int NetworkGraph::reinitialize(
     return node->getInputConnections().empty();
   };
 
+  // Register checkpoint recompute profiling event
+  if (profile_keys.find("checkpoint_recompute") == profile_keys.end()) {
+    int event_key = 0;
+    PROFILE_TIME_REGISTER_EVENT(event_key, "checkpoint_recompute");
+    profile_keys["checkpoint_recompute"] = event_key;
+  }
+
   for (unsigned int idx = 0; idx < graph.size(); ++idx) {
     std::vector<Var_Grad *> inputs = {};
     auto const &lnode = getSortedLayerNode(idx);
@@ -1464,8 +1506,8 @@ int NetworkGraph::reinitialize(
   for (unsigned int idx = 0; idx < graph.size(); ++idx) {
     auto const &lnode = getSortedLayerNode(idx);
     auto &rc = lnode->getRunContext();
-    auto first_grad_access = std::get<1>(lnode->getExecutionOrder());
-    auto last_grad_access = std::get<3>(lnode->getExecutionOrder());
+    auto first_grad_access = std::get<2>(lnode->getExecutionOrder());
+    auto last_grad_access = std::get<4>(lnode->getExecutionOrder());
     for (unsigned i = 0; i < rc.getNumWeights(); ++i) {
       if (!rc.weightHasGradient(i)) {
         /// @todo this is duck taping that MUST BE REMOVED. We will need to
@@ -1679,6 +1721,95 @@ void NetworkGraph::resetLossScale(float scale) {
     auto &ln = *iter;
     ln->getRunContext().setLossScale(scale);
   }
+}
+
+void NetworkGraph::applyCheckpointBlocks(
+  const std::vector<CheckpointBlock> &checkpoint_blocks) {
+  
+  ml_logi("Applying %zu checkpoint blocks to the graph", checkpoint_blocks.size());
+  
+  for (const auto &block : checkpoint_blocks) {
+    if (!block.isEnabled()) {
+      continue;
+    }
+    
+    const auto &layer_names = block.getLayerNames();
+    const std::string &block_id = block.getBlockId();
+    
+    ml_logi("Processing checkpoint block '%s' with %zu layers", 
+            block_id.c_str(), layer_names.size());
+    
+    for (size_t i = 0; i < layer_names.size(); ++i) {
+      const auto &layer_name = layer_names[i];
+      
+      try {
+        auto layer_node = getLayerNode(layer_name);
+        
+        // Mark as checkpointed
+        layer_node->setCheckpointed(true);
+        layer_node->setCheckpointBlockId(block_id);
+        
+        // First and last layers are boundary layers
+        if (i == 0 || i == layer_names.size() - 1) {
+          layer_node->setCheckpointBoundary(true);
+          ml_logd("  Layer '%s' marked as checkpoint boundary", layer_name.c_str());
+        } else {
+          layer_node->setCheckpointBoundary(false);
+          ml_logd("  Layer '%s' marked as checkpointed (non-boundary)", 
+                  layer_name.c_str());
+        }
+        
+        // Disable in-place optimization for checkpointed layers
+        if (layer_node->getInPlaceType() != InPlaceType::NONE) {
+          ml_logd("  Disabling in-place optimization for checkpointed layer '%s'", 
+                  layer_name.c_str());
+          layer_node->setInPlaceType(InPlaceType::NONE);
+        }
+        
+      } catch (const std::exception &e) {
+        ml_loge("Failed to apply checkpoint block to layer '%s': %s", 
+                layer_name.c_str(), e.what());
+        throw;
+      }
+    }
+  }
+  
+  ml_logi("Successfully applied checkpoint blocks");
+}
+
+void NetworkGraph::recomputeCheckpointBlock(const std::string &block_id) {
+  ml_logd("Recomputing checkpoint block '%s'", block_id.c_str());
+  
+  // Collect all layers in this checkpoint block
+  std::vector<std::shared_ptr<LayerNode>> block_layers;
+  
+  for (auto iter = cbegin(); iter != cend(); ++iter) {
+    auto &node = *iter;
+    if (node->isCheckpointed() && node->getCheckpointBlockId() == block_id) {
+      block_layers.push_back(node);
+    }
+  }
+  
+  if (block_layers.empty()) {
+    ml_loge("No layers found for checkpoint block '%s'", block_id.c_str());
+    return;
+  }
+  
+  ml_logd("Recomputing %zu layers in block '%s'", 
+          block_layers.size(), block_id.c_str());
+  
+  // Profile the entire recomputation block
+  PROFILE_TIME_START(profile_keys.at("checkpoint_recompute"));
+  
+  // Recompute forward pass for all layers in the block
+  for (auto &layer : block_layers) {
+    // Each layer's forwarding() will be profiled individually with its forward_event_key
+    layer->forwarding(true);
+  }
+  
+  PROFILE_TIME_END(profile_keys.at("checkpoint_recompute"));
+  
+  ml_logd("Completed recomputation for block '%s'", block_id.c_str());
 }
 
 } /* namespace nntrainer */

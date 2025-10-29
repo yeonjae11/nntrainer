@@ -171,7 +171,7 @@ static Tensor *requestTensor_(const TensorSpecV2 &spec,
     << "Modifying view cannot be requested, the request type has to be "
        "delegated to either view or unique";
 
-  auto [forward, calc_grad, calc_deriv, apply_grad] = exec_order;
+  auto [forward, recompute, calc_grad, calc_deriv, apply_grad] = exec_order;
 
   std::vector<unsigned> order = spec.additional_exec_order;
   if (expose) {
@@ -373,8 +373,8 @@ void Manager::initializeTensorsTrain(unsigned int max_exec_order_) {
 std::vector<Weight *> Manager::requestWeights(
   const GraphNode &node, const std::vector<Weight::Spec> &weights_spec,
   bool trainable, const std::vector<std::string> &shared_names) {
-  const auto [forwarding_order, calcGradient_order, calcDerivative_order,
-              applyGradient_order] = node.getExecutionOrder();
+  const auto [forwarding_order, recompute_order, calcGradient_order,
+              calcDerivative_order, applyGradient_order] = node.getExecutionOrder();
 
   std::vector<unsigned int> default_var_exec_order(
     {forwarding_order, calcDerivative_order});
@@ -521,8 +521,8 @@ std::vector<Weight *> Manager::requestWeights(
 std::vector<Var_Grad *> Manager::requestTensors(
   const GraphNode &node, const std::vector<Var_Grad::Spec> &tensors_spec,
   bool trainable, const std::vector<std::string> &shared_names) {
-  const auto [forwarding_order, calcGradient_order, calcDerivative_order,
-              applyGradient_order] = node.getExecutionOrder();
+  const auto [forwarding_order, recompute_order, calcGradient_order,
+              calcDerivative_order, applyGradient_order] = node.getExecutionOrder();
 
   std::vector<Var_Grad *> ret;
   size_t current_size = tensors_v2.size();

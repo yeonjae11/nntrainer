@@ -33,6 +33,7 @@
 #include <chrono>
 #endif
 
+#include <checkpoint_block.h>
 #include <common_properties.h>
 #include <compiler_fwd.h>
 #include <dynamic_training_optimization.h>
@@ -479,6 +480,26 @@ public:
   int addLayer(NodeType layer);
 
   /**
+   * @brief Add a checkpoint block for gradient checkpointing
+   * @param layer_names Names of layers to include in this checkpoint block
+   * @retval #ML_ERROR_NONE Successful.
+   * @retval #ML_ERROR_INVALID_PARAMETER invalid parameter.
+   * @details Layers in a checkpoint block will not store intermediate activations
+   * during forward pass. Instead, they will be recomputed during backward pass.
+   */
+  int addCheckpointBlock(const std::vector<std::string> &layer_names);
+
+  /**
+   * @brief Enable automatic checkpointing by grouping layers
+   * @param layers_per_block Number of layers per checkpoint block
+   * @retval #ML_ERROR_NONE Successful.
+   * @retval #ML_ERROR_INVALID_PARAMETER invalid parameter.
+   * @details Automatically creates checkpoint blocks by grouping consecutive
+   * layers. This must be called after all layers are added.
+   */
+  int setAutoCheckpointing(unsigned int layers_per_block);
+
+  /**
    * @brief     set optimizer for the neural network model
    * @retval #ML_ERROR_NONE Successful.
    * @retval #ML_ERROR_INVALID_PARAMETER invalid parameter.
@@ -706,6 +727,8 @@ private:
 
   DynamicTrainingOptimization dynamic_training_opt; /**< Dynamic fine-tuning
    optimization mode. supported modes are "max" and "norm" */
+
+  std::vector<CheckpointBlock> checkpoint_blocks; /**< Gradient checkpointing blocks */
 
   /**
    * @brief save model in ini
