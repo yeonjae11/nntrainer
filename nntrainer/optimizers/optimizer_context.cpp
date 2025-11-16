@@ -23,6 +23,13 @@ Tensor &RunOptimizerContext::getWeight() const {
 }
 
 /**
+ * @brief Get the Weight FP32 tensor object (master weight for mixed precision)
+ */
+Tensor &RunOptimizerContext::getWeightFP32() const {
+  return weight->getVariableFP32Ref();
+}
+
+/**
  * @brief Get the Weight Gradient tensor object
  */
 Tensor &RunOptimizerContext::getGradient() const {
@@ -61,5 +68,12 @@ void RunOptimizerContext::applyLossScale(Tensor &fp32_grad) {
       "gradient should be fullprecsion to maintain accuracy");
   float loss_scale = weight->getLossScale();
   fp32_grad.divide_i(loss_scale);
+}
+
+/**
+ * @brief Return if the underlying weight is mixed precision
+ */
+bool RunOptimizerContext::isMixedPrecision() const {
+  return weight->isMixedPrecision();
 }
 } // namespace nntrainer

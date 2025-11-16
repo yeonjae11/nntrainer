@@ -86,8 +86,9 @@ void Lion::applyGradient(RunOptimizerContext &context) {
   // 5. Add decoupled weight decay term.
   // Effective gradient becomes: sign(c_t) + weight_decay * weight_t
   if (weight_decay > 0.0) {
-    Tensor &weight = context.getWeight();
-    update_vec.add_i(weight, weight_decay);
+    Tensor &decay_src =
+      context.isMixedPrecision() ? context.getWeightFP32() : context.getWeight();
+    update_vec.add_i(decay_src, weight_decay);
   }
 
   // 6. Apply the final gradient update
