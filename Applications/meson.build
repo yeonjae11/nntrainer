@@ -59,3 +59,4 @@ if get_option('enable-transformer')
 endif
 
 subdir('MyApp/jni')
+subdir('MyApp_MNIST/jni')
