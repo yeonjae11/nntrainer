@@ -113,7 +113,8 @@ NNTrainer Provides
  | sgd | Stochastic Gradient Decent | - |
  | adam | Adaptive Moment Estimation | - |
  | adamw | Adam with decoupled weight decay regularization | - |
- | lion | EvoLved Sign Momentum | - |
+ | lion | Lion | Sign-only momentum; memory-efficient, fast updates. |
+ | sophia | Sophia | Clipped 2nd moment with stochastic Hessian approx (ρ); stable training. |
 
  | Keyword | Learning Rate | Description |
  |:-------:|:---:|:---:|

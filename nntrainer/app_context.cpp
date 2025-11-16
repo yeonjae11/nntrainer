@@ -30,6 +30,7 @@
 #include <adam.h>
 #include <adamw.h>
 #include <lion.h>
+#include <sophia.h>
 #include <sgd.h>
 
 #include <activation_layer.h>
@@ -259,6 +260,8 @@ void AppContext::add_default_object() {
                   OptType::ADAMW);
   registerFactory(nntrainer::createOptimizer<Lion>, Lion::type,
                   OptType::LION);
+  registerFactory(nntrainer::createOptimizer<Sophia>, Sophia::type,
+                  OptType::SOPHIA);
   registerFactory(AppContext::unknownFactory<nntrainer::Optimizer>, "unknown",
                   OptType::UNKNOWN);
 
