@@ -585,11 +585,13 @@ void NeuralNetwork::backwarding(int iteration,
     if (apply_gradient) {
       /// Apply gradient only at the end of the last shared weight access
       model_graph.applyGradients(
-        node.get(), [iteration, opt_ = opt.get()](Weight &w) {
+        node.get(), [this, iteration, opt_ = opt.get()](Weight &w) {
           w.calcRegularizationGradient();
           w.calcWeightDecayGradient();
           RunOptimizerContext opt_context(&w, iteration,
                                           opt_->getLearningRate(iteration));
+          // Propagate effective batch size to optimizer context (for Sophia, etc.)
+          opt_context.setBatchSize(model_graph.getBatchSize());
           opt_->applyGradient(opt_context);
         });
     }
@@ -597,11 +599,12 @@ void NeuralNetwork::backwarding(int iteration,
   };
 
   std::function<void(Weight &, int)> lazy_apply_grad_op =
-    [opt_ = opt.get()](Weight &w, int iteration) -> void {
+    [this, opt_ = opt.get()](Weight &w, int iteration) -> void {
     w.calcRegularizationGradient();
     w.calcWeightDecayGradient();
     RunOptimizerContext opt_context(&w, iteration,
                                     opt_->getLearningRate(iteration));
+    opt_context.setBatchSize(model_graph.getBatchSize());
     opt_->applyGradient(opt_context);
   };
 

@@ -10,9 +10,30 @@
 
 #include <vector>
 
+#include <adam.h>              // PropsB1, PropsB2, PropsEpsilon
 #include <optimizer_devel.h>
+#include <base_properties.h>
+#include <lion.h>             // PropsWeightDecay
 
 namespace nntrainer {
+
+/**
+ * @brief rho clipping threshold property
+ */
+class PropsRho : public Property<double> {
+public:
+  static constexpr const char *key = "rho";
+  using prop_tag = double_prop_tag;
+};
+
+/**
+ * @brief Hessian update period K (every K steps)
+ */
+class PropsK : public PositiveIntegerProperty {
+public:
+  static constexpr const char *key = "k";
+  using prop_tag = uint_prop_tag;
+};
 
 /**
  * @class   Sophia Optimizer class (skeleton)
@@ -33,7 +54,7 @@ public:
   /**
    * @copydoc Optimizer::getDefaultLearningRate()
    */
-  double getDefaultLearningRate() const override { return 1e-3; }
+  double getDefaultLearningRate() const override { return 1e-4; }
 
   /**
    * @copydoc Optimizer::applyGradient(RunOptimizerContext &context)
@@ -63,6 +84,13 @@ public:
   void setProperty(const std::vector<std::string> &values) override;
 
   static constexpr const char *type = "sophia";
+
+private:
+  /**
+   * @brief beta1, beta2, epsilon, rho, weight_decay
+   */
+  std::tuple<PropsB1, PropsB2, PropsEpsilon, PropsRho, PropsWeightDecay, PropsK>
+    sophia_props;
 };
 
 } /* namespace nntrainer */
