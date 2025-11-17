@@ -22,7 +22,7 @@ static unsigned int total_train_data_size = 100;
 static unsigned int total_val_data_size   = 100;
 static unsigned int batch_size = 32;
 static unsigned int epochs     = 5;
-static std::string  optimizer_type = "lion"; // lion|adam|adamw|sgd
+static std::string  optimizer_type = "lion"; // lion|adam|adamw|sgd|sophia
 static float        learning_rate  = 1e-3f;
 static float        weight_decay   = 0.0f;
 
@@ -120,7 +120,7 @@ static void parse_args(int argc, char *argv[]) {
       total_val_data_size = static_cast<unsigned int>(std::stoul(arg.substr(11)));
     } else if (arg == "--help" || arg == "-h") {
       std::cout
-        << "Usage: nntrainer_myapp_mnist [--config=<ini>] [--data=<dat>] [--opt=lion|adam|adamw|sgd]\n"
+        << "Usage: nntrainer_myapp_mnist [--config=<ini>] [--data=<dat>] [--opt=lion|adam|adamw|sgd|sophia]\n"
            "                               [--lr=<float>] [--wd=<float>] [--epochs=<uint>] [--bs=<uint>]\n"
            "                               [--train_size=<uint>] [--val_size=<uint>]\n";
       std::exit(0);
@@ -241,7 +241,8 @@ int main(int argc, char *argv[]) {
 
   try {
     std::vector<std::string> opt_props = {"learning_rate=" + std::to_string(learning_rate)};
-    if ((optimizer_type == "lion" || optimizer_type == "adamw") && weight_decay > 0.0f) {
+    if ((optimizer_type == "lion" || optimizer_type == "adamw" || optimizer_type == "sophia") &&
+        weight_decay > 0.0f) {
       opt_props.emplace_back("weight_decay=" + std::to_string(weight_decay));
     }
     auto optimizer = ml::train::createOptimizer(optimizer_type, opt_props);
