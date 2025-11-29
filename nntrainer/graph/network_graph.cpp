@@ -869,30 +869,8 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
                  std::back_inserter(input_dims),
                  [](const Var_Grad *vg) { return vg->getDim(); });
 
-  // DEBUG: Print input dimensions
-  printf("[DEBUG] Layer '%s' (type: %s) - Input dimensions:\n", 
-          lnode->getName().c_str(), lnode->getType().c_str());
-  for (size_t i = 0; i < input_dims.size(); ++i) {
-    printf("  Input[%zu]: %zu:%zu:%zu:%zu (buffer size: %zu bytes)\n", 
-            i, input_dims[i].batch(), input_dims[i].channel(), 
-            input_dims[i].height(), input_dims[i].width(),
-            input_dims[i].getDataLen() * sizeof(float));
-  }
-  fflush(stdout);
-
   /** finalize the layer and get the final context */
   auto init_context = lnode->finalize(input_dims, getTensorType(), exec_mode);
-  
-  // DEBUG: Print output dimensions after finalize
-  auto out_specs_debug = init_context.getOutSpecs();
-  printf("[DEBUG] Layer '%s' - Output dimensions:\n", lnode->getName().c_str());
-  for (size_t i = 0; i < out_specs_debug.size(); ++i) {
-    auto &dim = out_specs_debug[i].variable_spec.dim;
-    printf("  Output[%zu]: %zu:%zu:%zu:%zu (buffer size: %zu bytes)\n", 
-            i, dim.batch(), dim.channel(), dim.height(), dim.width(),
-            dim.getDataLen() * sizeof(float));
-  }
-  fflush(stdout);
   
   // Gradient checkpointing: Track if this is a checkpointed layer
   bool is_checkpointed_layer = lnode->isCheckpointed();
@@ -1012,37 +990,71 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
     });
   }
 
-  // Gradient checkpointing: Request initial forward outputs first (before modifying out_specs)
-  std::vector<Var_Grad *> initial_outputs;
-  if (is_checkpointed_layer) {
-    ml_logd("[CHECKPOINT] Layer '%s' is checkpointed - allocating initial outputs", lnode->getName().c_str());
-    auto initial_out_specs = out_specs;
-    for (auto &spec : initial_out_specs) {
-      // Create new name instead of modifying in place
-      spec.variable_spec.name = spec.variable_spec.name + "_initial";
-      spec.variable_spec.ls = TensorLifespan::FORWARD_FUNC_LIFESPAN;
-      
-      // Initial forward doesn't need gradients - only variables
-      spec.gradient_spec = nullptr;
-      
-      // CRITICAL: Set batch dimension as dynamic to support variable batch sizes
-      // Batch dimension (index 0) should be dynamic for runtime flexibility
-      std::bitset<TensorDim::MAXDIM> dyn_dim_flag;
-      dyn_dim_flag.set(3); // Set batch dimension (rightmost in NCHW = index 3) as dynamic
-      spec.variable_spec.dim.setDynDimFlag(dyn_dim_flag);
-      
-      // Extend lifespan to next layer's forward
-      if (lnode->getOutputConnections().size() > 0) {
-        auto conn = lnode->getOutputConnection(0);
-        auto next_layer = getLayerNode(conn->getName());
-        auto next_forward_order = std::get<0>(next_layer->getExecutionOrder());
-        spec.variable_spec.additional_exec_order.push_back(next_forward_order);
+  // Gradient checkpointing: Check if this layer needs initial_outputs
+  // A layer needs initial_outputs if:
+  // 1. It is checkpointed, OR
+  // 2. It receives input from a checkpointed layer (to propagate initial values)
+  bool needs_initial_outputs = is_checkpointed_layer;
+  if (!needs_initial_outputs) {
+    // Check if any input comes from a checkpointed layer
+    for (unsigned int i = 0; i < lnode->getNumInputConnections(); ++i) {
+      auto input_conn_name = lnode->getInputConnectionName(i);
+      if (!input_conn_name.empty()) {
+        auto prev_layer = getLayerNode(input_conn_name);
+        if (prev_layer && prev_layer->isCheckpointed()) {
+          needs_initial_outputs = true;
+          printf("[CHECKPOINT] Layer '%s' (non-checkpointed) needs initial_outputs because it receives from checkpointed layer '%s'\n",
+                  lnode->getName().c_str(), prev_layer->getName().c_str());
+          break;
+        }
       }
     }
+  }
+  
+  // Request initial forward outputs first (before modifying out_specs)
+  std::vector<Var_Grad *> initial_outputs;
+  if (needs_initial_outputs) {
+    printf("[CHECKPOINT] Layer '%s' (checkpointed=%d) - allocating initial outputs\n", 
+            lnode->getName().c_str(), is_checkpointed_layer);
+    auto initial_out_specs = out_specs;
     
-    initial_outputs = tensor_manager->requestTensors(
-      initial_out_specs, Manager::TensorGroupType::OUTPUT, 
-      lnode->getExecutionOrder(), lnode->getName());
+    // For in-place layers (like MultiOut), skip allocating initial_outputs
+    // They will return initial_inputs directly via getOutput()
+    bool is_inplace_layer = (lnode->getType() == MultiOutLayer::type || 
+                             lnode->getType() == IdentityLayer::type);
+    
+    if (is_inplace_layer) {
+      printf("[CHECKPOINT] Layer '%s' is in-place - skipping initial_outputs allocation (will use initial_inputs)\n",
+             lnode->getName().c_str());
+      // Leave initial_outputs empty - getOutput() will return initial_inputs
+    } else {
+      for (auto &spec : initial_out_specs) {
+        // Create new name instead of modifying in place
+        spec.variable_spec.name = spec.variable_spec.name + "_initial";
+        spec.variable_spec.ls = TensorLifespan::FORWARD_FUNC_LIFESPAN;
+        
+        // Initial forward doesn't need gradients - only variables
+        spec.gradient_spec = nullptr;
+        
+        // CRITICAL: Set batch dimension as dynamic to support variable batch sizes
+        // Batch dimension (index 0) should be dynamic for runtime flexibility
+        std::bitset<TensorDim::MAXDIM> dyn_dim_flag;
+        dyn_dim_flag.set(3); // Set batch dimension (rightmost in NCHW = index 3) as dynamic
+        spec.variable_spec.dim.setDynDimFlag(dyn_dim_flag);
+        
+        // Extend lifespan to next layer's forward
+        if (lnode->getOutputConnections().size() > 0) {
+          auto conn = lnode->getOutputConnection(0);
+          auto next_layer = getLayerNode(conn->getName());
+          auto next_forward_order = std::get<0>(next_layer->getExecutionOrder());
+          spec.variable_spec.additional_exec_order.push_back(next_forward_order);
+        }
+      }
+      
+      initial_outputs = tensor_manager->requestTensors(
+        initial_out_specs, Manager::TensorGroupType::OUTPUT, 
+        lnode->getExecutionOrder(), lnode->getName());
+    }
     
     // Now set lifespan for default outputs (recompute & backward)
     std::for_each(out_specs.begin(), out_specs.end(),
@@ -1472,6 +1484,13 @@ int NetworkGraph::initialize(ExecutionMode mode,
    * @note: these input tensors have already been allocated
    */
   std::unordered_map<std::string, std::vector<Var_Grad *>> input_map;
+  
+  /**
+   * this contains the map from node name to its INITIAL input tensor names
+   * (for gradient checkpointing initial forward pass)
+   * @note: these input tensors are short-lived, used only during initial forward
+   */
+  std::unordered_map<std::string, std::vector<Var_Grad *>> initial_input_map;
 
   /** check if the given config of node is of input node */
   auto is_input_node = [](const LayerNode *node) -> bool {
@@ -1514,6 +1533,21 @@ int NetworkGraph::initialize(ExecutionMode mode,
     if (idx == graph.size() - 1)
       break;
 
+    // Get initial outputs if this is a checkpointed layer
+    // For in-place layers, use initial_inputs instead (they don't allocate initial_outputs)
+    std::vector<Var_Grad *> initial_outputs;
+    if (lnode->isCheckpointed()) {
+      initial_outputs = lnode->getRunContext().getInitialOutputs();
+      // For in-place layers, initial_outputs is empty, so use initial_inputs
+      if (initial_outputs.empty()) {
+        initial_outputs = lnode->getRunContext().getInitialInputs();
+        if (!initial_outputs.empty()) {
+          printf("[CHECKPOINT] Layer '%s' is in-place - using initial_inputs as initial_outputs for connections\n",
+                 lnode->getName().c_str());
+        }
+      }
+    }
+
     for (auto i = 0u, num_node = lnode->getNumOutputConnections(); i < num_node;
          ++i) {
       auto conn = lnode->getOutputConnection(i);
@@ -1536,6 +1570,34 @@ int NetworkGraph::initialize(ExecutionMode mode,
       auto &sink_tensors = it->second;
       sink_tensors.resize(sink_node->getNumInputConnections());
       sink_tensors[conn->getIndex()] = outputs[i];
+      
+      // Setup initial output connections (for initial forward)
+      // If current layer is checkpointed, connect its initial_outputs (or initial_inputs for in-place) to next layer
+      if (!initial_outputs.empty()) {
+        [[maybe_unused]] auto [init_it, init_b] =
+          initial_input_map.try_emplace({sink_node->getName(), {}});
+        
+        auto &init_sink_tensors = init_it->second;
+        init_sink_tensors.resize(sink_node->getNumInputConnections());
+        // For in-place layers, we only have 1 input/output, so use index 0
+        unsigned int output_idx = (initial_outputs.size() == 1) ? 0 : i;
+        init_sink_tensors[conn->getIndex()] = initial_outputs[output_idx];
+        
+        printf("[CHECKPOINT] Connected initial output: %s[%u] -> %s[%u]\n",
+                lnode->getName().c_str(), output_idx, sink_node->getName().c_str(), conn->getIndex());
+      }
+    }
+  }
+
+  // CRITICAL: Set initial_inputs for ALL layers that receive inputs from checkpointed layers
+  // This ensures that during initial forward, getInput() returns the correct initial outputs
+  for (unsigned int idx = 0; idx < graph.size(); ++idx) {
+    auto const &lnode = getSortedLayerNode(idx);
+    if (initial_input_map.find(lnode->getName()) != initial_input_map.end()) {
+      auto &rc = lnode->getRunContext();
+      rc.setInitialInputs(initial_input_map.at(lnode->getName()));
+      printf("[CHECKPOINT] Set initial inputs for layer '%s' (checkpointed=%d) with %zu inputs\n",
+              lnode->getName().c_str(), lnode->isCheckpointed(), initial_input_map.at(lnode->getName()).size());
     }
   }
 
@@ -2078,24 +2140,10 @@ void NetworkGraph::recomputeCheckpointBlock(const std::string &block_id) {
           layers_to_recompute.size(), block_id.c_str(),
           all_block_layers.size() - layers_to_recompute.size());
   
-  // Set recompute mode for all layers in the block
-  for (auto &layer : layers_to_recompute) {
-    layer->getRunContext().setInitialForward(false);
-  }
-  
-  // Profile the entire recomputation block
-  PROFILE_TIME_START(profile_keys.at("checkpoint_recompute"));
-  
-  // Recompute forward pass for checkpointed layers
-  // is_initial_forward=false, so:
-  // - getOutput() returns recompute_outputs
-  // - getInput() returns saved initial_inputs (first layer) or recomputed values (other layers)
   for (auto &layer : layers_to_recompute) {
     ml_logd("Recomputing layer '%s'", layer->getName().c_str());
     layer->forwarding(true);
   }
-  
-  PROFILE_TIME_END(profile_keys.at("checkpoint_recompute"));
   
   ml_logd("Completed recomputation for block '%s'", block_id.c_str());
 }
