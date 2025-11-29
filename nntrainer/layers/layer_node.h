@@ -1009,18 +1009,18 @@ public:
   bool isCheckpointed() const { return is_checkpointed; }
 
   /**
-   * @brief Set if this layer is a checkpoint block boundary
+   * @brief Set if this layer is the first layer in a checkpoint block
    * 
-   * @param boundary true if this is a boundary layer
+   * @param val true if first layer, false otherwise
    */
-  void setCheckpointBoundary(bool boundary) { is_checkpoint_boundary = boundary; }
+  void setFirstInCheckpointBlock(bool val) { is_checkpoint_boundary = val; }
 
   /**
-   * @brief Check if this layer is a checkpoint block boundary
+   * @brief Get if this layer is the first layer in a checkpoint block
    * 
-   * @return true if boundary, false otherwise
+   * @return true if first layer, false otherwise
    */
-  bool isCheckpointBoundary() const { return is_checkpoint_boundary; }
+  bool isFirstInCheckpointBlock() const { return is_checkpoint_boundary; }
 
   /**
    * @brief Set the checkpoint block ID this layer belongs to

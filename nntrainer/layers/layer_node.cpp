@@ -658,9 +658,13 @@ InitLayerContext LayerNode::finalize(const std::vector<TensorDim> &input_dims,
     out_info.push_back(true);
   }
 
+  // Pass checkpoint information to InitLayerContext
+  bool is_checkpointed = isCheckpointed();
+  
   auto context = InitLayerContext(
     actual_input_dims, out_info, getInPlaceType() != InPlaceType::NONE,
-    getName(), scope, max_norm, tensor_type, loss_scale, mode, compute_engine);
+    getName(), scope, max_norm, tensor_type, loss_scale, mode, compute_engine,
+    is_checkpointed);
 
   layer->finalize(context);
 
@@ -797,6 +801,11 @@ void LayerNode::forwarding(bool training) {
       }
     }
   }
+
+  // Gradient checkpointing: Save inputs for first layer during initial forward
+  // Note: Saved inputs are stored in RunContext but managed externally
+  // The actual saving/cloning happens in the graph execution layer
+  // This is just a placeholder for future implementation if needed
 
   layer->forwarding(*run_context, training);
   reStoreData(false);

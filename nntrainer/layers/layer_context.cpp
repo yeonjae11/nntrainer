@@ -44,7 +44,7 @@ InitLayerContext::InitLayerContext(
   bool is_inplace_, const std::string &n, const std::string &prefix_,
   const float max_norm, std::array<std::string, 3> tensor_type_,
   const float loss_scale_, ml::train::ExecutionMode mode_,
-  ml::train::LayerComputeEngine engine_) :
+  ml::train::LayerComputeEngine engine_, bool is_checkpointed_) :
   input_dim(dim),
   is_inplace(is_inplace_),
   clip_by_global_norm(max_norm),
@@ -55,7 +55,8 @@ InitLayerContext::InitLayerContext(
   tensor_type(tensor_type_),
   loss_scale(loss_scale_),
   mode(mode_),
-  engine(engine_) {
+  engine(engine_),
+  is_checkpointed(is_checkpointed_) {
   NNTR_THROW_IF(!validate(), std::invalid_argument)
     << "Invalid init context name: " << name
     << " num inputs: " << getNumInputs();
@@ -242,12 +243,26 @@ bool RunLayerContext::weightHasGradient(unsigned int idx) const {
  *
  * @param idx Identifier of the output
  * @return Tensor& Reference to the output tensor
+ * @note For gradient checkpointing:
+ *   - Initial forward: returns initial_outputs (short-lived)
+ *   - Recompute forward: returns outputs (default)
+ *   - Backward: returns outputs (default)
  */
 Tensor &RunLayerContext::getOutput(unsigned int idx) {
+  if (is_checkpointed && is_initial_forward && !initial_outputs.empty()) {
+    printf("[Initial Forward_getOutput] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
+    return initial_outputs[idx]->getVariableRef();
+  }
+  printf("[Recompute Forward_getOutput] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
   return outputs[idx]->getVariableRef();
 }
 
 const Tensor &RunLayerContext::getOutput(unsigned int idx) const {
+  if (is_checkpointed && is_initial_forward && !initial_outputs.empty()) {
+    printf("[Initial Forward_getOutput] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
+    return initial_outputs[idx]->getVariableRef();
+  }
+  printf("[Recompute Forward_getOutput] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
   return outputs[idx]->getVariableRef();
 }
 
@@ -282,6 +297,8 @@ bool RunLayerContext::outputHasGradient(unsigned int idx) const {
  *
  * @note recommended to NOT use this function as a layer developer but rather
  * use getOutputGrad().
+ * @note For gradient checkpointing:
+ *   - Backward phase: returns outputs gradient (from next layer's backprop)
  */
 Tensor &RunLayerContext::getOutputGradUnsafe(unsigned int idx) {
   return outputs[idx]->getGradientRef();
@@ -301,13 +318,27 @@ const Tensor RunLayerContext::getIncomingDerivative(unsigned int idx) const {
  * @brief Get the Input tensor object
  *
  * @param idx Identifier of the input
- * @return Tensor& Reference to the input grad tensor
+ * @return Tensor& Reference to the input tensor
+ * @note For gradient checkpointing:
+ *   - Initial forward: returns inputs (pointer to previous layer's output)
+ *   - Recompute forward (first layer only): returns initial_inputs (saved copy)
+ *   - Backward: returns inputs (recomputed values via pointer)
  */
 Tensor &RunLayerContext::getInput(unsigned int idx) {
-  return inputs[idx]->getVariableRef();
+  if (is_checkpointed && !is_initial_forward && !initial_inputs.empty()) {
+    printf("[Recompute Forward_getInput] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
+    return initial_inputs[idx]->getVariableRef();  // Recompute: use saved inputs
+  }
+  printf("[Normal_getInput] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
+  return inputs[idx]->getVariableRef();  // Normal: pointer to prev output
 }
 
 const Tensor &RunLayerContext::getInput(unsigned int idx) const {
+  if (is_checkpointed && !is_initial_forward && !initial_inputs.empty()) {
+    printf("[Recompute Forward_getInput] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
+    return initial_inputs[idx]->getVariableRef();
+  }
+  printf("[Normal_getInput] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
   return inputs[idx]->getVariableRef();
 }
 
@@ -316,6 +347,8 @@ const Tensor &RunLayerContext::getInput(unsigned int idx) const {
  *
  * @param idx Identifier of the input
  * @return Tensor& Reference to the input grad tensor
+ * @note For gradient checkpointing:
+ *   - Backward phase: returns inputs gradient (default)
  */
 Tensor &RunLayerContext::getInputGrad(unsigned int idx) {
   if (!inputs[idx]->hasGradient()) {
@@ -351,8 +384,17 @@ Tensor &RunLayerContext::getOutgoingDerivative(unsigned int idx) {
  *
  * @param idx Identifier of the tensor
  * @return Tensor& Reference to the tensor
+ * @note For gradient checkpointing:
+ *   - Initial forward: returns initial_tensors (short-lived)
+ *   - Recompute forward: returns tensors (default)
+ *   - Backward phase: returns tensors (default)
  */
 Tensor &RunLayerContext::getTensor(unsigned int idx) {
+  if (is_checkpointed && is_initial_forward && !initial_tensors.empty()) {
+    printf("[Initial Forward_getTensor] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
+    return initial_tensors[idx]->getVariableRef();
+  }
+  printf("[Normal_getTensor] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
   return tensors[idx]->getVariableRef();
 }
 
@@ -361,8 +403,17 @@ Tensor &RunLayerContext::getTensor(unsigned int idx) {
  *
  * @param idx Identifier of the tensor
  * @return Tensor& Reference to the tensor
+ * @note For gradient checkpointing:
+ *   - Initial forward: returns initial_tensors (short-lived)
+ *   - Recompute forward: returns tensors (default)
+ *   - Backward phase: returns tensors (default)
  */
 const Tensor &RunLayerContext::getTensor(unsigned int idx) const {
+  if (is_checkpointed && is_initial_forward && !initial_tensors.empty()) {
+    printf("[Initial Forward_getTensor] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
+    return initial_tensors[idx]->getVariableRef();
+  }
+  printf("[Normal_getTensor] Layer name: %s, idx: %d\n", std::get<props::Name>(props).get().c_str(), idx);
   return tensors[idx]->getVariableRef();
 }
 
