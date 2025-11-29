@@ -182,6 +182,9 @@ static Tensor *requestTensor_(const TensorSpecV2 &spec,
   if (enum_class_or(spec.ls, LS::FORWARD_FUNC_LIFESPAN) == spec.ls) {
     order.push_back(forward);
   }
+  if (enum_class_or(spec.ls, LS::FORWARD_RECOMPUTE_LIFESPAN) == spec.ls) {
+    order.push_back(recompute);
+  }
   if (enum_class_or(spec.ls, LS::CALC_GRAD_LIFESPAN) == spec.ls) {
     order.push_back(calc_grad);
   }
@@ -538,6 +541,10 @@ std::vector<Var_Grad *> Manager::requestTensors(
     /** usage for tensors */
     if (enum_class_logical_and(tspan, TensorLifespan::FORWARD_FUNC_LIFESPAN))
       var_exec_order.push_back(forwarding_order);
+
+    if (is_train_mode && enum_class_logical_and(tspan, TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN)) {
+      var_exec_order.push_back(recompute_order);
+    }
 
     /** usage for tensors gradient in backwarding */
     if (trainable && is_train_mode &&
