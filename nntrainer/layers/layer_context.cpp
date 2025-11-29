@@ -581,6 +581,10 @@ void RunLayerContext::setBatch(unsigned int batch) {
     vg->setBatchSize(batch);
   for (auto &vg : outputs)
     vg->setBatchSize(batch);
+  for (auto &vg : initial_inputs)
+    vg->setBatchSize(batch);
+  for (auto &vg : initial_outputs)
+    vg->setBatchSize(batch);
 }
 
 /**
@@ -591,18 +595,26 @@ void RunLayerContext::setBatch(unsigned int batch) {
  */
 void RunLayerContext::updateTensor(unsigned int idx, unsigned int batch) {
   tensors[idx]->setBatchSize(batch);
+  if (idx < initial_tensors.size() && initial_tensors[idx])
+    initial_tensors[idx]->setBatchSize(batch);
 }
 
 void RunLayerContext::updateInput(unsigned int idx, TensorDim dimension) {
   inputs[idx]->updateDimension(dimension);
+  if (idx < initial_inputs.size() && initial_inputs[idx])
+    initial_inputs[idx]->updateDimension(dimension);
 }
 
 void RunLayerContext::updateOutput(unsigned int idx, TensorDim dimension) {
   outputs[idx]->updateDimension(dimension);
+  if (idx < initial_outputs.size() && initial_outputs[idx])
+    initial_outputs[idx]->updateDimension(dimension);
 }
 
 void RunLayerContext::updateTensor(unsigned int idx, TensorDim dimension) {
   tensors[idx]->updateDimension(dimension);
+  if (idx < initial_tensors.size() && initial_tensors[idx])
+    initial_tensors[idx]->updateDimension(dimension);
 }
 
 /**
