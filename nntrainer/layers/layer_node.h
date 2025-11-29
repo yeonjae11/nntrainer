@@ -1022,6 +1022,20 @@ public:
    */
   bool isFirstInCheckpointBlock() const { return is_checkpoint_boundary; }
 
+   /**
+   * @brief Set if this layer is the first layer in a checkpoint block
+   * 
+   * @param val true if first layer, false otherwise
+   */
+  void setLastInCheckpointBlock(bool val) { is_checkpoint_block_end = val; }
+
+  /**
+   * @brief Get if this layer is the first layer in a checkpoint block
+   * 
+   * @return true if first layer, false otherwise
+   */
+  bool isLastInCheckpointBlock() const { return is_checkpoint_block_end; }
+
   /**
    * @brief Set the checkpoint block ID this layer belongs to
    * 
@@ -1119,6 +1133,7 @@ properties in the context/graph unless intended. */
   /** Gradient checkpointing related fields */
   bool is_checkpointed;           /**< Whether this layer is in a checkpoint block */
   bool is_checkpoint_boundary;    /**< Whether this is a block boundary layer */
+  bool is_checkpoint_block_end;
   std::string checkpoint_block_id; /**< ID of the checkpoint block this layer belongs to */
 
   /**
