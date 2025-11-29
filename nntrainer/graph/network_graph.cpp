@@ -54,6 +54,30 @@
 #define LNODE(x) std::static_pointer_cast<LayerNode>(x)
 
 namespace nntrainer {
+
+namespace {
+
+constexpr unsigned lifespanMask(TensorLifespan span) {
+  return static_cast<unsigned>(span);
+}
+
+constexpr unsigned FORWARD_MASK =
+  lifespanMask(TensorLifespan::FORWARD_FUNC_LIFESPAN);
+
+constexpr unsigned FORWARD_RECOMPUTE_MASK =
+  lifespanMask(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN);
+
+constexpr TensorLifespan promoteToRecompute(TensorLifespan span) {
+  auto mask = lifespanMask(span);
+  if (mask & FORWARD_MASK) {
+    mask &= ~FORWARD_MASK;
+    mask |= FORWARD_RECOMPUTE_MASK;
+    return static_cast<TensorLifespan>(mask);
+  }
+  return span;
+}
+
+} // namespace
 int NetworkGraph::compile(const std::string &loss_type) {
   int status = ML_ERROR_NONE;
 
@@ -103,21 +127,46 @@ int NetworkGraph::compile(const std::string &loss_type) {
 
 void NetworkGraph::setExecutionOrder() {
   auto backward_order = graph.size();
+  
+  // Track which checkpoint blocks have been processed (same as backwarding logic)
+  std::set<std::string> recomputed_blocks;
+  
+  // Map to store recompute orders for each layer
+  std::map<std::string, unsigned int> layer_recompute_orders;
+  
+  // Simulate the backwarding flow to assign execution orders
   for (auto iter = getBackwardingBeginIter(); iter != getBackwardingEndIter();
        iter++) {
     auto &node = *iter;
     auto order_idx = getBackwardingEndIter() - iter - 1;
     auto forward_order = order_idx;
     
-    // Recompute order for checkpointed layers
-    // Will be set to 0 for non-checkpointed layers (no recomputation)
-    unsigned recompute_order = 0;
-    if (node->isCheckpointed() && !node->isCheckpointBoundary()) {
-      // Recomputation happens right before backward pass
-      recompute_order = backward_order;
-      backward_order++;
+    // Recompute checkpoint block if needed (same logic as backwarding)
+    if (node->isCheckpointed()) {
+      const std::string &block_id = node->getCheckpointBlockId();
+      
+      // Only recompute each block once (when we encounter the first layer in backward order)
+      if (recomputed_blocks.find(block_id) == recomputed_blocks.end()) {
+        // Collect all layers in this checkpoint block (in forward order)
+        std::vector<std::shared_ptr<LayerNode>> block_layers;
+        for (auto fwd_iter = cbegin(); fwd_iter != cend(); ++fwd_iter) {
+          auto &fwd_node = *fwd_iter;
+          if (fwd_node->getCheckpointBlockId() == block_id && fwd_node->isCheckpointed()) {
+            block_layers.push_back(fwd_node);
+          }
+        }
+        
+        // Assign recompute orders in forward order (same as recomputeCheckpointBlock)
+        for (auto &layer : block_layers) {
+          layer_recompute_orders[layer->getName()] = backward_order;
+          backward_order++;
+        }
+    
+        recomputed_blocks.insert(block_id);
+      }
     }
     
+    // Now assign backward execution orders
     auto calc_gradient_order = backward_order;
     if (node->getTrainable())
       backward_order++;
@@ -125,6 +174,12 @@ void NetworkGraph::setExecutionOrder() {
     if (node->getTrainable())
       backward_order++;
     auto apply_gradient_order = backward_order++;
+
+    // Get recompute order (0 if not checkpointed)
+    unsigned int recompute_order = 0;
+    if (node->isCheckpointed()) {
+      recompute_order = layer_recompute_orders[node->getName()];
+    }
 
     node->setExecutionOrder({forward_order, recompute_order, calc_gradient_order,
                              calc_derivative_order, apply_gradient_order});
@@ -990,9 +1045,11 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
       lnode->getExecutionOrder(), lnode->getName());
     
     // Now set lifespan for default outputs (recompute & backward)
-    std::for_each(out_specs.begin(), out_specs.end(), [](VarGradSpecV2 &spec) {
-      spec.variable_spec.ls = TensorLifespan::RECOMPUTE_DERIV_LIFESPAN;
-    });
+    std::for_each(out_specs.begin(), out_specs.end(),
+                  [](VarGradSpecV2 &spec) {
+                    spec.variable_spec.ls =
+                      promoteToRecompute(spec.variable_spec.ls);
+                  });
     
     ml_logd("Layer '%s' is checkpointed - requested %zu initial outputs (FORWARD_FUNC_LIFESPAN)",
             lnode->getName().c_str(), initial_outputs.size());
@@ -1098,6 +1155,7 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
         if (lifespan == TensorLifespan::FORWARD_GRAD_LIFESPAN) {
           lifespan = TensorLifespan::CALC_DERIV_LIFESPAN;
         }
+        lifespan = promoteToRecompute(lifespan);
       }
       
       ml_logd("Layer '%s' has intermediate tensors used in backward - dual allocation",
