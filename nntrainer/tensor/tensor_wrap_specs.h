@@ -62,6 +62,32 @@ enum class TensorLifespan {
   ITERATION_LIFESPAN = 0b1111, /**< tensor must not be reset until the owning
                         layer finishes its execution in the current
                         iteration, eg. hidden memory/cells of RNN */
+  RECOMPUTE_LIFESPAN = 0b10000, /**< Recompute lifespan */
+  FORWARD_RECOMPUTE_LIFESPAN = 0b10001, /**< Forward + recompute lifespan */
+  RECOMPUTE_DERIV_LIFESPAN = 0b10010,   /**< Recompute + deriv lifespan */
+  RECOMPUTE_GRAD_LIFESPAN = 0b10100,    /**< Recompute + grad lifespan */
+  RECOMPUTE_AGRAD_LIFESPAN =
+    0b11000, /**< Recompute + apply gradient lifespan */
+  FORWARD_RECOMPUTE_DERIV_LIFESPAN =
+    0b10011, /**< Forward + recompute + deriv lifespan */
+  FORWARD_RECOMPUTE_GRAD_LIFESPAN =
+    0b10101, /**< Forward + recompute + grad lifespan */
+  FORWARD_RECOMPUTE_AGRAD_LIFESPAN =
+    0b11001, /**< Forward + recompute + apply gradient lifespan */
+  RECOMPUTE_DERIV_GRAD_LIFESPAN =
+    0b10110, /**< Recompute + deriv + grad lifespan */
+  RECOMPUTE_DERIV_AGRAD_LIFESPAN =
+    0b11010, /**< Recompute + deriv + apply gradient lifespan */
+  RECOMPUTE_GRAD_AGRAD_LIFESPAN =
+    0b11100, /**< Recompute + grad + apply gradient lifespan */
+  FORWARD_RECOMPUTE_DERIV_GRAD_LIFESPAN =
+    0b10111, /**< Forward + recompute + deriv + grad lifespan */
+  FORWARD_RECOMPUTE_DERIV_AGRAD_LIFESPAN =
+    0b11011, /**< Forward + recompute + deriv + apply gradient lifespan */
+  FORWARD_RECOMPUTE_GRAD_AGRAD_LIFESPAN =
+    0b11101, /**< Forward + recompute + grad + apply gradient lifespan  */
+  RECOMPUTE_DERIV_GRAD_AGRAD_LIFESPAN =
+    0b11110, /**< Recompute + deriv + grad + apply gradient lifespan */
   EPOCH_LIFESPAN = 0b11111, /**< tensor must be valid before the epoch ends */
   FORWARD_INFER_LIFESPAN =
     0b100000,               /**< tensor is only used for only inference */

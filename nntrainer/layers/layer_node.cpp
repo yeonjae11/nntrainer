@@ -206,7 +206,7 @@ LayerNode::LayerNode(std::unique_ptr<nntrainer::Layer> &&l) :
   layer_node_props_realization(
     new RealizationPropsType(props::Flatten(), props::Activation())),
   loss(new props::Loss()),
-  exec_order({0, 0, 0, 0}),
+  exec_order({0, 0, 0, 0, 0}),
   needs_restore_data(false),
   data_type({TensorDim::DataType::FP32, TensorDim::DataType::FP32}) {
   if (layer && layer->getType() == TimeDistLayer::type) {

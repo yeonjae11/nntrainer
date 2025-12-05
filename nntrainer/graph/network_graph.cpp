@@ -115,7 +115,7 @@ void NetworkGraph::setExecutionOrder() {
       backward_order++;
     auto apply_gradient_order = backward_order++;
 
-    node->setExecutionOrder({forward_order, calc_gradient_order,
+    node->setExecutionOrder({forward_order, 0, calc_gradient_order,
                              calc_derivative_order, apply_gradient_order});
   }
 
@@ -124,7 +124,7 @@ void NetworkGraph::setExecutionOrder() {
    * This set max execution order is used to extend gradient exec orders for
    * clipping.
    */
-  graph_exec_end = std::get<3>((*(cbegin()))->getExecutionOrder());
+  graph_exec_end = std::get<4>((*(cbegin()))->getExecutionOrder());
 }
 
 void NetworkGraph::addLayerNode(std::unique_ptr<Layer> layer) {
@@ -568,9 +568,9 @@ LayerNode *NetworkGraph::computeBackwardEnd() {
     int cur_order = std::get<0>(exec_order);
     if (ln->needsCalcDerivative() || ln->needsCalcGradient()) {
 #ifdef ENABLE_TEST
-      cur_order = std::get<2>(exec_order);
+      cur_order = std::get<3>(exec_order);
 #else
-      cur_order = std::get<1>(exec_order);
+      cur_order = std::get<2>(exec_order);
 #endif
     }
 
@@ -612,7 +612,7 @@ void NetworkGraph::allocateTensors(ExecutionMode exec_mode_) {
      * + 1
      */
     tensor_manager->allocateTensors(
-      std::get<3>(backward_iter_end->getExecutionOrder()));
+      std::get<4>(backward_iter_end->getExecutionOrder()));
   }
 }
 
@@ -1251,8 +1251,8 @@ int NetworkGraph::initialize(ExecutionMode mode,
   for (unsigned int idx = 0; idx < graph.size(); ++idx) {
     auto const &lnode = getSortedLayerNode(idx);
     auto &rc = lnode->getRunContext();
-    auto first_grad_access = std::get<1>(lnode->getExecutionOrder());
-    auto last_grad_access = std::get<3>(lnode->getExecutionOrder());
+    auto first_grad_access = std::get<2>(lnode->getExecutionOrder());
+    auto last_grad_access = std::get<4>(lnode->getExecutionOrder());
     for (unsigned i = 0; i < rc.getNumWeights(); ++i) {
       if (!rc.weightHasGradient(i)) {
         /// @todo this is duck taping that MUST BE REMOVED. We will need to
@@ -1464,8 +1464,8 @@ int NetworkGraph::reinitialize(
   for (unsigned int idx = 0; idx < graph.size(); ++idx) {
     auto const &lnode = getSortedLayerNode(idx);
     auto &rc = lnode->getRunContext();
-    auto first_grad_access = std::get<1>(lnode->getExecutionOrder());
-    auto last_grad_access = std::get<3>(lnode->getExecutionOrder());
+    auto first_grad_access = std::get<2>(lnode->getExecutionOrder());
+    auto last_grad_access = std::get<4>(lnode->getExecutionOrder());
     for (unsigned i = 0; i < rc.getNumWeights(); ++i) {
       if (!rc.weightHasGradient(i)) {
         /// @todo this is duck taping that MUST BE REMOVED. We will need to
