@@ -13,8 +13,11 @@
 #ifndef __CHECKPOINT_BLOCK_H__
 #define __CHECKPOINT_BLOCK_H__
 
+#include <memory>
 #include <string>
 #include <vector>
+
+#include <layer_node.h>
 
 namespace nntrainer {
 
@@ -31,21 +34,21 @@ public:
   /**
    * @brief Construct a new Checkpoint Block object
    *
-   * @param layers Vector of layer names to include in this block
-   * @param id Unique identifier for this block
+   * @param _block_name Unique identifier for this block
+   * @param _layer_nodes Vector of layers to include in this block
    */
-  CheckpointBlock(const std::string &_block_name,
-                  const std::vector<std::string> &_layer_names);
-
-  CheckpointBlock(const std::vector<std::string> &_layer_names) :
-    CheckpointBlock("", _layer_names) {}
+  CheckpointBlock(
+    const std::string &_block_name,
+    const std::vector<std::shared_ptr<LayerNode>> &_layer_nodes);
 
   /**
-   * @brief Get the layer names in this block
+   * @brief Construct a new Checkpoint Block object
    *
-   * @return const std::vector<std::string>& Layer names
+   * @param _layer_nodes Vector of layers to include in this block
    */
-  const std::vector<std::string> &getLayerNames() const { return layer_names; }
+  CheckpointBlock(
+    const std::vector<std::shared_ptr<LayerNode>> &_layer_nodes) :
+    CheckpointBlock("", _layer_nodes) {}
 
   /**
    * @brief Get the block name
@@ -59,30 +62,11 @@ public:
    *
    * @return size_t Number of layers
    */
-  size_t size() const { return layer_names.size(); }
-
-  /**
-   * @brief Get the start layer name
-   *
-   * @return std::string Name of the first layer
-   */
-  std::string getFirstLayerName() const;
-
-  /**
-   * @brief Check if the block contains a specific layer
-   *
-   * @return bool true if the layer is in the block, false otherwise
-   */
-  bool hasLayer(const std::string &layer_name) const;
-
-  /**
-   * @brief Insert a new layer name after a specified layer
-   */
-  void insertAfter(const std::string &layer, const std::string &new_layer);
+  size_t size() const { return layer_nodes.size(); }
 
 private:
   std::string block_name;               /**< Unique identifier for this block */
-  std::vector<std::string> layer_names; /**< Names of layers in this block */
+  std::vector<std::shared_ptr<LayerNode>> layer_nodes; /**< layer nodes */
 };
 
 } // namespace nntrainer

@@ -203,8 +203,17 @@ int NeuralNetwork::compile(ExecutionMode mode) {
     model_graph.addLayer(node);
   }
 
-  for (auto &gc_block : gc_block_representation)
-    model_graph.addCheckpointBlock(gc_block.block_name, gc_block.layer_names);
+  for (const auto &gc_block : gc_block_representation) {
+    std::vector<std::shared_ptr<LayerNode>> block_layers;
+    for (const std::string &block_layer : gc_block.layer_names) {
+      auto layer_node = model_graph.getLayerNode(block_layer);
+      NNTR_THROW_IF(!layer_node, std::invalid_argument)
+        << "Layer " << block_layer
+        << " specified in checkpoint block not found in the model graph";
+      block_layers.push_back(layer_node);
+    }
+    model_graph.addCheckpointBlock(gc_block.block_name, block_layers);
+  }
 
   int status = model_graph.compile(loss_type);
   NN_RETURN_STATUS();

@@ -546,13 +546,15 @@ public:
   /**
    * @brief Add a checkpoint block for gradient checkpointing
    */
-  void addCheckpointBlock(const std::string &block_name,
-                          const std::vector<std::string> &layer_names);
+  void addCheckpointBlock(
+    const std::string &block_name,
+    const std::vector<std::shared_ptr<LayerNode>> &layer_nodes);
 
   /**
    * @brief Add a checkpoint block for gradient checkpointing
    */
-  void addCheckpointBlock(const std::vector<std::string> &layer_names);
+  void addCheckpointBlock(
+    const std::vector<std::shared_ptr<LayerNode>> &layer_nodes);
 
 private:
   std::map<std::string, std::string> sub_in_out; /** This is map to identify
