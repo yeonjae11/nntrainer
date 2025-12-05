@@ -14,9 +14,12 @@
 #define __REALIZER_H__
 
 #include <memory>
+#include <optional>
 #include <vector>
 
+#include <checkpoint_block.h>
 #include <compiler_fwd.h>
+#include <nntrainer_log.h>
 
 namespace nntrainer {
 
@@ -37,6 +40,18 @@ public:
    * @todo consider void GraphRepresentation &
    */
   virtual GraphRepresentation realize(const GraphRepresentation &reference) = 0;
+
+  /**
+   * @brief graph realizer creates a new graph based on the reference and modify
+   * gradient checkpoint blocks correctly
+   */
+  virtual GraphRepresentation
+  realize(const GraphRepresentation &reference,
+          std::optional<std::reference_wrapper<std::vector<CheckpointBlock>>>
+            checkpoint_blocks) {
+    ml_loge("Warning: graph realize without gradient checkpoint blocks");
+    return realize(reference);            
+  }
 };
 
 } // namespace nntrainer

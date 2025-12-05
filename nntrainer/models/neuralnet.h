@@ -33,6 +33,7 @@
 #include <chrono>
 #endif
 
+#include <checkpoint_block.h>
 #include <common_properties.h>
 #include <compiler_fwd.h>
 #include <dynamic_training_optimization.h>
@@ -472,6 +473,17 @@ public:
   }
 
   /**
+   * @brief Add a checkpoint block for gradient checkpointing
+   * @param layer_names Names of layers to include in this checkpoint block
+   * @retval #ML_ERROR_NONE Successful.
+   * @retval #ML_ERROR_INVALID_PARAMETER invalid parameter.
+   * @details Layers in a checkpoint block will not store intermediate
+   * activations during forward pass. Instead, they will be recomputed during
+   * backward pass.
+   */
+  int addCheckpointBlock(const std::vector<std::string> &layer_names);
+
+  /**
    * @brief     add layer into neural network model
    * @retval #ML_ERROR_NONE Successful.
    * @retval #ML_ERROR_INVALID_PARAMETER invalid parameter.
@@ -703,6 +715,9 @@ private:
   NetworkGraph model_graph; /** Network Model Graph */
 
   GraphRepresentation graph_representation; /** Unsorted graph representation */
+
+  std::vector<CheckpointBlock>
+    checkpoint_blocks; /** Gradient Checkpointing blocks */
 
   DynamicTrainingOptimization dynamic_training_opt; /**< Dynamic fine-tuning
    optimization mode. supported modes are "max" and "norm" */

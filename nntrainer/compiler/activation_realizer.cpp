@@ -25,6 +25,13 @@ ActivationRealizer::~ActivationRealizer() {}
 
 GraphRepresentation
 ActivationRealizer::realize(const GraphRepresentation &reference) {
+  return realize(reference, std::nullopt);
+}
+
+GraphRepresentation ActivationRealizer::realize(
+  const GraphRepresentation &reference,
+  std::optional<std::reference_wrapper<std::vector<CheckpointBlock>>>
+    checkpoint_blocks) {
   GraphRepresentation processed;
   processed.reserve(reference.size());
 
@@ -65,6 +72,17 @@ ActivationRealizer::realize(const GraphRepresentation &reference) {
         createLayerNode("activation", {"name=" + act_name,
                                        "activation=" + to_string(act_prop)});
       act_node->setProperty({"input_layers=" + temp_name});
+
+      // insert new activation layer into gradient checkpoint block if the
+      // realized node is checkpointed
+      if (checkpoint_blocks.has_value()) {
+        for (auto &block : checkpoint_blocks->get()) {
+          if (block.hasLayer(layer_name)) {
+            block.insertAfter(node->getName(), act_node->getName());
+            break;
+          }
+        }
+      }
       processed.push_back(std::move(act_node));
     }
   }

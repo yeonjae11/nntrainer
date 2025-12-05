@@ -14,6 +14,7 @@
 #define __ACTIVATION_REALIZER_H__
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include <realizer.h>
@@ -37,6 +38,15 @@ public:
    *
    */
   GraphRepresentation realize(const GraphRepresentation &reference) override;
+
+  /**
+   * @brief graph realizer creates a new graph based on the reference and modify
+   * gradient checkpoint blocks correctly
+   */
+  GraphRepresentation
+  realize(const GraphRepresentation &reference,
+          std::optional<std::reference_wrapper<std::vector<CheckpointBlock>>>
+            checkpoint_blocks) override;
 };
 
 } // namespace nntrainer
