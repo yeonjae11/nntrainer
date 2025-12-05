@@ -1681,4 +1681,14 @@ void NetworkGraph::resetLossScale(float scale) {
   }
 }
 
+void NetworkGraph::addCheckpointBlock(
+  const std::string &block_name, const std::vector<std::string> &layer_names) {
+  checkpoint_blocks.push_back(CheckpointBlock(block_name, layer_names));
+}
+
+void NetworkGraph::addCheckpointBlock(
+  const std::vector<std::string> &layer_names) {
+  checkpoint_blocks.push_back(CheckpointBlock(layer_names));
+}
+
 } /* namespace nntrainer */

@@ -25,13 +25,14 @@ ActivationRealizer::~ActivationRealizer() {}
 
 GraphRepresentation
 ActivationRealizer::realize(const GraphRepresentation &reference) {
-  return realize(reference, std::nullopt);
+  ml_loge("Warning: graph realize without gradient checkpoint blocks");
+  GCBlockRepresentation dummy;
+  return realize(reference, dummy);
 }
 
 GraphRepresentation ActivationRealizer::realize(
   const GraphRepresentation &reference,
-  std::optional<std::reference_wrapper<std::vector<CheckpointBlock>>>
-    checkpoint_blocks) {
+  GCBlockRepresentation &gc_block_reference) {
   GraphRepresentation processed;
   processed.reserve(reference.size());
 
@@ -72,16 +73,19 @@ GraphRepresentation ActivationRealizer::realize(
         createLayerNode("activation", {"name=" + act_name,
                                        "activation=" + to_string(act_prop)});
       act_node->setProperty({"input_layers=" + temp_name});
-
       // insert new activation layer into gradient checkpoint block if the
       // realized node is checkpointed
-      if (checkpoint_blocks.has_value()) {
-        for (auto &block : checkpoint_blocks->get()) {
-          if (block.hasLayer(layer_name)) {
-            block.insertAfter(node->getName(), act_node->getName());
+      bool inserted = false;
+      for (auto &[_, block_layers] : gc_block_reference) {
+        for (auto &block_layer : block_layers) {
+          if (block_layer == layer_name) {
+            block_layers.push_back(act_name);
+            inserted = true;
             break;
           }
         }
+        if (inserted)
+          break;
       }
       processed.push_back(std::move(act_node));
     }

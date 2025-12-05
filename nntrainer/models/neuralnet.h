@@ -33,7 +33,6 @@
 #include <chrono>
 #endif
 
-#include <checkpoint_block.h>
 #include <common_properties.h>
 #include <compiler_fwd.h>
 #include <dynamic_training_optimization.h>
@@ -716,8 +715,8 @@ private:
 
   GraphRepresentation graph_representation; /** Unsorted graph representation */
 
-  std::vector<CheckpointBlock>
-    checkpoint_blocks; /** Gradient Checkpointing blocks */
+  GCBlockRepresentation gc_block_representation; /** Unsorted gradient
+                                        checkpointing block representation */
 
   DynamicTrainingOptimization dynamic_training_opt; /**< Dynamic fine-tuning
    optimization mode. supported modes are "max" and "norm" */

@@ -15,16 +15,17 @@
 
 namespace nntrainer {
 
-CheckpointBlock::CheckpointBlock(const std::vector<std::string> &layers,
-                                 const std::string &id) :
-  layer_names(layers), block_id(id) {
+CheckpointBlock::CheckpointBlock(const std::string &_block_name,
+                                 const std::vector<std::string> &_layer_names) :
+  block_name(_block_name), layer_names(_layer_names) {
 
-  if (layers.empty())
+  if (layer_names.empty())
     throw std::invalid_argument("CheckpointBlock: layer list cannot be empty");
 
   // Generate block ID if not provided
-  if (block_id.empty())
-    block_id = "checkpoint_block_" + layers.front() + "_to_" + layers.back();
+  if (block_name.empty())
+    block_name =
+      "checkpoint_block_" + layer_names.front() + "_to_" + layer_names.back();
 }
 
 std::string CheckpointBlock::getFirstLayerName() const {

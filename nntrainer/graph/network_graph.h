@@ -21,6 +21,7 @@
 #include <stack>
 #include <vector>
 
+#include <checkpoint_block.h>
 #include <graph_core.h>
 #include <layer_node.h>
 #include <manager.h>
@@ -542,6 +543,17 @@ public:
     tensor_manager->setWeightOffset(offsets);
   }
 
+  /**
+   * @brief Add a checkpoint block for gradient checkpointing
+   */
+  void addCheckpointBlock(const std::string &block_name,
+                          const std::vector<std::string> &layer_names);
+
+  /**
+   * @brief Add a checkpoint block for gradient checkpointing
+   */
+  void addCheckpointBlock(const std::vector<std::string> &layer_names);
+
 private:
   std::map<std::string, std::string> sub_in_out; /** This is map to identify
                  input and output layer name of subgraph */
@@ -558,6 +570,8 @@ private:
                                    making it noop */
   LayerNode *forward_iter_end;  /**< inclusive end node of the forward execution
                                  when initialize */
+  std::vector<CheckpointBlock>
+    checkpoint_blocks; /**< Gradient Checkpointing blocks */
 
   /// @note *_list and *_dims must be synced at all times. Consider put it as a
   /// structure

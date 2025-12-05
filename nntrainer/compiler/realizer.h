@@ -47,10 +47,9 @@ public:
    */
   virtual GraphRepresentation
   realize(const GraphRepresentation &reference,
-          std::optional<std::reference_wrapper<std::vector<CheckpointBlock>>>
-            checkpoint_blocks) {
+          GCBlockRepresentation &gc_block_reference) {
     ml_loge("Warning: graph realize without gradient checkpoint blocks");
-    return realize(reference);            
+    return realize(reference);
   }
 };
 

@@ -173,7 +173,8 @@ int NeuralNetwork::compile(ExecutionMode mode) {
   realizers.emplace_back(new ActivationRealizer());
 
   for (auto &realizer : realizers) {
-    graph_representation = realizer->realize(graph_representation, checkpoint_blocks);
+    graph_representation =
+      realizer->realize(graph_representation, gc_block_representation);
   }
 
   bool fsu = std::get<props::Fsu>(model_flex_props);
@@ -201,6 +202,9 @@ int NeuralNetwork::compile(ExecutionMode mode) {
     }
     model_graph.addLayer(node);
   }
+
+  for (auto &gc_block : gc_block_representation)
+    model_graph.addCheckpointBlock(gc_block.block_name, gc_block.layer_names);
 
   int status = model_graph.compile(loss_type);
   NN_RETURN_STATUS();
@@ -1536,17 +1540,9 @@ int NeuralNetwork::addCheckpointBlock(
     ml_loge("Error: cannot add checkpoint block after initialization");
     return ML_ERROR_NOT_SUPPORTED;
   }
-
-  try {
-    std::string block_id =
-      "checkpoint_block_" + std::to_string(checkpoint_blocks.size());
-    CheckpointBlock block(layer_names, block_id);
-    checkpoint_blocks.push_back(block);
-  } catch (const std::exception &e) {
-    ml_loge("Failed to create checkpoint block: %s", e.what());
-    return ML_ERROR_INVALID_PARAMETER;
-  }
-
+  std::string block_name =
+    "checkpoint_block_" + std::to_string(gc_block_representation.size());
+  gc_block_representation.push_back({block_name, layer_names});
   return ML_ERROR_NONE;
 }
 

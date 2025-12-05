@@ -45,8 +45,7 @@ public:
    */
   GraphRepresentation
   realize(const GraphRepresentation &reference,
-          std::optional<std::reference_wrapper<std::vector<CheckpointBlock>>>
-            checkpoint_blocks) override;
+          GCBlockRepresentation &gc_block_reference) override;
 };
 
 } // namespace nntrainer

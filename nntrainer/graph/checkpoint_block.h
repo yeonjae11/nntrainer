@@ -34,8 +34,11 @@ public:
    * @param layers Vector of layer names to include in this block
    * @param id Unique identifier for this block
    */
-  CheckpointBlock(const std::vector<std::string> &layers,
-                  const std::string &id = "");
+  CheckpointBlock(const std::string &_block_name,
+                  const std::vector<std::string> &_layer_names);
+
+  CheckpointBlock(const std::vector<std::string> &_layer_names) :
+    CheckpointBlock("", _layer_names) {}
 
   /**
    * @brief Get the layer names in this block
@@ -45,11 +48,11 @@ public:
   const std::vector<std::string> &getLayerNames() const { return layer_names; }
 
   /**
-   * @brief Get the block ID
+   * @brief Get the block name
    *
    * @return std::string Block identifier
    */
-  std::string getBlockId() const { return block_id; }
+  std::string getBlockName() const { return block_name; }
 
   /**
    * @brief Get the number of layers in this block
@@ -78,8 +81,8 @@ public:
   void insertAfter(const std::string &layer, const std::string &new_layer);
 
 private:
+  std::string block_name;               /**< Unique identifier for this block */
   std::vector<std::string> layer_names; /**< Names of layers in this block */
-  std::string block_id;                 /**< Unique identifier for this block */
 };
 
 } // namespace nntrainer

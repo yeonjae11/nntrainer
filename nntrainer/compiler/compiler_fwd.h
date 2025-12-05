@@ -13,13 +13,20 @@
 #define __COMPILER_FWD_H__
 
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace nntrainer {
 class LayerNode;
 class NetworkGraph;
 
+struct GCBlock {
+  std::string block_name;
+  std::vector<std::string> layer_names;
+};
+
 using GraphRepresentation = std::vector<std::shared_ptr<LayerNode>>;
+using GCBlockRepresentation = std::vector<GCBlock>;
 using ExecutableGraph = NetworkGraph;
 
 } // namespace nntrainer
