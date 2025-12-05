@@ -994,6 +994,28 @@ public:
     return "cpu";
   }
 
+  /**
+   * @brief Set the Checkpoint Block Name
+   */
+  void setCheckpointBlockName(const std::string &name) {
+    checkpoint_block_name = name;
+  }
+
+  /**
+   * @brief Get the Checkpoint Block Name
+   */
+  std::string getCheckpointBlockName() const { return checkpoint_block_name; }
+
+  /**
+   * @brief Mark this layer as checkpointed
+   */
+  void setCheckpointed() { is_checkpointed = true; }
+
+  /**
+   * @brief Check if this layer is checkpointed
+   */
+  bool isCheckpointed() const { return is_checkpointed; }
+
 private:
   /**
    * @brief     Get the Input Layers object
@@ -1020,6 +1042,10 @@ private:
 
   std::vector<std::unique_ptr<Connection>>
     output_connections; /**< output layer names */
+  
+  std::string checkpoint_block_name; /**< name of the checkpoint block
+                                        this layer belongs to */
+  bool is_checkpointed; /**< true if this layer is checkpointed */
 
   /**
    * @brief compute_engine Information about the compute backend being used

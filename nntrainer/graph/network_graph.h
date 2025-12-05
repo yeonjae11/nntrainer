@@ -556,6 +556,12 @@ public:
   void addCheckpointBlock(
     const std::vector<std::shared_ptr<LayerNode>> &layer_nodes);
 
+  /**
+   * @brief Get the Checkpoint Block
+   */
+  const CheckpointBlock &
+  getCheckpointBlock(const std::string &block_name) const;
+
 private:
   std::map<std::string, std::string> sub_in_out; /** This is map to identify
                  input and output layer name of subgraph */

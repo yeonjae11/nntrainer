@@ -37,17 +37,15 @@ public:
    * @param _block_name Unique identifier for this block
    * @param _layer_nodes Vector of layers to include in this block
    */
-  CheckpointBlock(
-    const std::string &_block_name,
-    const std::vector<std::shared_ptr<LayerNode>> &_layer_nodes);
+  CheckpointBlock(const std::string &_block_name,
+                  const std::vector<std::shared_ptr<LayerNode>> &_layer_nodes);
 
   /**
    * @brief Construct a new Checkpoint Block object
    *
    * @param _layer_nodes Vector of layers to include in this block
    */
-  CheckpointBlock(
-    const std::vector<std::shared_ptr<LayerNode>> &_layer_nodes) :
+  CheckpointBlock(const std::vector<std::shared_ptr<LayerNode>> &_layer_nodes) :
     CheckpointBlock("", _layer_nodes) {}
 
   /**
@@ -55,7 +53,16 @@ public:
    *
    * @return std::string Block identifier
    */
-  std::string getBlockName() const { return block_name; }
+  std::string getName() const { return block_name; }
+
+  /**
+   * @brief Get the layer nodes
+   *
+   * @return std::vector<std::shared_ptr<LayerNode>> Layer nodes
+   */
+  std::vector<std::shared_ptr<LayerNode>> getLayerNodes() const {
+    return layer_nodes;
+  }
 
   /**
    * @brief Get the number of layers in this block
@@ -64,9 +71,21 @@ public:
    */
   size_t size() const { return layer_nodes.size(); }
 
+  /**
+   * @brief Set sorted layer nodes
+   *
+   * @param _sorted_layer_nodes Sorted vector of layer nodes
+   */
+  void setSortedLayerNodes(
+    std::vector<std::shared_ptr<LayerNode>> _sorted_layer_nodes) {
+    sorted_layer_nodes = _sorted_layer_nodes;
+  }
+
 private:
-  std::string block_name;               /**< Unique identifier for this block */
+  std::string block_name; /**< Unique identifier for this block */
   std::vector<std::shared_ptr<LayerNode>> layer_nodes; /**< layer nodes */
+  std::vector<std::shared_ptr<LayerNode>>
+    sorted_layer_nodes; /**< sorted layer nodes */
 };
 
 } // namespace nntrainer

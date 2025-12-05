@@ -196,8 +196,8 @@ LayerNode::LayerNode(std::unique_ptr<nntrainer::Layer> &&l) :
   inplace_type(InPlaceType::NONE),
   needs_calc_derivative(false),
   needs_calc_gradient(false),
-
   output_connections(),
+  is_checkpointed(false),
   run_context(nullptr),
   layer_node_props(new PropsType(
     props::Name(), props::Distribute(), props::Trainable(), {}, {},

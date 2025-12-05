@@ -24,6 +24,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include <checkpoint_block.h>
 #include <graph_node.h>
 
 namespace nntrainer {
@@ -165,6 +166,11 @@ public:
    * @brief Sorting and Define order to calculate : Depth First Search
    */
   void topologicalSort();
+
+  /**
+   * @brief Sort layers in checkpoint block using topological sort result
+   */
+  void sortCheckpointBlock(CheckpointBlock &checkpoint_block);
 
   /**
    * @brief     Copy the graph

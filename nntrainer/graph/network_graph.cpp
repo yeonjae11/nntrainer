@@ -87,6 +87,10 @@ int NetworkGraph::compile(const std::string &loss_type) {
 
   graph.topologicalSort();
 
+  for (auto &checkpoint_block : checkpoint_blocks) {
+    graph.sortCheckpointBlock(checkpoint_block);
+  }
+
   setExecutionOrder();
   forward_iter_end = (*(cend() - 1)).get();
 
@@ -101,12 +105,24 @@ int NetworkGraph::compile(const std::string &loss_type) {
 }
 
 void NetworkGraph::setExecutionOrder() {
+  std::map<std::string, unsigned int> recompute_orders;
   auto backward_order = graph.size();
   for (auto iter = getBackwardingBeginIter(); iter != getBackwardingEndIter();
        iter++) {
     auto &node = *iter;
     auto order_idx = getBackwardingEndIter() - iter - 1;
     auto forward_order = order_idx;
+    if (node->isCheckpointed() &&
+        recompute_orders.find(node->getCheckpointBlockName()) ==
+          recompute_orders.end()) {
+      recompute_orders.emplace(node->getCheckpointBlockName(), backward_order);
+      backward_order +=
+        getCheckpointBlock(node->getCheckpointBlockName()).size();
+    }
+    auto recompute_order =
+      node->isCheckpointed()
+        ? recompute_orders.at(node->getCheckpointBlockName())++
+        : 0;
     auto calc_gradient_order = backward_order;
     if (node->getTrainable())
       backward_order++;
@@ -115,8 +131,9 @@ void NetworkGraph::setExecutionOrder() {
       backward_order++;
     auto apply_gradient_order = backward_order++;
 
-    node->setExecutionOrder({forward_order, 0, calc_gradient_order,
-                             calc_derivative_order, apply_gradient_order});
+    node->setExecutionOrder({forward_order, recompute_order,
+                             calc_gradient_order, calc_derivative_order,
+                             apply_gradient_order});
   }
 
   /**
@@ -1690,6 +1707,16 @@ void NetworkGraph::addCheckpointBlock(
 void NetworkGraph::addCheckpointBlock(
   const std::vector<std::shared_ptr<LayerNode>> &layer_nodes) {
   checkpoint_blocks.push_back(CheckpointBlock(layer_nodes));
+}
+
+const CheckpointBlock &
+NetworkGraph::getCheckpointBlock(const std::string &block_name) const {
+  for (auto &block : checkpoint_blocks) {
+    if (block.getName() == block_name) {
+      return block;
+    }
+  }
+  throw std::invalid_argument("Checkpoint block not found");
 }
 
 } /* namespace nntrainer */

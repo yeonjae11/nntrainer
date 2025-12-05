@@ -104,6 +104,18 @@ void GraphCore::topologicalSort() {
   }
 }
 
+void GraphCore::sortCheckpointBlock(CheckpointBlock &checkpoint_block) {
+  std::vector<std::shared_ptr<LayerNode>> block_layers(
+    checkpoint_block.getLayerNodes());
+  std::sort(block_layers.begin(), block_layers.end(),
+            [this](const std::shared_ptr<LayerNode> &a,
+                   const std::shared_ptr<LayerNode> &b) {
+              return sorted_node_map.at(a->getName()) <
+                     sorted_node_map.at(b->getName());
+            });
+  checkpoint_block.setSortedLayerNodes(block_layers);
+}
+
 const std::shared_ptr<GraphNode> &
 GraphCore::getNode(const std::string &name) const {
   return node_list.at(node_map.at(name));

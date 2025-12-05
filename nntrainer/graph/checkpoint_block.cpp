@@ -20,14 +20,18 @@ CheckpointBlock::CheckpointBlock(
   const std::string &_block_name,
   const std::vector<std::shared_ptr<LayerNode>> &_layer_nodes) :
   block_name(_block_name), layer_nodes(_layer_nodes) {
-
   if (layer_nodes.empty())
     throw std::invalid_argument("CheckpointBlock: layer list cannot be empty");
 
   // Generate block ID if not provided
   if (block_name.empty())
-    block_name = "checkpoint_block_" + layer_nodes.front()->getName() +
-                 "_to_" + layer_nodes.back()->getName();
+    block_name = "checkpoint_block_" + layer_nodes.front()->getName() + "_to_" +
+                 layer_nodes.back()->getName();
+
+  for (auto &lnode : layer_nodes) {
+    lnode->setCheckpointBlockName(block_name);
+    lnode->setCheckpointed();
+  }
 }
 
 } // namespace nntrainer
