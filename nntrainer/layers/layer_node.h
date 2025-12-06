@@ -1037,17 +1037,6 @@ public:
    */
   bool isInputCheckpointLayer() const { return is_input_checkpoint_layer; }
 
-  /**
-   * @brief Mark this layer as the input/output layer in the checkpoint block
-   */
-  void setOutputCheckpointLayer() { is_output_checkpoint_layer = true; }
-
-  /**
-   * @brief Check if this layer is the input/output layer in the checkpoint
-   * block
-   */
-  bool isOutputCheckpointLayer() const { return is_output_checkpoint_layer; }
-
 private:
   /**
    * @brief     Get the Input Layers object
@@ -1082,8 +1071,6 @@ private:
                                         in the checkpoint block */
   bool is_input_checkpoint_layer;    /**< true if this layer is the input/output
                                         layer    in the checkpoint block */
-  bool is_output_checkpoint_layer;   /**< true if this layer is the input/output
-                                       layer   in the checkpoint block */
 
   /**
    * @brief compute_engine Information about the compute backend being used
