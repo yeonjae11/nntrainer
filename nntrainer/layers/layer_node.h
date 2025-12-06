@@ -1014,7 +1014,39 @@ public:
   /**
    * @brief Check if this layer is checkpointed
    */
-  bool isCheckpointed() const { return is_checkpointed; }
+  bool isCheckpointed() const override { return is_checkpointed; }
+
+  /**
+   * @brief Mark this layer as the last layer in the checkpoint block
+   */
+  void setLastCheckpointLayer() { is_last_checkpoint_layer = true; }
+
+  /**
+   * @brief Check if this layer is the last layer in the checkpoint block
+   */
+  bool isLastCheckpointLayer() const { return is_last_checkpoint_layer; }
+
+  /**
+   * @brief Mark this layer as the input/output layer in the checkpoint block
+   */
+  void setInputCheckpointLayer() { is_input_checkpoint_layer = true; }
+
+  /**
+   * @brief Check if this layer is the input/output layer in the checkpoint
+   * block
+   */
+  bool isInputCheckpointLayer() const { return is_input_checkpoint_layer; }
+
+  /**
+   * @brief Mark this layer as the input/output layer in the checkpoint block
+   */
+  void setOutputCheckpointLayer() { is_output_checkpoint_layer = true; }
+
+  /**
+   * @brief Check if this layer is the input/output layer in the checkpoint
+   * block
+   */
+  bool isOutputCheckpointLayer() const { return is_output_checkpoint_layer; }
 
 private:
   /**
@@ -1042,10 +1074,16 @@ private:
 
   std::vector<std::unique_ptr<Connection>>
     output_connections; /**< output layer names */
-  
+
   std::string checkpoint_block_name; /**< name of the checkpoint block
                                         this layer belongs to */
-  bool is_checkpointed; /**< true if this layer is checkpointed */
+  bool is_checkpointed;              /**< true if this layer is checkpointed */
+  bool is_last_checkpoint_layer;     /**< true if this layer is the last layer
+                                        in the checkpoint block */
+  bool is_input_checkpoint_layer;    /**< true if this layer is the input/output
+                                        layer    in the checkpoint block */
+  bool is_output_checkpoint_layer;   /**< true if this layer is the input/output
+                                       layer   in the checkpoint block */
 
   /**
    * @brief compute_engine Information about the compute backend being used

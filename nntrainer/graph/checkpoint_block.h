@@ -77,8 +77,15 @@ public:
    * @param _sorted_layer_nodes Sorted vector of layer nodes
    */
   void setSortedLayerNodes(
-    std::vector<std::shared_ptr<LayerNode>> _sorted_layer_nodes) {
-    sorted_layer_nodes = _sorted_layer_nodes;
+    std::vector<std::shared_ptr<LayerNode>> _sorted_layer_nodes);
+
+  /**
+   * @brief Get the sorted layer nodes
+   *
+   * @return std::vector<std::shared_ptr<LayerNode>> Sorted layer nodes
+   */
+  std::vector<std::shared_ptr<LayerNode>> getSortedLayerNodes() const {
+    return sorted_layer_nodes;
   }
 
 private:

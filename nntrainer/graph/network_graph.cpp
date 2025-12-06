@@ -112,16 +112,21 @@ void NetworkGraph::setExecutionOrder() {
     auto &node = *iter;
     auto order_idx = getBackwardingEndIter() - iter - 1;
     auto forward_order = order_idx;
-    if (node->isCheckpointed() &&
-        recompute_orders.find(node->getCheckpointBlockName()) ==
-          recompute_orders.end()) {
-      backward_order +=
-        getCheckpointBlock(node->getCheckpointBlockName()).size();
+    if (node->isCheckpointed() && node->isLastCheckpointLayer()) {
+      int num_recompute_layers = 0;
+      for (const auto &layer :
+           getCheckpointBlock(node->getCheckpointBlockName())
+             .getSortedLayerNodes()) {
+        if (!layer->isOutputCheckpointLayer()) {
+          num_recompute_layers++;
+        }
+      }
+      backward_order += num_recompute_layers;
       recompute_orders.emplace(node->getCheckpointBlockName(),
                                backward_order - 1);
     }
     auto recompute_order =
-      node->isCheckpointed()
+      node->isCheckpointed() && !node->isOutputCheckpointLayer()
         ? recompute_orders.at(node->getCheckpointBlockName())--
         : 0;
     auto calc_gradient_order = backward_order;

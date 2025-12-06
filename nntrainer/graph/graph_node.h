@@ -111,6 +111,11 @@ public:
    * respectively
    */
   virtual void setExecutionOrder(ExecutionOrder exec_order_) = 0;
+
+  /**
+   * @brief Check if this layer is checkpointed
+   */
+  virtual bool isCheckpointed() const = 0;
 };
 
 /**
