@@ -459,6 +459,7 @@ sharedConstTensors NetworkGraph::incremental_forwarding(
 bool NetworkGraph::backwarding(
   int iteration,
   std::function<void(std::shared_ptr<LayerNode>, bool)> &forwarding_op,
+  std::function<void(std::shared_ptr<LayerNode>, bool)> &recompute_op,
   std::function<bool(std::shared_ptr<LayerNode>, int)> &backwarding_op,
   std::function<void(Weight &, int)> &lazy_apply_grad_op,
   std::function<bool(void *userdata)> stop_cb, void *userdata) {

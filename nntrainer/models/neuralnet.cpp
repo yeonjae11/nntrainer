@@ -532,6 +532,17 @@ void NeuralNetwork::backwarding(int iteration,
     node->forwarding(training);
   };
 
+  std::function<void(std::shared_ptr<LayerNode>, bool)> recompute_op =
+    [this, stop_cb](std::shared_ptr<LayerNode> node, bool training) -> void {
+    (void)this;
+    PROFILE_MEM_ANNOTATE("Recompute for layer: " + node->getName());
+
+    auto f = std::get<1>(node->getExecutionOrder());
+    model_graph.flushCacheExcept(f);
+
+    node->forwarding(training);
+  };
+
   std::function<bool(std::shared_ptr<LayerNode>, int)> backwarding_op =
     [this, stop_cb, userdata](std::shared_ptr<LayerNode> node,
                               int iteration) -> bool {
@@ -625,8 +636,9 @@ void NeuralNetwork::backwarding(int iteration,
   bool ret = false;
 
   while (!ret) {
-    ret = model_graph.backwarding(iteration, forwarding_op, backwarding_op,
-                                  lazy_apply_grad_op, stop_cb, userdata);
+    ret = model_graph.backwarding(iteration, forwarding_op, recompute_op,
+                                  backwarding_op, lazy_apply_grad_op, stop_cb,
+                                  userdata);
   }
 }
 

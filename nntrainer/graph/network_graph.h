@@ -231,6 +231,7 @@ public:
    * @brief     backwarding the network graph
    * @param[in] iteration current iteration number
    * @param[in] forwarding_op operation for the forwarding
+   * @param[in] recompute_op operation for the recompute
    * @param[in] backwarding_op operation for the backwarding
    * @param[in] lazy_apply_grad_op operation for applying the lazy gradients
    * @retval ret it is false then the gradient has NaN valude in mixed precision
@@ -240,6 +241,7 @@ public:
   bool backwarding(
     int iteration,
     std::function<void(std::shared_ptr<LayerNode>, bool)> &forwarding_op,
+    std::function<void(std::shared_ptr<LayerNode>, bool)> &recompute_op,
     std::function<bool(std::shared_ptr<LayerNode>, int)> &backwarding_op,
     std::function<void(Weight &, int)> &lazy_apply_grad_op,
     std::function<bool(void *userdata)> stop_cb =
