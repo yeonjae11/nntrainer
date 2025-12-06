@@ -115,13 +115,14 @@ void NetworkGraph::setExecutionOrder() {
     if (node->isCheckpointed() &&
         recompute_orders.find(node->getCheckpointBlockName()) ==
           recompute_orders.end()) {
-      recompute_orders.emplace(node->getCheckpointBlockName(), backward_order);
       backward_order +=
         getCheckpointBlock(node->getCheckpointBlockName()).size();
+      recompute_orders.emplace(node->getCheckpointBlockName(),
+                               backward_order - 1);
     }
     auto recompute_order =
       node->isCheckpointed()
-        ? recompute_orders.at(node->getCheckpointBlockName())++
+        ? recompute_orders.at(node->getCheckpointBlockName())--
         : 0;
     auto calc_gradient_order = backward_order;
     if (node->getTrainable())
