@@ -416,7 +416,15 @@ sharedConstTensors NetworkGraph::forwarding(
   for (auto iter = cbegin(); iter != cend() && !stop_cb(userdata); iter++) {
     auto &ln = *iter;
     PROFILE_TIME_START(profile_keys.at(ln->getType()));
+    /**
+     * Configure run layer context to use initial tensors for checkpointed
+     * layers
+     */
+    if (ln->isCheckpointed())
+      ln->setInitialForward(true);
     forwarding_op(*iter, training);
+    if (ln->isCheckpointed())
+      ln->setInitialForward(false);
     PROFILE_TIME_END(profile_keys.at(ln->getType()));
   }
 

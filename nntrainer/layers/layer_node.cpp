@@ -956,6 +956,13 @@ void LayerNode::configureGCRunContext(
     is_input_checkpoint_layer, is_output_checkpoint_layer);
 }
 
+void LayerNode::setInitialForward(bool val) {
+  if (!run_context)
+    throw std::runtime_error("Error: run layer context is not initialized");
+
+  run_context->setInitialForward(val);
+}
+
 /**
  * @brief   Print Options when printing layer info
  */

@@ -1060,6 +1060,11 @@ public:
    */
   bool isOutputCheckpointLayer() const { return is_output_checkpoint_layer; }
 
+  /**
+   * @brief Set initial forwarding flag in run context
+   */
+  void setInitialForward(bool val);
+
 private:
   /**
    * @brief     Get the Input Layers object
