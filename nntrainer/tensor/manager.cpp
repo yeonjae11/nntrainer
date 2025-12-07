@@ -670,6 +670,55 @@ Manager::requestInputs(const GraphNode &node,
   return ret;
 }
 
+/**
+ * @brief     Create tensors with the given spec
+ */
+std::vector<Var_Grad *>
+Manager::requestInitialInputs(const GraphNode &node,
+                              const std::vector<TensorDim> &inputs_dim,
+                              const std::vector<std::string> &outputs_name) {
+  // This is requestInputs() without grad_spec and put "_initial" at the end of
+  // the tensor name for gradient checkpointing
+
+  using RT = TensorSpecV2::RequestType;
+
+  if (exec_mode != ExecutionMode::TRAIN)
+    throw std::runtime_error(
+      "Error: should use gradient checkpoiting in training mode");
+
+  TensorSpecV2 var_common_spec;
+  var_common_spec.ls = TensorLifespan::FORWARD_FUNC_LIFESPAN;
+
+  std::vector<Var_Grad *> ret;
+  size_t current_size = inputs_v2.size();
+
+  for (unsigned int idx = 0; idx < inputs_dim.size(); idx++) {
+    TensorSpecV2 var_spec = var_common_spec;
+
+    var_spec.name = std::string("input") + std::to_string(idx) + "_initial";
+    var_spec.dim = inputs_dim[idx];
+
+    if (!outputs_name.empty()) {
+      var_spec.reference_name = outputs_name[idx];
+    } else if (!node.getInputConnections().empty()) {
+      var_spec.request_type = RT::UNIQUE;
+    } else {
+      var_spec.request_type = RT::PLACEHOLDER;
+    }
+    inputs_v2.emplace_back(std::make_unique<Var_Grad>(
+      requestTensor_(var_spec, node.getExecutionOrder(), node.getName(),
+                     tensor_pool, false, node.getTrainable()),
+      nullptr));
+  }
+
+  ret.reserve(inputs_dim.size());
+  std::transform(inputs_v2.begin() + current_size, inputs_v2.end(),
+                 std::back_inserter(ret),
+                 [](auto const &elem) { return elem.get(); });
+
+  return ret;
+}
+
 std::vector<unsigned int>
 Manager::getTensorExecutionOrders(const std::string &name, bool is_weight) {
 

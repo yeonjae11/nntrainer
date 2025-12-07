@@ -361,6 +361,21 @@ public:
                   const std::vector<Var_Grad *> &prev_inputs);
 
   /**
+   * @brief Create run layer context from the given init layer context
+   *
+   * @param lnode layer node to finalize and set run context
+   * @param prev_initial_inputs previous input information from initial forward
+   * with gradient checkpointing
+   * @param prev_inputs previous input information
+   * @return first element is output information from initial forward with
+   * gradient checkpointing and second element is usual output information
+   */
+  std::tuple<std::vector<Var_Grad *>, std::vector<Var_Grad *>>
+  finalizeContext(const std::shared_ptr<LayerNode> &lnode,
+                  const std::vector<Var_Grad *> &prev_initial_inputs,
+                  const std::vector<Var_Grad *> &prev_inputs);
+
+  /**
    * @brief Recreate run layer context from the given init layer context
    *
    * @param lnode layer node to finalize and set run context

@@ -983,6 +983,13 @@ public:
    */
   bool reStoreData() { return restoreData; }
 
+  /**
+   * @brief   set initial tensors for gradient checkpointing
+   */
+  void configureInitialTensors(const std::vector<Var_Grad *> &_initial_inputs,
+                               const std::vector<Var_Grad *> &_initial_outputs,
+                               const std::vector<Var_Grad *> &_initial_tensors);
+
 private:
   std::tuple<props::Name, props::Trainable> props; /**< props of the layer */
   std::shared_ptr<ContextData> ct_data;
@@ -995,6 +1002,13 @@ private:
   std::vector<Var_Grad *> inputs;  /**< inputs of the layer */
   std::vector<Var_Grad *> outputs; /**< outputs of the layer */
   std::vector<Var_Grad *> tensors; /**< tensors of the layer */
+
+  std::vector<Var_Grad *>
+    initial_inputs; /**< inputs of the layer for initial forwarding */
+  std::vector<Var_Grad *>
+    initial_outputs; /**< outputs of the layer for initial forwarding */
+  std::vector<Var_Grad *>
+    initial_tensors; /**< tensors of the layer for initial forwarding */
 
 #ifdef DEBUG
   std::map<std::string, const void *>

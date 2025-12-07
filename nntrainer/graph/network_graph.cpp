@@ -786,6 +786,20 @@ setInplaceSharedMemoryConfigByLayer(const std::shared_ptr<LayerNode> &lnode,
 std::vector<Var_Grad *>
 NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
                               const std::vector<Var_Grad *> &prev_inputs) {
+  if (lnode->isCheckpointed())
+    throw std::runtime_error(
+      "Error: must call finalizeContext(const std::shared_ptr<LayerNode> "
+      "&lnode, const std::vector<Var_Grad *> &prev_initial_inputs, const "
+      "std::vector<Var_Grad *> &prev_inputs)");
+  auto [_, outputs] = finalizeContext(lnode, {}, prev_inputs);
+  return outputs;
+}
+
+std::tuple<std::vector<Var_Grad *>, std::vector<Var_Grad *>>
+NetworkGraph::finalizeContext(
+  const std::shared_ptr<LayerNode> &lnode,
+  const std::vector<Var_Grad *> &prev_initial_inputs,
+  const std::vector<Var_Grad *> &prev_inputs) {
   const GraphNode &gnode = *lnode.get();
   std::vector<TensorDim> input_dims;
   input_dims.reserve(prev_inputs.size());
@@ -906,6 +920,7 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
     });
   }
 
+  std::vector<Var_Grad *> initial_outputs;
   const std::vector<Var_Grad *> &outputs = tensor_manager->requestTensors(
     out_specs, Manager::TensorGroupType::OUTPUT, lnode->getExecutionOrder(),
     lnode->getName());
@@ -973,7 +988,7 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
                                    trainable, shared_tensor_names),
     init_context.getLossScale(), ct_data);
 
-  return outputs;
+  return std::make_tuple(initial_outputs, outputs);
 }
 
 std::vector<Var_Grad *>

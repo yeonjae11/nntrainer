@@ -630,4 +630,16 @@ bool RunLayerContext::validate(bool skip_input, bool skip_label) {
   return ret;
 }
 
+/**
+ * @brief   set initial tensors for gradient checkpointing
+ */
+void RunLayerContext::configureInitialTensors(
+  const std::vector<Var_Grad *> &_initial_inputs,
+  const std::vector<Var_Grad *> &_initial_outputs,
+  const std::vector<Var_Grad *> &_initial_tensors) {
+  initial_inputs = _initial_inputs;
+  initial_outputs = _initial_outputs;
+  initial_tensors = _initial_tensors;
+}
+
 } // namespace nntrainer
