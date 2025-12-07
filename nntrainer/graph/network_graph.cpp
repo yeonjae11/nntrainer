@@ -1089,8 +1089,8 @@ NetworkGraph::finalizeContext(
 
   /** Configure tensors for initial forwarding in run layer context */
   if (lnode->isCheckpointed()) {
-    lnode->configureInitialTensors(initial_inputs, initial_outputs,
-                                   initial_tensors);
+    lnode->configureGCRunContext(initial_inputs, initial_outputs,
+                                 initial_tensors);
   }
 
   return std::make_tuple(initial_outputs, outputs);

@@ -947,12 +947,13 @@ void LayerNode::configureRunContext(const std::vector<Weight *> &weights,
     loss_scale, ct_data, false, weights, inputs, outputs, tensors);
 }
 
-void LayerNode::configureInitialTensors(
+void LayerNode::configureGCRunContext(
   const std::vector<Var_Grad *> &initial_inputs,
   const std::vector<Var_Grad *> &initial_outputs,
   const std::vector<Var_Grad *> &initial_tensors) {
-  run_context->configureInitialTensors(initial_inputs, initial_outputs,
-                                       initial_tensors);
+  run_context->configureGradientCheckpointing(
+    initial_inputs, initial_outputs, initial_tensors, is_checkpointed,
+    is_input_checkpoint_layer, is_output_checkpoint_layer);
 }
 
 /**

@@ -897,9 +897,9 @@ public:
    * @param initial_outputs outputs for initial forwarding
    * @param initial_tensors tensors for initial forwarding
    */
-  void configureInitialTensors(const std::vector<Var_Grad *> &initial_inputs,
-                               const std::vector<Var_Grad *> &initial_outputs,
-                               const std::vector<Var_Grad *> &initial_tensors);
+  void configureGCRunContext(const std::vector<Var_Grad *> &initial_inputs,
+                             const std::vector<Var_Grad *> &initial_outputs,
+                             const std::vector<Var_Grad *> &initial_tensors);
 
   /**
    * @brief Preset modes for printing summary for the layer

@@ -139,6 +139,10 @@ RunLayerContext::RunLayerContext(const std::string &name, bool trainable,
   is_inplace(is_inplace_),
   loss_scale(loss_scale_),
   restoreData(restore_),
+  is_checkpointed(false),
+  is_input_checkpoint_layer(false),
+  is_output_checkpoint_layer(false),
+  is_initial_forward(false),
   weights(w),
   inputs(in),
   outputs(out),
@@ -631,15 +635,19 @@ bool RunLayerContext::validate(bool skip_input, bool skip_label) {
 }
 
 /**
- * @brief   set initial tensors for gradient checkpointing
+ * @brief   set run context for gradient checkpointing
  */
-void RunLayerContext::configureInitialTensors(
+void RunLayerContext::configureGradientCheckpointing(
   const std::vector<Var_Grad *> &_initial_inputs,
   const std::vector<Var_Grad *> &_initial_outputs,
-  const std::vector<Var_Grad *> &_initial_tensors) {
+  const std::vector<Var_Grad *> &_initial_tensors, bool _is_checkpointed,
+  bool _is_input_checkpoint_layer, bool _is_output_checkpoint_layer) {
   initial_inputs = _initial_inputs;
   initial_outputs = _initial_outputs;
   initial_tensors = _initial_tensors;
+  is_checkpointed = _is_checkpointed;
+  is_input_checkpoint_layer = _is_input_checkpoint_layer;
+  is_output_checkpoint_layer = _is_output_checkpoint_layer;
 }
 
 } // namespace nntrainer

@@ -984,19 +984,40 @@ public:
   bool reStoreData() { return restoreData; }
 
   /**
-   * @brief   set initial tensors for gradient checkpointing
+   * @brief   set Initial Forward Flag.
+   *
    */
-  void configureInitialTensors(const std::vector<Var_Grad *> &_initial_inputs,
-                               const std::vector<Var_Grad *> &_initial_outputs,
-                               const std::vector<Var_Grad *> &_initial_tensors);
+  void setInitialForward(bool val) { is_initial_forward = val; }
+
+  /**
+   * @brief   get Initial Forward Flag.
+   *
+   */
+  bool isInitialForward() const { return is_initial_forward; }
+
+  /**
+   * @brief   set run context for gradient checkpointing
+   */
+  void configureGradientCheckpointing(
+    const std::vector<Var_Grad *> &_initial_inputs,
+    const std::vector<Var_Grad *> &_initial_outputs,
+    const std::vector<Var_Grad *> &_initial_tensors, bool _is_checkpointed,
+    bool _is_input_checkpoint_layer, bool _is_output_checkpoint_layer);
 
 private:
   std::tuple<props::Name, props::Trainable> props; /**< props of the layer */
   std::shared_ptr<ContextData> ct_data;
-  float loss;       /**< loss of the layer */
-  bool is_inplace;  /**< if the layer is expected to run in-place */
-  float loss_scale; /**< loss_scale of the layer */
-  bool restoreData; /**< reset output for mixed precsion */
+  float loss;           /**< loss of the layer */
+  bool is_inplace;      /**< if the layer is expected to run in-place */
+  float loss_scale;     /**< loss_scale of the layer */
+  bool restoreData;     /**< reset output for mixed precsion */
+  bool is_checkpointed; /**< if the layer is checkpointed */
+  bool is_input_checkpoint_layer; /**< if the layer is input layer of checkpoint
+                                     block */
+  bool is_output_checkpoint_layer; /**< if the layer is output layer of
+                                      checkpoint block */
+  bool is_initial_forward; /**< set only when the layer is checkpointed and
+                             initial forwarding */
 
   std::vector<Weight *> weights;   /**< weights of the layer */
   std::vector<Var_Grad *> inputs;  /**< inputs of the layer */
