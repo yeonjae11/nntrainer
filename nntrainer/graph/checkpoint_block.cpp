@@ -48,6 +48,20 @@ static bool isInputCheckpointLayer(
   return true;
 }
 
+static bool isOutputCheckpointLayer(
+  const std::shared_ptr<LayerNode> &layer,
+  const std::vector<std::shared_ptr<LayerNode>> &block_layers) {
+  const std::vector<std::string> &outputs = layer->getOutputConnections();
+  for (const std::string &output : outputs) {
+    for (const auto &block_layer : block_layers) {
+      if (block_layer->getName() == output) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 void CheckpointBlock::setSortedLayerNodes(
   std::vector<std::shared_ptr<LayerNode>> _sorted_layer_nodes) {
   sorted_layer_nodes = _sorted_layer_nodes;
@@ -55,6 +69,9 @@ void CheckpointBlock::setSortedLayerNodes(
   for (auto &block_layer : sorted_layer_nodes) {
     if (isInputCheckpointLayer(block_layer, sorted_layer_nodes)) {
       block_layer->setInputCheckpointLayer();
+    }
+    if (isOutputCheckpointLayer(block_layer, sorted_layer_nodes)) {
+      block_layer->setOutputCheckpointLayer();
     }
   }
 }

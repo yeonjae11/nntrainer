@@ -200,6 +200,7 @@ LayerNode::LayerNode(std::unique_ptr<nntrainer::Layer> &&l) :
   is_checkpointed(false),
   is_last_checkpoint_layer(false),
   is_input_checkpoint_layer(false),
+  is_output_checkpoint_layer(false),
   run_context(nullptr),
   layer_node_props(new PropsType(
     props::Name(), props::Distribute(), props::Trainable(), {}, {},

@@ -1039,15 +1039,26 @@ public:
   bool isLastCheckpointLayer() const { return is_last_checkpoint_layer; }
 
   /**
-   * @brief Mark this layer as the input/output layer in the checkpoint block
+   * @brief Mark this layer as the input layer in the checkpoint block
    */
   void setInputCheckpointLayer() { is_input_checkpoint_layer = true; }
 
   /**
-   * @brief Check if this layer is the input/output layer in the checkpoint
+   * @brief Check if this layer is the input layer in the checkpoint
    * block
    */
   bool isInputCheckpointLayer() const { return is_input_checkpoint_layer; }
+
+  /**
+   * @brief Mark this layer as the output layer in the checkpoint block
+   */
+  void setOutputCheckpointLayer() { is_output_checkpoint_layer = true; }
+
+  /**
+   * @brief Check if this layer is the output layer in the checkpoint
+   * block
+   */
+  bool isOutputCheckpointLayer() const { return is_output_checkpoint_layer; }
 
 private:
   /**
@@ -1079,10 +1090,12 @@ private:
   std::string checkpoint_block_name; /**< name of the checkpoint block
                                         this layer belongs to */
   bool is_checkpointed;              /**< true if this layer is checkpointed */
-  bool is_last_checkpoint_layer;     /**< true if this layer is the last layer
-                                        in the checkpoint block */
-  bool is_input_checkpoint_layer;    /**< true if this layer is the input/output
-                                        layer    in the checkpoint block */
+  bool is_last_checkpoint_layer;  /**< true if this layer is the last layer in
+                                     the checkpoint block */
+  bool is_input_checkpoint_layer; /**< true if this layer is the input layer in
+                                     the checkpoint block */
+  bool is_output_checkpoint_layer; /**< true if this layer is the output layer in
+                                     the checkpoint block */
 
   /**
    * @brief compute_engine Information about the compute backend being used

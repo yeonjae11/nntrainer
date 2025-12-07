@@ -812,10 +812,36 @@ NetworkGraph::finalizeContext(
   const auto &ct_engine = nntrainer::Engine::Global();
 
   /**
+   * check if additional tensors are required for initial forwarding in
+   * gradient checkpointing
+   */
+  const bool need_initial_input =
+    lnode->isCheckpointed() && !lnode->isInputCheckpointLayer();
+  const bool need_initial_output =
+    lnode->isCheckpointed() && !lnode->isOutputCheckpointLayer();
+  const bool need_initial_tensor = lnode->isCheckpointed();
+
+  /**
    * Request manager for either a pre-allocated output as input or a newly
    * allocated output. This is necessary for manager to know when this
    * output node is going to be used.
    */
+  std::vector<std::string> initial_input_names;
+  std::vector<Var_Grad *> initial_inputs;
+  if (need_initial_input) {
+    initial_input_names.reserve(prev_initial_inputs.size());
+    std::transform(
+      prev_initial_inputs.begin(), prev_initial_inputs.end(),
+      std::back_inserter(initial_input_names),
+      [](auto const &vg) -> const auto & { return vg->getName(); });
+    /**
+     * Request input tensors for initial forwarding in gradient checkpointing
+     */
+    initial_inputs = tensor_manager->requestInitialInputs(
+      gnode, init_context.getInputDimensions(), initial_input_names);
+  }
+  /** @todo: jhy213 prior to prev_initial_inputs rather than prev_inputs for
+   * input block layer or non-checkpointed layer */
   std::vector<std::string> input_names;
   input_names.reserve(prev_inputs.size());
   std::transform(
@@ -830,6 +856,9 @@ NetworkGraph::finalizeContext(
    * allocated output. This is necessary for manager to know when this
    * output node is going to be used with in-place optimizations.
    */
+  auto initial_out_specs = need_initial_output
+                             ? init_context.getOutSpecs()
+                             : std::vector<nntrainer::VarGradSpecV2>{};
   auto out_specs = init_context.getOutSpecs();
 
   /// @note try move inplace control to finalize
@@ -839,6 +868,39 @@ NetworkGraph::finalizeContext(
     setInplaceSharedMemoryConfigByLayer(lnode, shared_var, shared_grad);
 
     for (unsigned int i = 0; i < out_specs.size(); ++i) {
+      if (need_initial_output) {
+        auto &initial_s = initial_out_specs.at(i);
+        if (shared_var) {
+          const auto &_inputs =
+            need_initial_input ? initial_inputs : inputs;
+          initial_s.variable_spec.request_type =
+            TensorSpecV2::RequestType::READ_ONLY_VIEW;
+          if (lnode->getType() == IdentityLayer::type) {
+            initial_s.variable_spec.reference_name = _inputs[i]->getName();
+            initial_s.variable_spec.dim.setFormat(
+              _inputs[i]->getDim().getFormat());
+          } else if (lnode->getInPlaceDirection() == InPlaceDirection::RIGHT) {
+            initial_s.variable_spec.reference_name = _inputs[1]->getName();
+            initial_s.variable_spec.dim.setFormat(
+              _inputs[1]->getDim().getFormat());
+          } else if (lnode->getType() == WeightLayer::type) {
+            WeightSpec w_spec = init_context.getWeightsSpec()[i];
+            initial_s.variable_spec.reference_name = std::get<8>(w_spec);
+            initial_s.variable_spec.dim.setFormat(
+              std::get<0>(w_spec).getFormat());
+          } else if (lnode->getType() == TensorLayer::type) {
+            InitLayerContext::TensorSpec t_spec =
+              init_context.getTensorsSpec()[i];
+            initial_s.variable_spec.reference_name = std::get<3>(t_spec);
+            initial_s.variable_spec.dim.setFormat(
+              std::get<0>(t_spec).getFormat());
+          } else {
+            initial_s.variable_spec.reference_name = _inputs[0]->getName();
+            initial_s.variable_spec.dim.setFormat(
+              _inputs[0]->getDim().getFormat());
+          }
+        }
+      }
       auto &s = out_specs.at(i);
       if (shared_var) {
         s.variable_spec.request_type =
@@ -912,6 +974,7 @@ NetworkGraph::finalizeContext(
                   });
   }
 
+  /** @todo: jhy213 */
   if (lnode->getType() == RNNCellLayer::type or
       lnode->getType() == LSTMCellLayer::type or
       lnode->getType() == GRUCellLayer::type) {
@@ -921,6 +984,21 @@ NetworkGraph::finalizeContext(
   }
 
   std::vector<Var_Grad *> initial_outputs;
+  if (need_initial_output) {
+    std::for_each(initial_out_specs.begin(), initial_out_specs.end(),
+                  [](VarGradSpecV2 &spec) {
+                    spec.variable_spec.ls =
+                      TensorLifespan::FORWARD_FUNC_LIFESPAN;
+                    spec.variable_spec.name += "_initial";
+                    spec.gradient_spec = nullptr;
+                  });
+    /**
+     * Request output tensors for initial forwarding in gradient checkpointing
+     */
+    initial_outputs = tensor_manager->requestTensors(
+      initial_out_specs, Manager::TensorGroupType::OUTPUT,
+      lnode->getExecutionOrder(), lnode->getName());
+  }
   const std::vector<Var_Grad *> &outputs = tensor_manager->requestTensors(
     out_specs, Manager::TensorGroupType::OUTPUT, lnode->getExecutionOrder(),
     lnode->getName());
@@ -969,9 +1047,30 @@ NetworkGraph::finalizeContext(
       shared_weight_names.emplace_back(std::get<8>(w_specs.at(i)));
     }
   }
+
+  bool trainable = lnode->getTrainable();
+
+  std::vector<nntrainer::Var_Grad *> initial_tensors;
+  if (need_initial_tensor) {
+    const auto &tensor_spec = init_context.getTensorsSpec();
+    std::vector<VarGradSpec> initial_tensor_spec;
+    for (const auto &t : tensor_spec) {
+      initial_tensor_spec.push_back(
+        std::make_tuple(std::get<0>(t), std::get<1>(t), std::get<2>(t),
+                        std::get<3>(t) + "_initial",
+                        TensorLifespan::FORWARD_FUNC_LIFESPAN, std::get<5>(t)));
+    }
+    if (!shared_tensor_names.empty())
+      throw std::runtime_error("not implemented");
+    /**
+     * Request tensors for initial forwarding in gradient checkpointing
+     */
+    initial_tensors = tensor_manager->requestTensors(
+      gnode, initial_tensor_spec, trainable, shared_tensor_names);
+  }
+
   lnode->setDataType(init_context.getWeightDataType(),
                      init_context.getActivationDataType());
-  bool trainable = lnode->getTrainable();
   if (exec_mode == ExecutionMode::INFERENCE)
     trainable = false;
 
@@ -987,6 +1086,12 @@ NetworkGraph::finalizeContext(
     tensor_manager->requestTensors(gnode, init_context.getTensorsSpec(),
                                    trainable, shared_tensor_names),
     init_context.getLossScale(), ct_data);
+
+  /** Configure tensors for initial forwarding in run layer context */
+  if (lnode->isCheckpointed()) {
+    lnode->configureInitialTensors(initial_inputs, initial_outputs,
+                                   initial_tensors);
+  }
 
   return std::make_tuple(initial_outputs, outputs);
 }
@@ -1218,6 +1323,11 @@ int NetworkGraph::initialize(ExecutionMode mode,
   exec_mode = mode;
   tensor_manager->setExecutionMode(mode);
   /**
+   * this contains the map from node name to its input tensor names for initial
+   * forwarding in gradient checkpointing
+   */
+  std::unordered_map<std::string, std::vector<Var_Grad *>> initial_input_map;
+  /**
    * this contains the map from node name to its input tensor names
    * @note: these input tensors have already been allocated
    */
@@ -1229,6 +1339,7 @@ int NetworkGraph::initialize(ExecutionMode mode,
   };
 
   for (unsigned int idx = 0; idx < graph.size(); ++idx) {
+    std::vector<Var_Grad *> initial_inputs = {};
     std::vector<Var_Grad *> inputs = {};
     auto const &lnode = getSortedLayerNode(idx);
     if (profile_keys.find(lnode->getType()) == profile_keys.end()) {
@@ -1242,6 +1353,12 @@ int NetworkGraph::initialize(ExecutionMode mode,
      * For input layer, as input dimension is known, set input tensor.
      */
     if (!is_input_node(lnode.get())) {
+      /**
+       * @note: non-checkpointed layer or input layer of checkpoint block should
+       * use initial input tensor as its input if it exists. Otherwise, it
+       * should use regular input tensor. */
+      if (initial_input_map.find(lnode->getName()) != initial_input_map.end())
+        initial_inputs = initial_input_map.at(lnode->getName());
       if (input_map.find(lnode->getName()) == input_map.end())
         throw std::runtime_error("Cannot find input buffers for the node");
       inputs = input_map.at(lnode->getName());
@@ -1251,7 +1368,11 @@ int NetworkGraph::initialize(ExecutionMode mode,
      * Initialize all the layers, allocate output tensors for each layer
      * init2and add optimizer related weights for the layer
      */
-    const std::vector<Var_Grad *> &outputs = finalizeContext(lnode, inputs);
+    const auto &[initial_outputs, outputs] = finalizeContext(lnode, initial_inputs, inputs);
+
+    if (!lnode->isCheckpointed() && !initial_outputs.empty())
+      throw std::runtime_error(
+        "Error: non-checkpointed layer should only have regular outputs");
 
     /** no need to update input_map for the last layer */
     if (idx == graph.size() - 1)
@@ -1267,15 +1388,23 @@ int NetworkGraph::initialize(ExecutionMode mode,
       }
 
       auto sink_node = getLayerNode(conn->getName());
-      [[maybe_unused]] auto [it, b] =
-        input_map.try_emplace({sink_node->getName(), {}});
-
       NNTR_THROW_IF(sink_node->getInputConnectionName(conn->getIndex()) !=
                       lnode->getName(),
                     std::invalid_argument)
         << "node pair does not match between " << lnode->getName() << ' '
         << sink_node->getName();
-
+      if (!initial_outputs.empty()) {
+        /**
+         * @node: non-checkpointed sink node should use initial output as its
+         * input tensor if it exists, instead of regular output.
+         */
+        auto [initial_it, _] = initial_input_map.try_emplace({sink_node->getName(), {}});
+        auto &initial_sink_tensors = initial_it->second;
+        initial_sink_tensors.resize(sink_node->getNumInputConnections());
+        initial_sink_tensors[conn->getIndex()] = initial_outputs[i];
+      }
+      [[maybe_unused]] auto [it, _] =
+        input_map.try_emplace({sink_node->getName(), {}});
       auto &sink_tensors = it->second;
       sink_tensors.resize(sink_node->getNumInputConnections());
       sink_tensors[conn->getIndex()] = outputs[i];
