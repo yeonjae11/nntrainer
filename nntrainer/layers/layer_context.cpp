@@ -492,6 +492,12 @@ void RunLayerContext::setBatch(unsigned int batch) {
     vg->setBatchSize(batch);
   for (auto &vg : outputs)
     vg->setBatchSize(batch);
+  if (is_checkpointed && !is_input_checkpoint_layer)
+    for (auto &vg : initial_inputs)
+      vg->setBatchSize(batch);
+  if (is_checkpointed && !is_output_checkpoint_layer)
+    for (auto &vg : initial_outputs)
+      vg->setBatchSize(batch);
 }
 
 /**
@@ -502,18 +508,26 @@ void RunLayerContext::setBatch(unsigned int batch) {
  */
 void RunLayerContext::updateTensor(unsigned int idx, unsigned int batch) {
   tensors[idx]->setBatchSize(batch);
+  if (is_checkpointed)
+    initial_tensors[idx]->setBatchSize(batch);
 }
 
 void RunLayerContext::updateInput(unsigned int idx, TensorDim dimension) {
   inputs[idx]->updateDimension(dimension);
+  if (is_checkpointed && !is_input_checkpoint_layer)
+    initial_inputs[idx]->updateDimension(dimension);
 }
 
 void RunLayerContext::updateOutput(unsigned int idx, TensorDim dimension) {
   outputs[idx]->updateDimension(dimension);
+  if (is_checkpointed && !is_output_checkpoint_layer)
+    initial_outputs[idx]->updateDimension(dimension);
 }
 
 void RunLayerContext::updateTensor(unsigned int idx, TensorDim dimension) {
   tensors[idx]->updateDimension(dimension);
+  if (is_checkpointed)
+    initial_tensors[idx]->updateDimension(dimension);
 }
 
 /**
