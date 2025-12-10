@@ -381,7 +381,7 @@ std::vector<Weight *> Manager::requestWeights(
     node.getExecutionOrder();
 
   std::vector<unsigned int> default_var_exec_order(
-    {forwarding_order, calcDerivative_order});
+    {forwarding_order, recompute_order, calcDerivative_order});
 
   /**
    *  TODO: This needs to be fixed. calcDerivative does not needs the gradient.
@@ -543,6 +543,9 @@ std::vector<Var_Grad *> Manager::requestTensors(
     /** usage for tensors */
     if (enum_class_logical_and(tspan, TensorLifespan::FORWARD_FUNC_LIFESPAN))
       var_exec_order.push_back(forwarding_order);
+
+    if (enum_class_logical_and(tspan, TensorLifespan::RECOMPUTE_LIFESPAN))
+      var_exec_order.push_back(recompute_order);
 
     /** usage for tensors gradient in backwarding */
     if (trainable && is_train_mode &&
