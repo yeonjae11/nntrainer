@@ -496,9 +496,9 @@ bool NetworkGraph::backwarding(
     if (ln->isLastCheckpointLayer()) {
       const auto &cb = getCheckpointBlock(ln->getCheckpointBlockName());
       for (auto &cb_ln : cb.getSortedLayerNodes()) {
-        PROFILE_TIME_START(profile_keys.at(ln->getType()));
+        PROFILE_TIME_START(profile_keys.at(cb_ln->getType()));
         recompute_op(cb_ln, true);
-        PROFILE_TIME_END(profile_keys.at(ln->getType()));
+        PROFILE_TIME_END(profile_keys.at(cb_ln->getType()));
       }
     }
     PROFILE_TIME_START(profile_keys.at(ln->getType()));
