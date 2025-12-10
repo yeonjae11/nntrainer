@@ -77,9 +77,9 @@ GraphRepresentation ActivationRealizer::realize(
       // realized node is checkpointed
       bool inserted = false;
       for (auto &[_, block_layers] : gc_block_reference) {
-        for (auto &block_layer : block_layers) {
-          if (block_layer == layer_name) {
-            block_layers.push_back(act_name);
+        for (auto it = block_layers.begin(); it != block_layers.end(); ++it) {
+          if (*it == layer_name) {
+            block_layers.insert(std::next(it), act_name);
             inserted = true;
             break;
           }
