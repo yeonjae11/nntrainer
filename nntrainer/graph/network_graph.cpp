@@ -493,6 +493,14 @@ bool NetworkGraph::backwarding(
 
   for (iter_ = iter_begin; iter_ != iter_end && !stop_cb(userdata); iter_++) {
     auto &ln = *iter_;
+    if (ln->isLastCheckpointLayer()) {
+      const auto &cb = getCheckpointBlock(ln->getCheckpointBlockName());
+      for (auto &cb_ln : cb.getSortedLayerNodes()) {
+        PROFILE_TIME_START(profile_keys.at(ln->getType()));
+        recompute_op(cb_ln, true);
+        PROFILE_TIME_END(profile_keys.at(ln->getType()));
+      }
+    }
     PROFILE_TIME_START(profile_keys.at(ln->getType()));
     is_valid = backwarding_op(ln, iteration);
     PROFILE_TIME_END(profile_keys.at(ln->getType()));
@@ -848,15 +856,40 @@ NetworkGraph::finalizeContext(
     initial_inputs = tensor_manager->requestInitialInputs(
       gnode, init_context.getInputDimensions(), initial_input_names);
   }
-  /** @todo: jhy213 prior to prev_initial_inputs rather than prev_inputs for
-   * input block layer or non-checkpointed layer */
   std::vector<std::string> input_names;
   input_names.reserve(prev_inputs.size());
   std::transform(
     prev_inputs.begin(), prev_inputs.end(), std::back_inserter(input_names),
     [](auto const &vg) -> const auto & { return vg->getName(); });
   const std::vector<Var_Grad *> &inputs = tensor_manager->requestInputs(
-    gnode, init_context.getInputDimensions(), input_names);
+    gnode, init_context.getInputDimensions(), input_names, need_initial_input);
+
+  /** Set tensor specs */
+  std::vector<nntrainer::Var_Grad *> initial_tensors;
+  std::vector<VarGradSpec> initial_tensor_spec;
+  std::vector<VarGradSpec> tensor_spec;
+  if (need_initial_tensor) {
+    for (const auto &t : init_context.getTensorsSpec()) {
+      initial_tensor_spec.push_back(
+        std::make_tuple(std::get<0>(t), std::get<1>(t), std::get<2>(t),
+                        std::get<3>(t) + "_initial",
+                        TensorLifespan::FORWARD_FUNC_LIFESPAN, std::get<5>(t)));
+
+      auto ls = std::get<4>(t);
+      if ((bool)enum_class_or(ls, TensorLifespan::FORWARD_FUNC_LIFESPAN)) {
+        ls = enum_class_and(
+          ls, enum_class_not(TensorLifespan::FORWARD_FUNC_LIFESPAN));
+        ls = enum_class_or(ls, TensorLifespan::RECOMPUTE_LIFESPAN);
+      }
+      tensor_spec.push_back(std::make_tuple(std::get<0>(t), std::get<1>(t),
+                                            std::get<2>(t), std::get<3>(t), ls,
+                                            std::get<5>(t)));
+    }
+  } else {
+    for (const auto &t : init_context.getTensorsSpec()) {
+      tensor_spec.push_back(t);
+    }
+  }
 
   /** In-Place optimizations */
   /**
@@ -898,7 +931,7 @@ NetworkGraph::finalizeContext(
               std::get<0>(w_spec).getFormat());
           } else if (lnode->getType() == TensorLayer::type) {
             InitLayerContext::TensorSpec t_spec =
-              init_context.getTensorsSpec()[i];
+              initial_tensor_spec[i];
             initial_s.variable_spec.reference_name = std::get<3>(t_spec);
             initial_s.variable_spec.dim.setFormat(
               std::get<0>(t_spec).getFormat());
@@ -975,6 +1008,8 @@ NetworkGraph::finalizeContext(
   /// train initialization this might not worth optimize because in general
   /// output of a neuralnet is very small
   if (lnode->getOutputConnections().size() == 0u) {
+    if (lnode->isCheckpointed())
+      throw std::runtime_error("not implemented");
     std::for_each(out_specs.begin(), out_specs.end(),
                   [this](VarGradSpecV2 &spec) {
                     spec.variable_spec.additional_exec_order.push_back(
@@ -982,13 +1017,16 @@ NetworkGraph::finalizeContext(
                   });
   }
 
-  /** @todo: jhy213 */
   if (lnode->getType() == RNNCellLayer::type or
       lnode->getType() == LSTMCellLayer::type or
       lnode->getType() == GRUCellLayer::type) {
-    std::for_each(out_specs.begin(), out_specs.end(), [](VarGradSpecV2 &spec) {
-      spec.variable_spec.ls = TensorLifespan::FORWARD_GRAD_LIFESPAN;
-    });
+    std::for_each(out_specs.begin(), out_specs.end(),
+                  [need_initial_output](VarGradSpecV2 &spec) {
+                    spec.variable_spec.ls =
+                      need_initial_output
+                        ? TensorLifespan::RECOMPUTE_GRAD_LIFESPAN
+                        : TensorLifespan::FORWARD_GRAD_LIFESPAN;
+                  });
   }
 
   std::vector<Var_Grad *> initial_outputs;
@@ -1007,12 +1045,28 @@ NetworkGraph::finalizeContext(
       initial_out_specs, Manager::TensorGroupType::OUTPUT,
       lnode->getExecutionOrder(), lnode->getName());
   }
+  if (lnode->isCheckpointed()) {
+    std::for_each(
+      out_specs.begin(), out_specs.end(),
+      [need_initial_output](VarGradSpecV2 &spec) {
+        if ((bool)enum_class_or(spec.variable_spec.ls,
+                                TensorLifespan::FORWARD_FUNC_LIFESPAN)) {
+          if (need_initial_output)
+            spec.variable_spec.ls = enum_class_and(
+              spec.variable_spec.ls,
+              enum_class_not(TensorLifespan::FORWARD_FUNC_LIFESPAN));
+          spec.variable_spec.ls = enum_class_or(
+            spec.variable_spec.ls, TensorLifespan::RECOMPUTE_LIFESPAN);
+        }
+      });
+  }
   const std::vector<Var_Grad *> &outputs = tensor_manager->requestTensors(
     out_specs, Manager::TensorGroupType::OUTPUT, lnode->getExecutionOrder(),
     lnode->getName());
 
   /** create shared weight names if requested */
   std::vector<std::string> shared_weight_names;
+  std::vector<std::string> shared_initial_tensor_names;
   std::vector<std::string> shared_tensor_names;
   if (auto shared_node_str = lnode->getSharedFrom(); !shared_node_str.empty()) {
     /// @note below is commented but kept from quick fix to be referenced
@@ -1045,6 +1099,13 @@ NetworkGraph::finalizeContext(
     /// @fixme tensor should be only shared if context explicitly requested
     /// to do so. This has to be added to the part of tensor spec, other
     /// wise it will break many things
+    if (need_initial_tensor) {
+      for (auto i = 0u; i < initial_tensor_spec.size(); ++i) {
+        shared_initial_tensor_names.emplace_back(
+          std::get<3>(initial_tensor_spec.at(i)));
+      }
+    }
+
     const auto &t_specs = init_context.getTensorsSpec();
     for (auto i = 0u; i < t_specs.size(); ++i) {
       shared_tensor_names.emplace_back(std::get<3>(t_specs.at(i)));
@@ -1055,30 +1116,9 @@ NetworkGraph::finalizeContext(
       shared_weight_names.emplace_back(std::get<8>(w_specs.at(i)));
     }
   }
-
-  bool trainable = lnode->getTrainable();
-
-  std::vector<nntrainer::Var_Grad *> initial_tensors;
-  if (need_initial_tensor) {
-    const auto &tensor_spec = init_context.getTensorsSpec();
-    std::vector<VarGradSpec> initial_tensor_spec;
-    for (const auto &t : tensor_spec) {
-      initial_tensor_spec.push_back(
-        std::make_tuple(std::get<0>(t), std::get<1>(t), std::get<2>(t),
-                        std::get<3>(t) + "_initial",
-                        TensorLifespan::FORWARD_FUNC_LIFESPAN, std::get<5>(t)));
-    }
-    if (!shared_tensor_names.empty())
-      throw std::runtime_error("not implemented");
-    /**
-     * Request tensors for initial forwarding in gradient checkpointing
-     */
-    initial_tensors = tensor_manager->requestTensors(
-      gnode, initial_tensor_spec, trainable, shared_tensor_names);
-  }
-
   lnode->setDataType(init_context.getWeightDataType(),
                      init_context.getActivationDataType());
+  bool trainable = lnode->getTrainable();
   if (exec_mode == ExecutionMode::INFERENCE)
     trainable = false;
 
@@ -1091,14 +1131,16 @@ NetworkGraph::finalizeContext(
     tensor_manager->requestWeights(gnode, init_context.getWeightsSpec(),
                                    trainable, shared_weight_names),
     inputs, outputs,
-    tensor_manager->requestTensors(gnode, init_context.getTensorsSpec(),
+    tensor_manager->requestTensors(gnode, tensor_spec,
                                    trainable, shared_tensor_names),
     init_context.getLossScale(), ct_data);
 
   /** Configure tensors for initial forwarding in run layer context */
   if (lnode->isCheckpointed()) {
-    lnode->configureGCRunContext(initial_inputs, initial_outputs,
-                                 initial_tensors);
+    lnode->configureGCRunContext(
+      initial_inputs, initial_outputs,
+      tensor_manager->requestTensors(gnode, initial_tensor_spec, trainable,
+                                     shared_initial_tensor_names));
   }
 
   return std::make_tuple(initial_outputs, outputs);

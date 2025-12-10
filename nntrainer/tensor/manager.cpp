@@ -182,6 +182,9 @@ static Tensor *requestTensor_(const TensorSpecV2 &spec,
   if (enum_class_or(spec.ls, LS::FORWARD_FUNC_LIFESPAN) == spec.ls) {
     order.push_back(forward);
   }
+  if (enum_class_or(spec.ls, LS::RECOMPUTE_LIFESPAN) == spec.ls) {
+    order.push_back(recompute);
+  }
   if (enum_class_or(spec.ls, LS::CALC_GRAD_LIFESPAN) == spec.ls) {
     order.push_back(calc_grad);
   }
@@ -623,6 +626,15 @@ std::vector<Var_Grad *> Manager::requestInputs(
 
   if (node.getType() == GRUCellLayer::type) {
     grad_common_spec.ls = TensorLifespan::CALC_GRAD_DERIV_LIFESPAN;
+  }
+
+  if (node.isCheckpointed()) {
+    if (need_initial_input)
+      var_common_spec.ls =
+        enum_class_and(var_common_spec.ls,
+                       enum_class_not(TensorLifespan::FORWARD_FUNC_LIFESPAN));
+    var_common_spec.ls =
+      enum_class_or(var_common_spec.ls, TensorLifespan::RECOMPUTE_LIFESPAN);
   }
 
   std::vector<Var_Grad *> ret;

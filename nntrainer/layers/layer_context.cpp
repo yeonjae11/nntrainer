@@ -248,10 +248,14 @@ bool RunLayerContext::weightHasGradient(unsigned int idx) const {
  * @return Tensor& Reference to the output tensor
  */
 Tensor &RunLayerContext::getOutput(unsigned int idx) {
+  if (is_initial_forward && !is_output_checkpoint_layer)
+    return initial_outputs[idx]->getVariableRef();
   return outputs[idx]->getVariableRef();
 }
 
 const Tensor &RunLayerContext::getOutput(unsigned int idx) const {
+  if (is_initial_forward && !is_output_checkpoint_layer)
+    return initial_outputs[idx]->getVariableRef();
   return outputs[idx]->getVariableRef();
 }
 
@@ -262,6 +266,8 @@ const Tensor &RunLayerContext::getOutput(unsigned int idx) const {
  * @return Tensor Read-only output grad tensor
  */
 const Tensor RunLayerContext::getOutputGrad(unsigned int idx) const {
+  if (is_initial_forward && !is_output_checkpoint_layer)
+    throw std::runtime_error("Error: initial output does not have grad tensor");
   if (!outputs[idx]->hasGradient()) {
     return Tensor(outputs[idx]->getDim(), true, Initializer::ZEROS);
   }
@@ -308,10 +314,14 @@ const Tensor RunLayerContext::getIncomingDerivative(unsigned int idx) const {
  * @return Tensor& Reference to the input grad tensor
  */
 Tensor &RunLayerContext::getInput(unsigned int idx) {
+  if (is_initial_forward && !is_input_checkpoint_layer)
+    return initial_inputs[idx]->getVariableRef();
   return inputs[idx]->getVariableRef();
 }
 
 const Tensor &RunLayerContext::getInput(unsigned int idx) const {
+  if (is_initial_forward && !is_input_checkpoint_layer)
+    return initial_inputs[idx]->getVariableRef();
   return inputs[idx]->getVariableRef();
 }
 
@@ -322,6 +332,8 @@ const Tensor &RunLayerContext::getInput(unsigned int idx) const {
  * @return Tensor& Reference to the input grad tensor
  */
 Tensor &RunLayerContext::getInputGrad(unsigned int idx) {
+  if (is_initial_forward && !is_input_checkpoint_layer)
+    throw std::runtime_error("Error: initial input does not have grad tensor");
   if (!inputs[idx]->hasGradient()) {
     throw std::invalid_argument(
       "Requesting gradient for a non-trainable tensor.");
@@ -357,6 +369,8 @@ Tensor &RunLayerContext::getOutgoingDerivative(unsigned int idx) {
  * @return Tensor& Reference to the tensor
  */
 Tensor &RunLayerContext::getTensor(unsigned int idx) {
+  if (is_initial_forward)
+    return initial_tensors[idx]->getVariableRef();
   return tensors[idx]->getVariableRef();
 }
 
@@ -367,6 +381,8 @@ Tensor &RunLayerContext::getTensor(unsigned int idx) {
  * @return Tensor& Reference to the tensor
  */
 const Tensor &RunLayerContext::getTensor(unsigned int idx) const {
+  if (is_initial_forward)
+    return initial_tensors[idx]->getVariableRef();
   return tensors[idx]->getVariableRef();
 }
 
@@ -390,6 +406,8 @@ Tensor &RunLayerContext::getTensorGrad(unsigned int idx) {
  * @return Tensor& Reference to the tensor grad tensor
  */
 const Tensor &RunLayerContext::getTensorGrad(unsigned int idx) const {
+  if (is_initial_forward)
+    throw std::runtime_error("Error: initial tensor does not have grad tensor");
   if (!tensors[idx]->hasGradient())
     throw std::invalid_argument(
       "Requesting gradient for a non-trainable tensor.");

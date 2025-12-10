@@ -365,6 +365,34 @@ template <typename T, typename C = int> T enum_class_or(T e1, T e2) {
 }
 
 /**
+ * @brief Perform INT_AND operation on enum class value
+ *
+ * @param e1 enum value
+ * @param e2 enum value
+ *
+ * @return enum value after performing OR operation
+ */
+template <typename T, typename C = int> T enum_class_and(T e1, C e2) {
+  C i1 = static_cast<int>(e1);
+  C i2 = static_cast<int>(e2);
+
+  return static_cast<T>(i1 & i2);
+}
+
+/**
+ * @brief Perform INT_NOT operation on enum class value
+ *
+ * @param e1 enum value
+ * @param e2 enum value
+ *
+ * @return enum value after performing OR operation
+ */
+template <typename T, typename C = int> C enum_class_not(T e) {
+  C i = static_cast<int>(e);
+  return ~i;
+}
+
+/**
  * @brief Find value in tuple by key (internal impl)
  *
  * @tparam Tuple Tuple type to search
