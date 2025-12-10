@@ -230,7 +230,8 @@ public:
    */
   std::vector<Var_Grad *>
   requestInputs(const GraphNode &node, const std::vector<TensorDim> &inputs_dim,
-                const std::vector<std::string> &outputs_name = {});
+                const std::vector<std::string> &outputs_name = {},
+                bool need_initial_input = false);
 
   /**
    * @brief     Create tensors with the given spec

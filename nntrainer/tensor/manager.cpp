@@ -594,10 +594,9 @@ std::vector<Var_Grad *> Manager::requestTensors(
 /**
  * @brief     Create tensors with the given spec
  */
-std::vector<Var_Grad *>
-Manager::requestInputs(const GraphNode &node,
-                       const std::vector<TensorDim> &inputs_dim,
-                       const std::vector<std::string> &outputs_name) {
+std::vector<Var_Grad *> Manager::requestInputs(
+  const GraphNode &node, const std::vector<TensorDim> &inputs_dim,
+  const std::vector<std::string> &outputs_name, bool need_initial_input) {
   using RT = TensorSpecV2::RequestType;
 
   bool is_train_mode = exec_mode == ExecutionMode::TRAIN;
@@ -699,6 +698,7 @@ Manager::requestInitialInputs(const GraphNode &node,
     var_spec.dim = inputs_dim[idx];
 
     if (!outputs_name.empty()) {
+      var_spec.request_type = RT::READ_ONLY_VIEW;
       var_spec.reference_name = outputs_name[idx];
     } else if (!node.getInputConnections().empty()) {
       var_spec.request_type = RT::UNIQUE;
