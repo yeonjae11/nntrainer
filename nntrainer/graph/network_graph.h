@@ -25,6 +25,7 @@
 #include <graph_core.h>
 #include <layer_node.h>
 #include <manager.h>
+#include <tensor.h>
 
 namespace nntrainer {
 using ExecutionMode = ml::train::ExecutionMode;
@@ -52,7 +53,11 @@ public:
     tensor_format("NCHW"),
     tensor_dtype(split("FP32-FP32", getRegex("\\-"))),
     is_clip_grad(false),
-    loss_scale(1.0f) {
+    loss_scale(1.0f),
+    checkpoint_verification_enabled(false),
+    tensor_dump_enabled(false),
+    tensor_dump_path(""),
+    tensor_dump_iteration(0) {
     nan_count = 0;
   }
 
@@ -83,7 +88,11 @@ public:
     tensor_format(tensor_format_),
     tensor_dtype(split(tensor_dtype_, getRegex("\\-"))),
     is_clip_grad(false),
-    loss_scale(1.0f) {
+    loss_scale(1.0f),
+    checkpoint_verification_enabled(false),
+    tensor_dump_enabled(false),
+    tensor_dump_path(""),
+    tensor_dump_iteration(0) {
     nan_count = 0;
   }
 
@@ -212,6 +221,101 @@ public:
    * @note This is called during backwarding to restore activations
    */
   void recomputeCheckpointBlock(const std::string &block_id);
+
+  /**
+   * @brief Enable verification mode for gradient checkpointing
+   * 
+   * @param enable true to enable verification, false to disable
+   */
+  void enableCheckpointVerification(bool enable);
+
+  /**
+   * @brief Save forward inputs for verification
+   * 
+   * @param layer_name Name of the layer
+   * @param inputs Input tensors to save
+   */
+  void saveForwardInputs(const std::string &layer_name,
+                         const std::vector<Tensor> &inputs);
+
+  /**
+   * @brief Save forward outputs for verification
+   * 
+   * @param layer_name Name of the layer
+   * @param outputs Output tensors to save
+   */
+  void saveForwardOutputs(const std::string &layer_name,
+                          const std::vector<Tensor> &outputs);
+
+  /**
+   * @brief Save forward tensors for verification
+   * 
+   * @param layer_name Name of the layer
+   * @param tensors Intermediate tensors to save
+   */
+  void saveForwardTensors(const std::string &layer_name,
+                          const std::vector<Tensor> &tensors);
+
+  /**
+   * @brief Save forward weights for verification
+   * 
+   * @param layer_name Name of the layer
+   * @param weights Weight tensors to save
+   */
+  void saveForwardWeights(const std::string &layer_name,
+                          const std::vector<Tensor> &weights);
+
+  /**
+   * @brief Verify recomputed inputs against saved forward inputs
+   * 
+   * @param layer_name Name of the layer
+   * @param recomputed_inputs Recomputed input tensors
+   * @return true if inputs match within tolerance, false otherwise
+   */
+  bool verifyRecomputedInputs(const std::string &layer_name,
+                              const std::vector<Tensor> &recomputed_inputs);
+
+  /**
+   * @brief Verify recomputed outputs against saved forward outputs
+   * 
+   * @param layer_name Name of the layer
+   * @param recomputed_outputs Recomputed output tensors
+   * @return true if outputs match within tolerance, false otherwise
+   */
+  bool verifyRecomputedOutputs(const std::string &layer_name,
+                               const std::vector<Tensor> &recomputed_outputs);
+
+  /**
+   * @brief Verify recomputed tensors against saved forward tensors
+   * 
+   * @param layer_name Name of the layer
+   * @param recomputed_tensors Recomputed intermediate tensors
+   * @param forward_tensor_indices Tensor indices used in forward pass (empty means all)
+   * @return true if tensors match within tolerance, false otherwise
+   */
+  bool verifyRecomputedTensors(const std::string &layer_name,
+                               const std::vector<Tensor> &recomputed_tensors,
+                               const std::vector<unsigned int> &forward_tensor_indices = {});
+
+  /**
+   * @brief Verify recomputed weights against saved forward weights
+   * 
+   * @param layer_name Name of the layer
+   * @param recomputed_weights Recomputed weight tensors
+   * @return true if weights match within tolerance, false otherwise
+   */
+  bool verifyRecomputedWeights(const std::string &layer_name,
+                               const std::vector<Tensor> &recomputed_weights);
+
+  /**
+   * @brief Clear saved forward inputs and outputs
+   */
+  void clearSavedOutputs();
+
+  /**
+   * @brief Print verification statistics
+   */
+  void printVerificationStats();
 
   /**
    * @brief     forwarding network graph
@@ -598,6 +702,53 @@ private:
   bool is_clip_grad;
   float loss_scale;
   unsigned int nan_count;
+
+  // Gradient checkpointing verification
+  bool checkpoint_verification_enabled; /**< Enable verification mode */
+  bool tensor_dump_enabled; /**< Enable tensor dump for debugging */
+  std::string tensor_dump_path; /**< Path to dump tensors */
+  unsigned int tensor_dump_iteration; /**< Current iteration for tensor dump */
+  std::unordered_map<std::string, std::vector<Tensor>> saved_forward_outputs; /**< Saved forward outputs for verification */
+  std::unordered_map<std::string, std::vector<Tensor>> saved_forward_inputs; /**< Saved forward inputs for verification */
+  std::unordered_map<std::string, std::vector<Tensor>> saved_forward_tensors; /**< Saved forward tensors for verification */
+  std::unordered_map<std::string, std::vector<Tensor>> saved_forward_weights; /**< Saved forward weights for verification */
+  struct VerificationStats {
+    unsigned int total_verifications;
+    unsigned int passed_verifications;
+    unsigned int failed_verifications;
+    float max_diff;
+    float avg_diff;
+    
+    VerificationStats() : total_verifications(0), passed_verifications(0),
+                          failed_verifications(0), max_diff(0.0f), avg_diff(0.0f) {}
+  };
+  VerificationStats verification_stats; /**< Verification statistics */
+
+public:
+  /**
+   * @brief Enable tensor dump for debugging forward pass differences
+   * @param enable Enable or disable tensor dump
+   * @param path Path to dump tensor files
+   */
+  void enableTensorDump(bool enable, const std::string &path = "./tensor_dump");
+  
+  /**
+   * @brief Set current iteration for tensor dump
+   * @param iteration Current iteration number
+   */
+  void setTensorDumpIteration(unsigned int iteration);
+  
+  /**
+   * @brief Dump tensor to file
+   * @param layer_name Name of the layer
+   * @param tensor_type Type of tensor (input, output, weight, tensor)
+   * @param index Index of the tensor
+   * @param tensor Tensor to dump
+   */
+  void dumpTensor(const std::string &layer_name, const std::string &tensor_type,
+                  unsigned int index, const Tensor &tensor);
+
+private:
 
   /**
    * @brief     topological sort

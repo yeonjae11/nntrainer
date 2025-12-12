@@ -422,6 +422,14 @@ public:
   bool supportBackwarding() const { return getLayer()->supportBackwarding(); }
 
   /**
+   * @brief     Get tensor indices used during forward pass
+   * @return    Vector of tensor indices used in forwarding
+   */
+  std::vector<unsigned int> getForwardTensorIndices() const {
+    return getLayer()->getForwardTensorIndices();
+  }
+
+  /**
    * Support interfaces for the properties intercepted from layer
    */
 

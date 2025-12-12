@@ -46,6 +46,7 @@
 #include <cmath>
 #include <iostream>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -76,6 +77,56 @@ constexpr TensorLifespan promoteToRecompute(TensorLifespan span) {
     return static_cast<TensorLifespan>(mask);
   }
   return span;
+}
+
+std::string lifespanToString(TensorLifespan ls, 
+                             const std::tuple<unsigned, unsigned, unsigned, unsigned, unsigned> &exec_order) {
+  unsigned mask = static_cast<unsigned>(ls);
+  std::vector<std::string> components;
+  std::vector<unsigned> active_orders;
+  
+  auto [forward, recompute, calc_grad, calc_deriv, apply_grad] = exec_order;
+  
+  if (mask & lifespanMask(TensorLifespan::FORWARD_FUNC_LIFESPAN)) {
+    components.push_back("FORWARD_FUNC");
+    active_orders.push_back(forward);
+  }
+  if (mask & lifespanMask(TensorLifespan::CALC_DERIV_LIFESPAN)) {
+    components.push_back("CALC_DERIV");
+    active_orders.push_back(calc_deriv);
+  }
+  if (mask & lifespanMask(TensorLifespan::CALC_GRAD_LIFESPAN)) {
+    components.push_back("CALC_GRAD");
+    active_orders.push_back(calc_grad);
+  }
+  if (mask & lifespanMask(TensorLifespan::CALC_AGRAD_LIFESPAN)) {
+    components.push_back("CALC_AGRAD");
+    active_orders.push_back(apply_grad);
+  }
+  if (mask & lifespanMask(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN)) {
+    components.push_back("FORWARD_RECOMPUTE");
+    active_orders.push_back(recompute);
+  }
+  if (mask & lifespanMask(TensorLifespan::FORWARD_INFER_LIFESPAN)) {
+    components.push_back("FORWARD_INFER");
+    active_orders.push_back(forward);
+  }
+  
+  if (components.empty())
+    return "UNMANAGED";
+  
+  std::string result;
+  for (size_t i = 0; i < components.size(); i++) {
+    if (i > 0) result += "|";
+    result += components[i];
+  }
+  
+  // Calculate validity range
+  unsigned validity_start = active_orders.empty() ? 0 : *std::min_element(active_orders.begin(), active_orders.end());
+  unsigned validity_end = active_orders.empty() ? 0 : *std::max_element(active_orders.begin(), active_orders.end());
+  
+  return result + " (mask=" + std::to_string(mask) + 
+         ", lifetime=[" + std::to_string(validity_start) + "," + std::to_string(validity_end) + "])";
 }
 
 } // namespace
@@ -184,6 +235,10 @@ void NetworkGraph::setExecutionOrder() {
 
     node->setExecutionOrder({forward_order, recompute_order, calc_gradient_order,
                              calc_derivative_order, apply_gradient_order});
+    
+    printf("[EXEC-ORDER] Layer: %s, forward=%ld, recompute=%u, calc_grad=%u, calc_deriv=%u, apply_grad=%u\n",
+           node->getName().c_str(), forward_order, recompute_order, calc_gradient_order,
+           calc_derivative_order, apply_gradient_order);
   }
 
   /**
@@ -464,13 +519,85 @@ sharedConstTensors NetworkGraph::forwarding(
   std::function<bool(void *userdata)> stop_cb, void *userdata) {
   for (auto iter = cbegin(); iter != cend() && !stop_cb(userdata); iter++) {
     auto &ln = *iter;
-    if (ln->isCheckpointed()) {
+    bool is_checkpointed = ln->isCheckpointed();
+    
+    if (is_checkpointed) {
       ln->getRunContext().setInitialForward(true);
+      
+      // Save inputs and weights BEFORE forwarding for verification
+      // This matches the timing of recompute verification
+      if (checkpoint_verification_enabled) {
+        auto &rc = ln->getRunContext();
+        
+        // Save inputs (using initial_inputs at this point)
+        std::vector<Tensor> inputs;
+        for (unsigned int i = 0; i < ln->getNumInputs(); ++i) {
+          inputs.push_back(ln->getInput(i));
+        }
+        saveForwardInputs(ln->getName(), inputs);
+        
+        // Save weights
+        std::vector<Tensor> weights;
+        for (unsigned int i = 0; i < rc.getNumWeights(); ++i) {
+          weights.push_back(rc.getWeight(i));
+        }
+        saveForwardWeights(ln->getName(), weights);
+      }
     }
+    
     PROFILE_TIME_START(profile_keys.at(ln->getType()));
     forwarding_op(*iter, training);
     PROFILE_TIME_END(profile_keys.at(ln->getType()));
-    if (ln->isCheckpointed()) {
+    
+    // Tensor dump for debugging:
+    // - For checkpointed layers: dump after initial forward (before setInitialForward(false))
+    // - For non-checkpointed layers: dump after normal forward
+    if (tensor_dump_enabled) {
+      auto &rc = ln->getRunContext();
+      
+      // Dump inputs
+      for (unsigned int i = 0; i < ln->getNumInputs(); ++i) {
+        dumpTensor(ln->getName(), "input", i, ln->getInput(i));
+      }
+      
+      // Dump outputs
+      for (unsigned int i = 0; i < ln->getNumOutputs(); ++i) {
+        dumpTensor(ln->getName(), "output", i, ln->getOutput(i));
+      }
+      
+      // Dump weights
+      for (unsigned int i = 0; i < rc.getNumWeights(); ++i) {
+        dumpTensor(ln->getName(), "weight", i, rc.getWeight(i));
+      }
+      
+      // Dump intermediate tensors
+      for (unsigned int i = 0; i < rc.getNumTensors(); ++i) {
+        dumpTensor(ln->getName(), "tensor", i, rc.getTensor(i));
+      }
+    }
+    
+    if (is_checkpointed) {
+      // Save outputs and tensors AFTER forwarding for verification
+      // IMPORTANT: Must save BEFORE setInitialForward(false) to capture initial_tensors
+      if (checkpoint_verification_enabled) {
+        auto &rc = ln->getRunContext();
+        
+        // Save outputs
+        std::vector<Tensor> outputs;
+        for (unsigned int i = 0; i < ln->getNumOutputs(); ++i) {
+          outputs.push_back(ln->getOutput(i));
+        }
+        saveForwardOutputs(ln->getName(), outputs);
+        
+        // Save tensors (intermediate tensors) - must be done while is_initial_forward=true
+        // to capture initial_tensors which were actually used during forward
+        std::vector<Tensor> tensors;
+        for (unsigned int i = 0; i < rc.getNumTensors(); ++i) {
+          tensors.push_back(rc.getTensor(i));
+        }
+        saveForwardTensors(ln->getName(), tensors);
+      }
+      
       ln->getRunContext().setInitialForward(false);
     }
   }
@@ -555,7 +682,7 @@ bool NetworkGraph::backwarding(
       
       // Only recompute each block once (when we encounter the first layer in backward order)
       if (recomputed_blocks.find(block_id) == recomputed_blocks.end()) {
-        ml_logd("Triggering recomputation for checkpoint block '%s' at layer '%s'",
+        printf("Triggering recomputation for checkpoint block '%s' at layer '%s'\n",
                 block_id.c_str(), ln->getName().c_str());
         recomputeCheckpointBlock(block_id);
         recomputed_blocks.insert(block_id);
@@ -565,6 +692,43 @@ bool NetworkGraph::backwarding(
     PROFILE_TIME_START(profile_keys.at(ln->getType()));
     is_valid = backwarding_op(ln, iteration);
     PROFILE_TIME_END(profile_keys.at(ln->getType()));
+
+    // Dump gradients after backward pass
+    if (tensor_dump_enabled) {
+      auto &rc = ln->getRunContext();
+      
+      // Dump input/output used in backward (for debugging)
+      for (unsigned int i = 0; i < ln->getNumInputs(); ++i) {
+        try {
+          const Tensor &in = ln->getInput(i);
+          dumpTensor(ln->getName(), "backward_input", i, in);
+        } catch (...) {}
+      }
+      for (unsigned int i = 0; i < ln->getNumOutputs(); ++i) {
+        try {
+          const Tensor &out = ln->getOutput(i);
+          dumpTensor(ln->getName(), "backward_output", i, out);
+        } catch (...) {}
+      }
+      
+      // Dump outgoing derivative (gradient to previous layer)
+      for (unsigned int i = 0; i < ln->getNumInputs(); ++i) {
+        try {
+          const Tensor &grad = rc.getOutgoingDerivative(i);
+          dumpTensor(ln->getName(), "outgoing_grad", i, grad);
+        } catch (...) {}
+      }
+      
+      // Dump weight gradients
+      for (unsigned int i = 0; i < rc.getNumWeights(); ++i) {
+        try {
+          if (rc.isGradientFirstAccess(i)) {
+            const Tensor &wgrad = rc.getWeightGrad(i);
+            dumpTensor(ln->getName(), "weight_grad", i, wgrad);
+          }
+        } catch (...) {}
+      }
+    }
 
     if (!is_valid) {
       break;
@@ -890,6 +1054,17 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
     [](auto const &vg) -> const auto & { return vg->getName(); });
   const std::vector<Var_Grad *> &inputs = tensor_manager->requestInputs(
     gnode, init_context.getInputDimensions(), input_names);
+  
+  // Print input allocation info
+  printf("[TENSOR-ALLOC] ===== Layer: %s - INPUTS =====\n", lnode->getName().c_str());
+  for (size_t i = 0; i < inputs.size(); i++) {
+    // Note: inputs are typically READ_ONLY_VIEW references to previous layer outputs
+    // Their actual lifespan is determined by the source output tensor
+    printf("[TENSOR-ALLOC] Layer: %s, Type: INPUT, Name: %s, Ptr: %p (reference to prev output)\n",
+           lnode->getName().c_str(), 
+           inputs[i]->getName().c_str(),
+           (void*)inputs[i]);
+  }
 
   /** In-Place optimizations */
   /**
@@ -1034,6 +1209,26 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
     }
   }
 
+  // CRITICAL: If this layer feeds a FIRST checkpoint layer, its normal output
+  // must be kept alive until recompute. The first checkpoint layer uses
+  // saved_inputs (normal inputs) instead of initial_outputs, so the producer's
+  // normal output must persist until recompute time.
+  bool feeds_first_checkpoint_layer = false;
+  unsigned int first_checkpoint_recompute_order = 0;
+  for (unsigned int i = 0; i < lnode->getNumOutputConnections(); ++i) {
+    auto conn = lnode->getOutputConnection(i);
+    if (!conn)
+      continue;
+    auto sink_node = getLayerNode(conn->getName());
+    if (sink_node && sink_node->isCheckpointed() && sink_node->isFirstInCheckpointBlock()) {
+      feeds_first_checkpoint_layer = true;
+      first_checkpoint_recompute_order = std::get<1>(sink_node->getExecutionOrder());
+      printf("[CHECKPOINT] Layer '%s' feeds FIRST checkpoint layer '%s' - extending normal output lifespan to recompute order %u\n",
+             lnode->getName().c_str(), sink_node->getName().c_str(), first_checkpoint_recompute_order);
+      break;
+    }
+  }
+
   if (is_checkpoint_layer) {
     std::for_each(out_specs.begin(), out_specs.end(),
                   [](VarGradSpecV2 &spec) {
@@ -1042,10 +1237,30 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
                   });
   }
 
+  // Extend normal output lifespan if feeding first checkpoint layer
+  if (feeds_first_checkpoint_layer && !is_checkpoint_layer) {
+    for (auto &spec : out_specs) {
+      // Add recompute order to keep output alive until recompute
+      spec.variable_spec.additional_exec_order.push_back(first_checkpoint_recompute_order);
+      printf("[CHECKPOINT] Layer '%s' output '%s' - added recompute order %u to additional_exec_order\n",
+             lnode->getName().c_str(), spec.variable_spec.name.c_str(), first_checkpoint_recompute_order);
+    }
+  }
+
   // Request outputs (default: for recompute & backward)
   const std::vector<Var_Grad *> &outputs = tensor_manager->requestTensors(
     out_specs, Manager::TensorGroupType::OUTPUT, lnode->getExecutionOrder(),
     lnode->getName());
+  
+  // Print tensor allocation info
+  auto exec_order = lnode->getExecutionOrder();
+  printf("[TENSOR-ALLOC] ===== Layer: %s - OUTPUTS (recompute) =====\n", lnode->getName().c_str());
+  for (size_t i = 0; i < out_specs.size(); i++) {
+    printf("[TENSOR-ALLOC] Layer: %s, Type: OUTPUT, Name: %s, Ptr: %p, Lifespan: %s\n",
+           lnode->getName().c_str(), out_specs[i].variable_spec.name.c_str(),
+           i < outputs.size() ? (void*)outputs[i] : nullptr,
+           lifespanToString(out_specs[i].variable_spec.ls, exec_order).c_str());
+  }
 
   // Request initial forward outputs first (before modifying out_specs)
   std::vector<Var_Grad *> initial_outputs;
@@ -1070,48 +1285,91 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
         }
       };
       
-      // For in-place layers (like MultiOut), skip allocating initial_outputs
-      // They will return initial_inputs directly via getOutput()
-      bool is_inplace_layer = (lnode->getType() == MultiOutLayer::type || 
-                               lnode->getType() == IdentityLayer::type);
-      
-      if (is_inplace_layer) {
-        printf("[CHECKPOINT] Layer '%s' is in-place - skipping initial_outputs allocation (will use initial_inputs)\n",
-               lnode->getName().c_str());
-        // Leave initial_outputs empty - getOutput() will return initial_inputs
-      } else {
-        for (size_t spec_idx = 0; spec_idx < initial_out_specs.size();
-             ++spec_idx) {
-          auto &spec = initial_out_specs[spec_idx];
-          // Create new name instead of modifying in place
-          spec.variable_spec.name = spec.variable_spec.name + "_initial";
-          spec.variable_spec.ls = TensorLifespan::FORWARD_FUNC_LIFESPAN;
+      // Allocate initial_outputs for all layers
+      // Note: For in-place layers like MultiOut, layer_context.cpp will automatically
+      // return initial_inputs instead of initial_outputs during getOutput()
+      for (size_t spec_idx = 0; spec_idx < initial_out_specs.size();
+           ++spec_idx) {
+        auto &spec = initial_out_specs[spec_idx];
+        // Create new name instead of modifying in place
+        spec.variable_spec.name = spec.variable_spec.name + "_initial";
+        spec.variable_spec.ls = TensorLifespan::FORWARD_FUNC_LIFESPAN;
 
-          // Initial forward doesn't need gradients - only variables
-          spec.gradient_spec = nullptr;
+        // Initial forward doesn't need gradients - only variables
+        spec.gradient_spec = nullptr;
 
-          bool consumer_added = false;
-          if (spec_idx < lnode->getNumOutputConnections()) {
-            auto conn = lnode->getOutputConnection(spec_idx);
-            if (conn) {
-              auto sink_node = getLayerNode(conn->getName());
-              if (sink_node) {
-                auto sink_forward_order =
-                  std::get<0>(sink_node->getExecutionOrder());
-                append_consumer_order(spec, sink_forward_order);
-                consumer_added = true;
+        bool consumer_added = false;
+        if (spec_idx < lnode->getNumOutputConnections()) {
+          auto conn = lnode->getOutputConnection(spec_idx);
+          if (conn) {
+            auto sink_node = getLayerNode(conn->getName());
+            if (sink_node) {
+              // For in-place layers, we need to follow the chain to find all
+              // actual consumers, because in-place layers share memory with input
+              std::vector<std::shared_ptr<LayerNode>> consumers_to_process;
+              consumers_to_process.push_back(sink_node);
+              
+              while (!consumers_to_process.empty()) {
+                auto current = consumers_to_process.back();
+                consumers_to_process.pop_back();
+                
+                // Use actual in-place type instead of hardcoded layer types
+                // This correctly handles cases like GELU (not in-place) vs ReLU (in-place)
+                bool is_inplace = (current->getInPlaceType() != InPlaceType::NONE);
+                
+                if (is_inplace) {
+                  // In-place layer: follow to its consumers
+                  for (unsigned int i = 0; i < current->getNumOutputConnections(); ++i) {
+                    auto next_conn = current->getOutputConnection(i);
+                    if (next_conn) {
+                      auto next_node = getLayerNode(next_conn->getName());
+                      if (next_node) {
+                        consumers_to_process.push_back(next_node);
+                      }
+                    }
+                  }
+                } else {
+                  // Non-in-place layer: this is an actual consumer
+                  auto sink_forward_order = std::get<0>(current->getExecutionOrder());
+                  append_consumer_order(spec, sink_forward_order + 1);
+                  consumer_added = true;
+                  printf("[INITIAL_OUTPUT-LIFESPAN] Layer '%s' output[%zu] -> consumer '%s' (forward_order=%u, added order=%u)\n",
+                         lnode->getName().c_str(), spec_idx, current->getName().c_str(), 
+                         sink_forward_order, sink_forward_order + 1);
+                }
               }
             }
           }
-
-          if (!consumer_added) {
-            append_consumer_order(spec, terminal_forward_order);
-          }
         }
-        
-        initial_outputs = tensor_manager->requestTensors(
-          initial_out_specs, Manager::TensorGroupType::OUTPUT, 
-          lnode->getExecutionOrder(), lnode->getName());
+
+        if (!consumer_added) {
+          append_consumer_order(spec, terminal_forward_order + 1);
+          printf("[INITIAL_OUTPUT-LIFESPAN] Layer '%s' output[%zu] -> no consumer, using terminal_forward_order+1=%u\n",
+                 lnode->getName().c_str(), spec_idx, terminal_forward_order + 1);
+        }
+      }
+      
+      // Debug: print additional_exec_order before requesting tensors
+      for (size_t i = 0; i < initial_out_specs.size(); i++) {
+        printf("[DEBUG] Layer '%s' initial_out_specs[%zu] additional_exec_order: [", 
+               lnode->getName().c_str(), i);
+        for (auto o : initial_out_specs[i].variable_spec.additional_exec_order) {
+          printf("%u ", o);
+        }
+        printf("]\n");
+      }
+      
+      initial_outputs = tensor_manager->requestTensors(
+        initial_out_specs, Manager::TensorGroupType::OUTPUT, 
+        lnode->getExecutionOrder(), lnode->getName());
+      
+      printf("[TENSOR-ALLOC] ===== Layer: %s - INITIAL_OUTPUTS =====\n", lnode->getName().c_str());
+      for (size_t i = 0; i < initial_outputs.size(); i++) {
+        printf("[TENSOR-ALLOC] Layer: %s, Type: INITIAL_OUTPUT, Name: %s, Ptr: %p, Lifespan: %s\n",
+               lnode->getName().c_str(),
+               initial_outputs[i]->getName().c_str(),
+               (void*)initial_outputs[i],
+               lifespanToString(TensorLifespan::FORWARD_FUNC_LIFESPAN, exec_order).c_str());
       }
     }
     ml_logd("Layer '%s' is checkpointed - requested %zu initial outputs (FORWARD_FUNC_LIFESPAN)",
@@ -1207,6 +1465,15 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
       initial_tensors = tensor_manager->requestTensors(
         *lnode.get(), initial_tensors_spec, true, {});
       
+      printf("[TENSOR-ALLOC] ===== Layer: %s - INITIAL_TENSORS =====\n", lnode->getName().c_str());
+      for (size_t i = 0; i < initial_tensors.size(); i++) {
+        printf("[TENSOR-ALLOC] Layer: %s, Type: INITIAL_TENSOR, Name: %s, Ptr: %p, Lifespan: %s\n",
+               lnode->getName().c_str(),
+               initial_tensors[i]->getName().c_str(),
+               (void*)initial_tensors[i],
+               lifespanToString(TensorLifespan::FORWARD_FUNC_LIFESPAN, exec_order).c_str());
+      }
+      
       // Recompute tensors: change lifespan to be available during backward
       for (auto &spec : tensors_spec) {
         auto &lifespan = std::get<4>(spec);
@@ -1236,6 +1503,13 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   std::vector<Var_Grad *> saved_inputs;
   if (is_first_checkpoint_layer) {
     saved_inputs = inputs;
+    printf("[TENSOR-ALLOC] ===== Layer: %s - INITIAL_INPUTS (saved from inputs) =====\n", lnode->getName().c_str());
+    for (size_t i = 0; i < saved_inputs.size(); i++) {
+      printf("[TENSOR-ALLOC] Layer: %s, Type: INITIAL_INPUT, Name: %s, Ptr: %p\n",
+             lnode->getName().c_str(),
+             saved_inputs[i]->getName().c_str(),
+             (void*)saved_inputs[i]);
+    }
   }
   
   ml_logd("[CHECKPOINT] Layer '%s' - About to configure RunContext (checkpointed=%d, first=%d)", 
@@ -1243,6 +1517,17 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
 
   // Configure RunContext with recompute outputs (for input_map pointer connections)
   // This ensures that inputs[] in next layer points to recompute_outputs
+  // Print tensor allocation info for intermediate tensors
+  if (!tensors_spec.empty()) {
+    printf("[TENSOR-ALLOC] ===== Layer: %s - TENSORS (recompute) =====\n", lnode->getName().c_str());
+    for (size_t i = 0; i < tensors_spec.size(); i++) {
+      auto &[dim, init, need_grad, name, lifespan, engine] = tensors_spec[i];
+      printf("[TENSOR-ALLOC] Layer: %s, Type: TENSOR, Name: %s, Lifespan: %s\n",
+             lnode->getName().c_str(), name.c_str(),
+             lifespanToString(lifespan, exec_order).c_str());
+    }
+  }
+  
   lnode->configureRunContext(
     // TODO: update weights spec for trainable based on layer trainable prop
     tensor_manager->requestWeights(gnode, init_context.getWeightsSpec(),
@@ -1603,19 +1888,59 @@ int NetworkGraph::initialize(ExecutionMode mode,
       return false;
     };
 
-    if (initial_outputs.empty()) {
-      // For checkpointed in-place layers, reuse their saved initial inputs.
-      if (lnode->isCheckpointed()) {
-        initial_outputs = lnode->getRunContext().getInitialInputs();
-        if (!initial_outputs.empty()) {
-          printf("[CHECKPOINT] Layer '%s' is in-place - using initial_inputs as initial_outputs for connections\n",
+    // For checkpointed in-place layers, use initial_inputs instead of initial_outputs
+    // This is because getOutput() returns initial_inputs for in-place layers
+    // Use actual in-place type instead of hardcoded layer types
+    // This correctly handles cases like GELU (not in-place) vs ReLU (in-place)
+    bool is_inplace_layer = (lnode->getInPlaceType() != InPlaceType::NONE);
+    if (lnode->isCheckpointed() && is_inplace_layer) {
+      // For FIRST checkpoint layer, use normal inputs (from input_map) instead of initial_input_map
+      // because first layer uses saved_inputs = inputs (normal inputs)
+      std::vector<Var_Grad *> initial_inputs_vec;
+      if (lnode->isFirstInCheckpointBlock()) {
+        // First checkpoint layer: use normal inputs
+        auto input_it = input_map.find(lnode->getName());
+        if (input_it != input_map.end()) {
+          initial_inputs_vec = input_it->second;
+          printf("[CHECKPOINT] Layer '%s' is FIRST in-place checkpoint - using normal inputs (input_map) for connections\n",
                  lnode->getName().c_str());
         }
+      } else {
+        // Non-first checkpoint layer: use initial_input_map
+        auto init_it = initial_input_map.find(lnode->getName());
+        if (init_it != initial_input_map.end()) {
+          initial_inputs_vec = init_it->second;
+          printf("[CHECKPOINT] Layer '%s' is in-place - using initial_input_map as initial_outputs for connections\n",
+                 lnode->getName().c_str());
+        } else {
+          initial_inputs_vec = lnode->getRunContext().getInitialInputs();
+        }
       }
+      if (!initial_inputs_vec.empty()) {
+        initial_outputs = initial_inputs_vec;
+        printf("[CHECKPOINT] Layer '%s' is in-place - using initial_inputs as initial_outputs for connections\n",
+               lnode->getName().c_str());
+        
+        // For multi-output in-place layers (e.g., MultiOut), replicate the single initial_input
+        // across all output indices since they share the same memory
+        bool is_multiout_layer = (lnode->getType() == MultiOutLayer::type);
+        if (is_multiout_layer && initial_outputs.size() == 1 && lnode->getNumOutputConnections() > 1) {
+          auto shared_tensor = initial_outputs[0];
+          initial_outputs.resize(lnode->getNumOutputConnections());
+          for (size_t i = 0; i < initial_outputs.size(); ++i) {
+            initial_outputs[i] = shared_tensor;
+          }
+          printf("[CHECKPOINT] Layer '%s' (MultiOut) - replicated initial_input across %zu outputs\n",
+                 lnode->getName().c_str(), initial_outputs.size());
+        }
+      }
+      else{
+        printf("[CHECKPOINT] Layer '%s' is in-place - no initial_inputs found\n", lnode->getName().c_str());
+      }
+    }
 
-      if (initial_outputs.empty()) {
-        reuse_recorded_initial_inputs();
-      }
+    if (initial_outputs.empty()) {
+      reuse_recorded_initial_inputs();
     }
 
     for (auto i = 0u, num_node = lnode->getNumOutputConnections(); i < num_node;
@@ -1652,22 +1977,49 @@ int NetworkGraph::initialize(ExecutionMode mode,
         // For in-place layers, we only have 1 input/output, so use index 0
         unsigned int output_idx = (initial_outputs.size() == 1) ? 0 : i;
         init_sink_tensors[conn->getIndex()] = initial_outputs[output_idx];
-        
-        printf("[CHECKPOINT] Connected initial output: %s[%u] -> %s[%u]\n",
-                lnode->getName().c_str(), output_idx, sink_node->getName().c_str(), conn->getIndex());
+        printf("[CHECKPOINT-CONNECT] %s[%u] -> %s[%u]: tensor_name='%s', ptr=%p, data_ptr=%p\n",
+                lnode->getName().c_str(), output_idx, 
+                sink_node->getName().c_str(), conn->getIndex(),
+                initial_outputs[output_idx]->getName().c_str(),
+                (void*)initial_outputs[output_idx],
+                (void*)initial_outputs[output_idx]->getVariableRef().getData());
       }
     }
   }
 
   // CRITICAL: Set initial_inputs for ALL layers that receive inputs from checkpointed layers
   // This ensures that during initial forward, getInput() returns the correct initial outputs
+  // EXCEPTION: First layer in checkpoint block already has initial_inputs set to normal inputs
+  //            in finalizeContext() - do NOT overwrite with initial_input_map
   for (unsigned int idx = 0; idx < graph.size(); ++idx) {
     auto const &lnode = getSortedLayerNode(idx);
+    
+    // Skip first layer in checkpoint block - it already has initial_inputs = normal inputs
+    // set in finalizeContext(). We don't want to overwrite with initial_outputs from
+    // non-checkpointed previous layer.
+    if (lnode->isCheckpointed() && lnode->isFirstInCheckpointBlock()) {
+      printf("[CHECKPOINT-SET] Layer '%s' is FIRST in checkpoint block - keeping saved_inputs (normal inputs)\n",
+              lnode->getName().c_str());
+      continue;
+    }
+    
     if (initial_input_map.find(lnode->getName()) != initial_input_map.end()) {
       auto &rc = lnode->getRunContext();
-      rc.setInitialInputs(initial_input_map.at(lnode->getName()));
-      printf("[CHECKPOINT] Set initial inputs for layer '%s' (checkpointed=%d) with %zu inputs\n",
-              lnode->getName().c_str(), lnode->isCheckpointed(), initial_input_map.at(lnode->getName()).size());
+      auto &initial_inputs_vec = initial_input_map.at(lnode->getName());
+      rc.setInitialInputs(initial_inputs_vec);
+      
+      printf("[CHECKPOINT-SET] Layer '%s' (checkpointed=%d) received %zu initial_inputs:\n",
+              lnode->getName().c_str(), lnode->isCheckpointed(), initial_inputs_vec.size());
+      for (size_t i = 0; i < initial_inputs_vec.size(); ++i) {
+        if (initial_inputs_vec[i]) {
+          printf("[CHECKPOINT-SET]   [%zu] tensor_name='%s', ptr=%p, data_ptr=%p\n",
+                 i, initial_inputs_vec[i]->getName().c_str(),
+                 (void*)initial_inputs_vec[i],
+                 (void*)initial_inputs_vec[i]->getVariableRef().getData());
+        } else {
+          printf("[CHECKPOINT-SET]   [%zu] NULL\n", i);
+        }
+      }
     }
   }
 
@@ -2121,17 +2473,45 @@ void NetworkGraph::applyCheckpointBlocks(
       continue;
     }
     
-    const auto &layer_names = block.getLayerNames();
+    const auto &user_layer_names = block.getLayerNames();
     const std::string &block_id = block.getBlockId();
     
-    if (layer_names.size() < 2) {
+    if (user_layer_names.size() < 2) {
       ml_logw("Checkpoint block '%s' has less than 2 layers, skipping",
               block_id.c_str());
       continue;
     }
     
-    ml_logi("Processing checkpoint block '%s' with %zu layers", 
-            block_id.c_str(), layer_names.size());
+    // Expand layer names to include auto-generated layers
+    // Auto-generated layers have names like "{original_layer}/suffix"
+    // We find all layers whose name starts with a user-specified layer name + "/"
+    std::vector<std::string> layer_names;
+    
+    for (const auto &user_name : user_layer_names) {
+      // Add the user-specified layer
+      layer_names.push_back(user_name);
+      
+      // Find all auto-generated layers for this user layer
+      // These have names like "{user_name}/activation_realized", "{user_name}/generated_out_0", etc.
+      std::string prefix = user_name + "/";
+      for (auto iter = cbegin(); iter != cend(); ++iter) {
+        auto &node = *iter;
+        const std::string &node_name = node->getName();
+        // Check if this layer's name starts with the user layer's name + "/"
+        if (node_name.size() > prefix.size() && 
+            node_name.compare(0, prefix.size(), prefix) == 0) {
+          layer_names.push_back(node_name);
+          ml_logi("  Auto-including '%s' in checkpoint block (child of '%s')", 
+                  node_name.c_str(), user_name.c_str());
+        }
+      }
+    }
+    
+    ml_logi("  Expanded checkpoint block from %zu user layers to %zu total layers",
+            user_layer_names.size(), layer_names.size());
+    
+    ml_logi("Processing checkpoint block '%s' with %zu layers (expanded from %zu)", 
+            block_id.c_str(), layer_names.size(), user_layer_names.size());
     
     for (size_t i = 0; i < layer_names.size(); ++i) {
       const auto &layer_name = layer_names[i];
@@ -2178,7 +2558,7 @@ void NetworkGraph::applyCheckpointBlocks(
 }
 
 void NetworkGraph::recomputeCheckpointBlock(const std::string &block_id) {
-  ml_logd("Recomputing checkpoint block '%s'", block_id.c_str());
+  printf("Recomputing checkpoint block '%s'\n", block_id.c_str());
   
   // Collect all layers in this checkpoint block (including boundary)
   std::vector<std::shared_ptr<LayerNode>> all_block_layers;
@@ -2191,7 +2571,7 @@ void NetworkGraph::recomputeCheckpointBlock(const std::string &block_id) {
   }
   
   if (all_block_layers.empty()) {
-    ml_loge("No layers found for checkpoint block '%s'", block_id.c_str());
+    printf("No layers found for checkpoint block '%s'\n", block_id.c_str());
     return;
   }
   
@@ -2201,27 +2581,730 @@ void NetworkGraph::recomputeCheckpointBlock(const std::string &block_id) {
     if (layer->isCheckpointed()) {
       layers_to_recompute.push_back(layer);
     } else {
-      ml_logd("Skipping boundary layer '%s' (output already exists)",
+      printf("Skipping boundary layer '%s' (output already exists)\n",
               layer->getName().c_str());
     }
   }
   
   if (layers_to_recompute.empty()) {
-    ml_logd("No layers to recompute in block '%s' (only boundary layer)",
+    printf("No layers to recompute in block '%s' (only boundary layer)\n",
             block_id.c_str());
     return;
   }
   
-  ml_logd("Recomputing %zu layers in block '%s' (skipping %zu boundary layers)", 
+  printf("Recomputing %zu layers in block '%s' (skipping %zu boundary layers)\n", 
           layers_to_recompute.size(), block_id.c_str(),
           all_block_layers.size() - layers_to_recompute.size());
   
-  for (auto &layer : layers_to_recompute) {
-    ml_logd("Recomputing layer '%s'", layer->getName().c_str());
+  for (size_t i = 0; i < layers_to_recompute.size(); ++i) {
+    auto &layer = layers_to_recompute[i];
+    printf("[DEBUG] Recomputing layer '%s' (first_in_block=%d)\n", 
+           layer->getName().c_str(), layer->isFirstInCheckpointBlock());
+    
+    // Debug: print is_initial_forward and first input value for first checkpoint layer
+    if (layer->isFirstInCheckpointBlock() && layer->getNumInputs() > 0) {
+      auto &rc_debug = layer->getRunContext();
+      fprintf(stderr, "[DEBUG-RECOMPUTE] First checkpoint layer '%s' is_initial_forward=%d\n",
+              layer->getName().c_str(), rc_debug.isInitialForward());
+      Tensor &input = layer->getInput(0);
+      if (input.getData() != nullptr && input.size() > 0) {
+        fprintf(stderr, "[DEBUG-RECOMPUTE] First checkpoint layer '%s' input[0][0]=%.6f\n",
+                layer->getName().c_str(), input.getData()[0]);
+      }
+    }
+    
+    // During recompute, all layers should use normal forward mode (is_initial_forward = false)
+    // - First layer: temporarily uses initial_forward to access initial_inputs (boundary outputs)
+    // - Other layers: uses inputs (which point to previous layer's recompute outputs)
+    // DO NOT set is_initial_forward=true for non-first layers, as this would use initial_tensors
+    // which are not available during recompute phase
+    
+    // Get run context once for all operations
+    auto &rc = layer->getRunContext();
+    
+    // Verify inputs, tensors, and weights before recompute if verification is enabled
+    if (checkpoint_verification_enabled) {
+      // Verify inputs
+      std::vector<Tensor> recomputed_inputs;
+      for (unsigned int j = 0; j < layer->getNumInputs(); ++j) {
+        recomputed_inputs.push_back(layer->getInput(j));
+      }
+      verifyRecomputedInputs(layer->getName(), recomputed_inputs);
+      
+      // Verify weights (should be identical)
+      std::vector<Tensor> recomputed_weights;
+      for (unsigned int j = 0; j < rc.getNumWeights(); ++j) {
+        recomputed_weights.push_back(rc.getWeight(j));
+      }
+      verifyRecomputedWeights(layer->getName(), recomputed_weights);
+    }
+    
+    // Reset ITERATION_LIFESPAN tensors before recompute to match initial forward state
+    // This is critical for layers like MHA that have internal state tensors
+    printf("[DEBUG] Resetting %u tensors for layer '%s' before recompute\n", 
+           rc.getNumTensors(), layer->getName().c_str());
+    for (unsigned int j = 0; j < rc.getNumTensors(); ++j) {
+      Tensor &tensor = rc.getTensor(j);
+      std::string tensor_name = tensor.getName();
+      
+      printf("[DEBUG] Zeroing tensor[%u] '%s' (size=%zu)\n", 
+             j, tensor_name.c_str(), tensor.size());
+      // Zero out the tensor to ensure clean state
+      tensor.setZero();
+    }
+    
     layer->forwarding(true);
+    
+    // Verify recomputed outputs and tensors if verification is enabled
+    if (checkpoint_verification_enabled) {
+      auto &rc = layer->getRunContext();
+      
+      // Verify outputs
+      std::vector<Tensor> recomputed_outputs;
+      for (unsigned int j = 0; j < layer->getNumOutputs(); ++j) {
+        recomputed_outputs.push_back(layer->getOutput(j));
+      }
+      verifyRecomputedOutputs(layer->getName(), recomputed_outputs);
+      
+      // Verify tensors (intermediate tensors)
+      std::vector<Tensor> recomputed_tensors;
+      for (unsigned int j = 0; j < rc.getNumTensors(); ++j) {
+        recomputed_tensors.push_back(rc.getTensor(j));
+      }
+      // Get forward tensor indices from the layer (empty means verify all)
+      auto forward_tensor_indices = layer->getForwardTensorIndices();
+      verifyRecomputedTensors(layer->getName(), recomputed_tensors, forward_tensor_indices);
+    }
   }
   
-  ml_logd("Completed recomputation for block '%s'", block_id.c_str());
+  printf("[DEBUG] Completed recomputation for block '%s'\n", block_id.c_str());
+}
+
+void NetworkGraph::enableCheckpointVerification(bool enable) {
+  checkpoint_verification_enabled = enable;
+  if (enable) {
+    printf("[INFO] Gradient checkpointing verification enabled\n");
+    verification_stats = VerificationStats();
+  } else {
+    printf("[INFO] Gradient checkpointing verification disabled\n");
+  }
+}
+
+void NetworkGraph::saveForwardInputs(const std::string &layer_name,
+                                     const std::vector<Tensor> &inputs) {
+  if (!checkpoint_verification_enabled) {
+    return;
+  }
+  
+  // Deep copy tensors to save
+  std::vector<Tensor> saved_inputs;
+  saved_inputs.reserve(inputs.size());
+  
+  for (const auto &input : inputs) {
+    Tensor copied_tensor = input.clone();
+    saved_inputs.push_back(copied_tensor);
+  }
+  
+  saved_forward_inputs[layer_name] = saved_inputs;
+  printf("[DEBUG] Saved forward inputs for layer '%s' (%zu tensors)\n", 
+         layer_name.c_str(), inputs.size());
+}
+
+void NetworkGraph::saveForwardOutputs(const std::string &layer_name,
+                                      const std::vector<Tensor> &outputs) {
+  if (!checkpoint_verification_enabled) {
+    return;
+  }
+  
+  // Deep copy tensors to save
+  std::vector<Tensor> saved_outputs;
+  saved_outputs.reserve(outputs.size());
+  
+  for (const auto &output : outputs) {
+    Tensor copied_tensor = output.clone();
+    saved_outputs.push_back(copied_tensor);
+  }
+  
+  saved_forward_outputs[layer_name] = saved_outputs;
+  printf("[DEBUG] Saved forward outputs for layer '%s' (%zu tensors)\n", 
+         layer_name.c_str(), outputs.size());
+}
+
+void NetworkGraph::saveForwardTensors(const std::string &layer_name,
+                                      const std::vector<Tensor> &tensors) {
+  if (!checkpoint_verification_enabled) {
+    return;
+  }
+  
+  // Deep copy tensors to save
+  std::vector<Tensor> saved_tensors;
+  saved_tensors.reserve(tensors.size());
+  
+  for (const auto &tensor : tensors) {
+    // Skip stateful tensors like KV cache that accumulate across iterations
+    std::string tensor_name = tensor.getName();
+    if (tensor_name.find("cache_key") != std::string::npos ||
+        tensor_name.find("cache_value") != std::string::npos) {
+      printf("[DEBUG] Skipping stateful tensor '%s' for verification\n", tensor_name.c_str());
+      continue;
+    }
+    
+    Tensor copied_tensor = tensor.clone();
+    saved_tensors.push_back(copied_tensor);
+  }
+  
+  saved_forward_tensors[layer_name] = saved_tensors;
+  printf("[DEBUG] Saved forward tensors for layer '%s' (%zu tensors)\n", 
+         layer_name.c_str(), tensors.size());
+}
+
+void NetworkGraph::saveForwardWeights(const std::string &layer_name,
+                                      const std::vector<Tensor> &weights) {
+  if (!checkpoint_verification_enabled) {
+    return;
+  }
+  
+  // Deep copy weights to save
+  std::vector<Tensor> saved_weights;
+  saved_weights.reserve(weights.size());
+  
+  for (const auto &weight : weights) {
+    Tensor copied_tensor = weight.clone();
+    saved_weights.push_back(copied_tensor);
+  }
+  
+  saved_forward_weights[layer_name] = saved_weights;
+  printf("[DEBUG] Saved forward weights for layer '%s' (%zu weights)\n", 
+         layer_name.c_str(), weights.size());
+}
+
+bool NetworkGraph::verifyRecomputedInputs(const std::string &layer_name,
+                                          const std::vector<Tensor> &recomputed_inputs) {
+  printf("Verifying recomputed inputs for layer '%s'\n", layer_name.c_str());
+  if (!checkpoint_verification_enabled) {
+    return true;
+  }
+  
+  auto it = saved_forward_inputs.find(layer_name);
+  if (it == saved_forward_inputs.end()) {
+    printf("[WARNING] No saved inputs found for layer '%s'\n", layer_name.c_str());
+    return false;
+  }
+  
+  const auto &saved_inputs = it->second;
+  
+  if (saved_inputs.size() != recomputed_inputs.size()) {
+    printf("[ERROR] Input count mismatch for layer '%s': saved=%zu, recomputed=%zu\n",
+           layer_name.c_str(), saved_inputs.size(), recomputed_inputs.size());
+    return false;
+  }
+  
+  bool all_match = true;
+  
+  for (size_t i = 0; i < saved_inputs.size(); ++i) {
+    const auto &saved = saved_inputs[i];
+    const auto &recomputed = recomputed_inputs[i];
+    
+    // Check dimensions
+    if (saved.getDim() != recomputed.getDim()) {
+      std::ostringstream saved_dim_str, recomputed_dim_str;
+      saved_dim_str << saved.getDim();
+      recomputed_dim_str << recomputed.getDim();
+      printf("[ERROR] Input dimension mismatch for layer '%s' input[%zu]: saved=%s, recomputed=%s\n",
+             layer_name.c_str(), i, 
+             saved_dim_str.str().c_str(),
+             recomputed_dim_str.str().c_str());
+      all_match = false;
+      continue;
+    }
+    
+    // Compute element-wise difference
+    float max_diff = 0.0f;
+    float sum_diff = 0.0f;
+    size_t element_count = saved.size();
+    
+    const float *saved_data = saved.getData();
+    const float *recomputed_data = recomputed.getData();
+    
+    for (size_t j = 0; j < element_count; ++j) {
+      float diff = std::abs(saved_data[j] - recomputed_data[j]);
+      sum_diff += diff;
+      if (diff > max_diff) {
+        max_diff = diff;
+      }
+    }
+    
+    float avg_diff = sum_diff / element_count;
+    
+    // Tolerance check (relative and absolute)
+    const float rel_tolerance = 1e-5f;
+    const float abs_tolerance = 1e-6f;
+    
+    bool matches = true;
+    for (size_t j = 0; j < element_count; ++j) {
+      float diff = std::abs(saved_data[j] - recomputed_data[j]);
+      float threshold = abs_tolerance + rel_tolerance * std::abs(saved_data[j]);
+      if (diff > threshold) {
+        matches = false;
+        break;
+      }
+    }
+    
+    if (!matches) {
+      printf("[ERROR] Input mismatch for layer '%s' input[%zu] '%s': max_diff=%.10f, avg_diff=%.10f\n",
+             layer_name.c_str(), i, saved.getName().c_str(), max_diff, avg_diff);
+      all_match = false;
+    } else {
+      printf("[DEBUG] Input match for layer '%s' input[%zu] '%s': max_diff=%.10f, avg_diff=%.10f\n",
+             layer_name.c_str(), i, saved.getName().c_str(), max_diff, avg_diff);
+    }
+  }
+  
+  if (all_match) {
+    printf("[INFO] ✓ Input verification PASSED for layer '%s'\n", layer_name.c_str());
+  } else {
+    printf("[ERROR] ✗ Input verification FAILED for layer '%s'\n", layer_name.c_str());
+  }
+  
+  return all_match;
+}
+
+bool NetworkGraph::verifyRecomputedOutputs(const std::string &layer_name,
+                                           const std::vector<Tensor> &recomputed_outputs) {
+  printf("Verifying recomputed outputs for layer '%s'\n", layer_name.c_str());
+  if (!checkpoint_verification_enabled) {
+    return true;
+  }
+  
+  auto it = saved_forward_outputs.find(layer_name);
+  if (it == saved_forward_outputs.end()) {
+    printf("[WARNING] No saved outputs found for layer '%s'\n", layer_name.c_str());
+    return false;
+  }
+  
+  const auto &saved_outputs = it->second;
+  
+  if (saved_outputs.size() != recomputed_outputs.size()) {
+    printf("[ERROR] Output count mismatch for layer '%s': saved=%zu, recomputed=%zu\n",
+           layer_name.c_str(), saved_outputs.size(), recomputed_outputs.size());
+    verification_stats.failed_verifications++;
+    verification_stats.total_verifications++;
+    return false;
+  }
+  
+  bool all_match = true;
+  float total_diff = 0.0f;
+  int diff_count = 0;
+  
+  for (size_t i = 0; i < saved_outputs.size(); ++i) {
+    const auto &saved = saved_outputs[i];
+    const auto &recomputed = recomputed_outputs[i];
+    
+    // Check dimensions
+    if (saved.getDim() != recomputed.getDim()) {
+      std::ostringstream saved_dim_str, recomputed_dim_str;
+      saved_dim_str << saved.getDim();
+      recomputed_dim_str << recomputed.getDim();
+      printf("[ERROR] Dimension mismatch for layer '%s' output[%zu]: saved=%s, recomputed=%s\n",
+             layer_name.c_str(), i, 
+             saved_dim_str.str().c_str(),
+             recomputed_dim_str.str().c_str());
+      all_match = false;
+      continue;
+    }
+    
+    // Compute element-wise difference
+    float max_diff = 0.0f;
+    float sum_diff = 0.0f;
+    size_t element_count = saved.size();
+    
+    const float *saved_data = saved.getData();
+    const float *recomputed_data = recomputed.getData();
+    
+    for (size_t j = 0; j < element_count; ++j) {
+      float diff = std::abs(saved_data[j] - recomputed_data[j]);
+      sum_diff += diff;
+      if (diff > max_diff) {
+        max_diff = diff;
+      }
+    }
+    
+    float avg_diff = sum_diff / element_count;
+    total_diff += sum_diff;
+    diff_count += element_count;
+    
+    // Tolerance check (relative and absolute)
+    const float rel_tolerance = 1e-5f;
+    const float abs_tolerance = 1e-6f;
+    
+    bool matches = true;
+    for (size_t j = 0; j < element_count; ++j) {
+      float diff = std::abs(saved_data[j] - recomputed_data[j]);
+      float threshold = abs_tolerance + rel_tolerance * std::abs(saved_data[j]);
+      if (diff > threshold) {
+        matches = false;
+        break;
+      }
+    }
+    
+    if (max_diff > verification_stats.max_diff) {
+      verification_stats.max_diff = max_diff;
+    }
+    
+    if (!matches) {
+      printf("[ERROR] Output mismatch for layer '%s' output[%zu] '%s': max_diff=%.10f, avg_diff=%.10f\n",
+             layer_name.c_str(), i, saved.getName().c_str(), max_diff, avg_diff);
+      all_match = false;
+    } else {
+      printf("[DEBUG] Output match for layer '%s' output[%zu] '%s': max_diff=%.10f, avg_diff=%.10f\n",
+             layer_name.c_str(), i, saved.getName().c_str(), max_diff, avg_diff);
+    }
+  }
+  
+  if (diff_count > 0) {
+    verification_stats.avg_diff = total_diff / diff_count;
+  }
+  
+  verification_stats.total_verifications++;
+  if (all_match) {
+    verification_stats.passed_verifications++;
+    printf("[INFO] ✓ Verification PASSED for layer '%s'\n", layer_name.c_str());
+  } else {
+    verification_stats.failed_verifications++;
+    printf("[ERROR] ✗ Verification FAILED for layer '%s'\n", layer_name.c_str());
+  }
+  
+  return all_match;
+}
+
+bool NetworkGraph::verifyRecomputedTensors(const std::string &layer_name,
+                                           const std::vector<Tensor> &recomputed_tensors,
+                                           const std::vector<unsigned int> &forward_tensor_indices) {
+  printf("Verifying recomputed tensors for layer '%s'\n", layer_name.c_str());
+  if (!checkpoint_verification_enabled) {
+    return true;
+  }
+  
+  auto it = saved_forward_tensors.find(layer_name);
+  if (it == saved_forward_tensors.end()) {
+    printf("[WARNING] No saved tensors found for layer '%s'\n", layer_name.c_str());
+    return false;
+  }
+  
+  const auto &saved_tensors = it->second;
+  
+  // Filter out stateful tensors from recomputed tensors
+  std::vector<Tensor> filtered_recomputed;
+  std::vector<size_t> original_indices; // Track original indices for forward_tensor_indices check
+  for (size_t idx = 0; idx < recomputed_tensors.size(); ++idx) {
+    const auto &tensor = recomputed_tensors[idx];
+    std::string tensor_name = tensor.getName();
+    if (tensor_name.find("cache_key") != std::string::npos ||
+        tensor_name.find("cache_value") != std::string::npos) {
+      continue;
+    }
+    filtered_recomputed.push_back(tensor);
+    original_indices.push_back(idx);
+  }
+  
+  if (saved_tensors.size() != filtered_recomputed.size()) {
+    printf("[ERROR] Tensor count mismatch for layer '%s': saved=%zu, recomputed=%zu\n",
+           layer_name.c_str(), saved_tensors.size(), filtered_recomputed.size());
+    return false;
+  }
+  
+  // Determine which tensors to verify
+  std::set<unsigned int> indices_to_verify;
+  if (forward_tensor_indices.empty()) {
+    // Verify all tensors
+    for (size_t i = 0; i < saved_tensors.size(); ++i) {
+      indices_to_verify.insert(static_cast<unsigned int>(i));
+    }
+  } else {
+    // Only verify specified forward tensor indices
+    for (auto idx : forward_tensor_indices) {
+      indices_to_verify.insert(idx);
+    }
+    printf("[INFO] Layer '%s' - only verifying forward tensors: [", layer_name.c_str());
+    for (auto idx : forward_tensor_indices) {
+      printf("%u ", idx);
+    }
+    printf("]\n");
+  }
+  
+  bool all_match = true;
+  
+  for (size_t i = 0; i < saved_tensors.size(); ++i) {
+    // Skip tensors not in forward_tensor_indices (if specified)
+    if (!indices_to_verify.empty() && 
+        indices_to_verify.find(static_cast<unsigned int>(i)) == indices_to_verify.end()) {
+      printf("[INFO] Skipping tensor[%zu] '%s' - not used in forward pass\n",
+             i, saved_tensors[i].getName().c_str());
+      continue;
+    }
+    
+    const auto &saved = saved_tensors[i];
+    const auto &recomputed = filtered_recomputed[i];
+    
+    // Check dimensions
+    if (saved.getDim() != recomputed.getDim()) {
+      std::ostringstream saved_dim_str, recomputed_dim_str;
+      saved_dim_str << saved.getDim();
+      recomputed_dim_str << recomputed.getDim();
+      printf("[ERROR] Tensor dimension mismatch for layer '%s' tensor[%zu] '%s': saved=%s, recomputed=%s\n",
+             layer_name.c_str(), i, saved.getName().c_str(),
+             saved_dim_str.str().c_str(),
+             recomputed_dim_str.str().c_str());
+      all_match = false;
+      continue;
+    }
+    
+    // Compute element-wise difference
+    float max_diff = 0.0f;
+    float sum_diff = 0.0f;
+    size_t element_count = saved.size();
+    
+    const float *saved_data = saved.getData();
+    const float *recomputed_data = recomputed.getData();
+    
+    for (size_t j = 0; j < element_count; ++j) {
+      float diff = std::abs(saved_data[j] - recomputed_data[j]);
+      sum_diff += diff;
+      if (diff > max_diff) {
+        max_diff = diff;
+      }
+    }
+    
+    float avg_diff = sum_diff / element_count;
+    
+    // Tolerance check (relative and absolute)
+    const float rel_tolerance = 1e-5f;
+    const float abs_tolerance = 1e-6f;
+    
+    bool matches = true;
+    for (size_t j = 0; j < element_count; ++j) {
+      float diff = std::abs(saved_data[j] - recomputed_data[j]);
+      float threshold = abs_tolerance + rel_tolerance * std::abs(saved_data[j]);
+      if (diff > threshold) {
+        matches = false;
+        break;
+      }
+    }
+    
+    if (!matches) {
+      printf("[ERROR] Tensor mismatch for layer '%s' tensor[%zu] '%s': max_diff=%.10f, avg_diff=%.10f\n",
+             layer_name.c_str(), i, saved.getName().c_str(), max_diff, avg_diff);
+      all_match = false;
+    } else {
+      printf("[DEBUG] Tensor match for layer '%s' tensor[%zu] '%s': max_diff=%.10f, avg_diff=%.10f\n",
+             layer_name.c_str(), i, saved.getName().c_str(), max_diff, avg_diff);
+    }
+  }
+  
+  if (all_match) {
+    printf("[INFO] ✓ Tensor verification PASSED for layer '%s'\n", layer_name.c_str());
+  } else {
+    printf("[ERROR] ✗ Tensor verification FAILED for layer '%s'\n", layer_name.c_str());
+  }
+  
+  return all_match;
+}
+
+bool NetworkGraph::verifyRecomputedWeights(const std::string &layer_name,
+                                           const std::vector<Tensor> &recomputed_weights) {
+  printf("Verifying recomputed weights for layer '%s'\n", layer_name.c_str());
+  if (!checkpoint_verification_enabled) {
+    return true;
+  }
+  
+  auto it = saved_forward_weights.find(layer_name);
+  if (it == saved_forward_weights.end()) {
+    printf("[WARNING] No saved weights found for layer '%s'\n", layer_name.c_str());
+    return false;
+  }
+  
+  const auto &saved_weights = it->second;
+  
+  if (saved_weights.size() != recomputed_weights.size()) {
+    printf("[ERROR] Weight count mismatch for layer '%s': saved=%zu, recomputed=%zu\n",
+           layer_name.c_str(), saved_weights.size(), recomputed_weights.size());
+    return false;
+  }
+  
+  bool all_match = true;
+  
+  for (size_t i = 0; i < saved_weights.size(); ++i) {
+    const auto &saved = saved_weights[i];
+    const auto &recomputed = recomputed_weights[i];
+    
+    // Check dimensions
+    if (saved.getDim() != recomputed.getDim()) {
+      std::ostringstream saved_dim_str, recomputed_dim_str;
+      saved_dim_str << saved.getDim();
+      recomputed_dim_str << recomputed.getDim();
+      printf("[ERROR] Weight dimension mismatch for layer '%s' weight[%zu] '%s': saved=%s, recomputed=%s\n",
+             layer_name.c_str(), i, saved.getName().c_str(),
+             saved_dim_str.str().c_str(),
+             recomputed_dim_str.str().c_str());
+      all_match = false;
+      continue;
+    }
+    
+    // Compute element-wise difference
+    float max_diff = 0.0f;
+    float sum_diff = 0.0f;
+    size_t element_count = saved.size();
+    
+    const float *saved_data = saved.getData();
+    const float *recomputed_data = recomputed.getData();
+    
+    for (size_t j = 0; j < element_count; ++j) {
+      float diff = std::abs(saved_data[j] - recomputed_data[j]);
+      sum_diff += diff;
+      if (diff > max_diff) {
+        max_diff = diff;
+      }
+    }
+    
+    float avg_diff = sum_diff / element_count;
+    
+    // Weights should be exactly identical (no tolerance)
+    bool matches = (max_diff == 0.0f);
+    
+    if (!matches) {
+      printf("[ERROR] Weight mismatch for layer '%s' weight[%zu] '%s': max_diff=%.10f, avg_diff=%.10f\n",
+             layer_name.c_str(), i, saved.getName().c_str(), max_diff, avg_diff);
+      all_match = false;
+    } else {
+      printf("[DEBUG] Weight match for layer '%s' weight[%zu] '%s': EXACT MATCH\n",
+             layer_name.c_str(), i, saved.getName().c_str());
+    }
+  }
+  
+  if (all_match) {
+    printf("[INFO] ✓ Weight verification PASSED for layer '%s'\n", layer_name.c_str());
+  } else {
+    printf("[ERROR] ✗ Weight verification FAILED for layer '%s'\n", layer_name.c_str());
+  }
+  
+  return all_match;
+}
+
+void NetworkGraph::clearSavedOutputs() {
+  saved_forward_inputs.clear();
+  saved_forward_outputs.clear();
+  saved_forward_tensors.clear();
+  saved_forward_weights.clear();
+  printf("[DEBUG] Cleared all saved forward inputs, outputs, tensors, and weights\n");
+}
+
+void NetworkGraph::printVerificationStats() {
+  printf("==========================================================================\n");
+  printf("          Gradient Checkpointing Verification Statistics\n");
+  printf("==========================================================================\n");
+  printf("Total verifications: %u\n", verification_stats.total_verifications);
+  printf("Passed: %u\n", verification_stats.passed_verifications);
+  printf("Failed: %u\n", verification_stats.failed_verifications);
+  
+  if (verification_stats.total_verifications > 0) {
+    float pass_rate = (float)verification_stats.passed_verifications / 
+                      verification_stats.total_verifications * 100.0f;
+    printf("Pass rate: %.2f%%\n", pass_rate);
+  }
+  
+  printf("Max difference: %.10f\n", verification_stats.max_diff);
+  printf("Avg difference: %.10f\n", verification_stats.avg_diff);
+  printf("==========================================================================\n");
+}
+
+void NetworkGraph::enableTensorDump(bool enable, const std::string &path) {
+  tensor_dump_enabled = enable;
+  tensor_dump_path = path;
+  tensor_dump_iteration = 0;
+  
+  if (enable) {
+    // Create dump directory if it doesn't exist
+    std::string mkdir_cmd = "mkdir -p " + path;
+    int ret = system(mkdir_cmd.c_str());
+    if (ret != 0) {
+      printf("[WARNING] Failed to create tensor dump directory: %s\n", path.c_str());
+    }
+    printf("[INFO] Tensor dump enabled. Output path: %s\n", path.c_str());
+  } else {
+    printf("[INFO] Tensor dump disabled\n");
+  }
+}
+
+void NetworkGraph::setTensorDumpIteration(unsigned int iteration) {
+  tensor_dump_iteration = iteration;
+}
+
+void NetworkGraph::dumpTensor(const std::string &layer_name, 
+                               const std::string &tensor_type,
+                               unsigned int index, 
+                               const Tensor &tensor) {
+  if (!tensor_dump_enabled) {
+    return;
+  }
+  
+  // Create filename: iter{N}_{layer_name}_{tensor_type}_{index}.txt
+  std::string safe_layer_name = layer_name;
+  // Replace '/' with '_' in layer name for valid filename
+  std::replace(safe_layer_name.begin(), safe_layer_name.end(), '/', '_');
+  
+  std::ostringstream filename;
+  filename << tensor_dump_path << "/iter" << tensor_dump_iteration 
+           << "_" << safe_layer_name 
+           << "_" << tensor_type 
+           << "_" << index << ".txt";
+  
+  std::ofstream file(filename.str());
+  if (!file.is_open()) {
+    printf("[ERROR] Failed to open file for tensor dump: %s\n", filename.str().c_str());
+    return;
+  }
+  
+  // Write tensor metadata
+  file << "# Layer: " << layer_name << "\n";
+  file << "# Type: " << tensor_type << "\n";
+  file << "# Index: " << index << "\n";
+  file << "# Iteration: " << tensor_dump_iteration << "\n";
+  file << "# Shape: " << tensor.getDim() << "\n";
+  file << "# Size: " << tensor.size() << "\n";
+  
+  // Compute statistics
+  float sum = 0.0f, min_val = std::numeric_limits<float>::max();
+  float max_val = std::numeric_limits<float>::lowest();
+  
+  const float *data = tensor.getData<float>();
+  size_t size = tensor.size();
+  
+  for (size_t i = 0; i < size; ++i) {
+    float val = data[i];
+    sum += val;
+    if (val < min_val) min_val = val;
+    if (val > max_val) max_val = val;
+  }
+  
+  float mean = size > 0 ? sum / size : 0.0f;
+  
+  file << "# Min: " << std::setprecision(10) << min_val << "\n";
+  file << "# Max: " << std::setprecision(10) << max_val << "\n";
+  file << "# Mean: " << std::setprecision(10) << mean << "\n";
+  file << "# Sum: " << std::setprecision(10) << sum << "\n";
+  file << "#\n";
+  
+  // Write first 100 values for quick comparison
+  file << "# First 100 values:\n";
+  size_t num_to_print = std::min(size, (size_t)100);
+  for (size_t i = 0; i < num_to_print; ++i) {
+    file << std::setprecision(10) << data[i];
+    if (i < num_to_print - 1) file << ", ";
+    if ((i + 1) % 10 == 0) file << "\n";
+  }
+  file << "\n";
+  
+  file.close();
 }
 
 } /* namespace nntrainer */

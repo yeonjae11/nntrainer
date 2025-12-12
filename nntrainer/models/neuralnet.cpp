@@ -583,7 +583,10 @@ void NeuralNetwork::backwarding(int iteration,
     }
 
     if (node->needsCalcDerivative()) {
+      fprintf(stderr, "[BACKWARD] Calling calcDerivative for %s\n", node->getName().c_str());
       node->calcDerivative();
+    } else {
+      fprintf(stderr, "[BACKWARD] Skipping calcDerivative for %s (needsCalcDerivative=false)\n", node->getName().c_str());
     }
 
     model_graph.flushCacheExcept(std::get<3>(node->getExecutionOrder()));
@@ -1369,6 +1372,9 @@ int NeuralNetwork::train_run(
     [this, stop_cb, stop_user_data, batch_size](RunStats &stat, DataBuffer &buffer) {
       ml_logi("train for iteration");
       
+      // Set tensor dump iteration before forward pass
+      model_graph.setTensorDumpIteration(global_iteration);
+      
       // Measure forward pass time
       auto iteration_start = std::chrono::high_resolution_clock::now();
       auto forward_start = std::chrono::high_resolution_clock::now();
@@ -1380,6 +1386,11 @@ int NeuralNetwork::train_run(
       auto backward_start = std::chrono::high_resolution_clock::now();
       backwarding(iter++, stop_cb, stop_user_data);
       auto backward_end = std::chrono::high_resolution_clock::now();
+      
+      // Disable tensor dump after first iteration (after backward pass) to avoid excessive output
+      if (global_iteration == 0) {
+        model_graph.enableTensorDump(false, "");
+      }
       auto backward_duration = std::chrono::duration_cast<std::chrono::microseconds>(backward_end - backward_start);
       auto iteration_end = std::chrono::high_resolution_clock::now();
       auto total_duration = std::chrono::duration_cast<std::chrono::microseconds>(iteration_end - iteration_start);

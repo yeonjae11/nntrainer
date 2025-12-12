@@ -572,9 +572,9 @@ public:
 
   /**
    * @brief     get network graph
-   * @retval NetowrkGraphType
+   * @retval NetowrkGraphType reference
    */
-  NetworkGraphType getNetworkGraph() { return model_graph; }
+  NetworkGraphType& getNetworkGraph() { return model_graph; }
 
   /**
    * @brief get current graph from the model

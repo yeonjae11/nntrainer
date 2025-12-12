@@ -249,36 +249,58 @@ bool RunLayerContext::weightHasGradient(unsigned int idx) const {
  *   - Backward: returns outputs (default)
  */
 Tensor &RunLayerContext::getOutput(unsigned int idx) {
-  if (is_checkpointed && is_initial_forward && !initial_outputs.empty()) {
-    auto& tensor = initial_outputs[idx]->getVariableRef();
-    printf("[Initial Forward_getOutput] Layer name: %s, idx: %d, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
+  // For in-place layers during initial forward, return input instead of output
+  // This takes priority over checkpointed initial_outputs for in-place layers
+  // For multi-output in-place layers, all outputs share initial_inputs[0]
+  if (is_initial_forward){
+    auto &tensor = initial_outputs[idx]->getVariableRef();
+    // Also show what the normal input would be for comparison
+    auto &normal_tensor = outputs[idx]->getVariableRef();
+    printf("[Initial Forward_getOutput] Layer: %s, idx: %u\n", std::get<props::Name>(props).get().c_str(), idx);
+    printf("  -> Using INITIAL_OUTPUT: name='%s', ptr=%p, data_ptr=%p\n",
+            tensor.getName().c_str(), (void *)&tensor, (void *)tensor.getData());
+    printf("  -> Normal output would be: name='%s', ptr=%p, data_ptr=%p\n",
+            normal_tensor.getName().c_str(), (void *)&normal_tensor, (void *)normal_tensor.getData());
+  }
+  if (is_initial_forward && is_inplace && !initial_inputs.empty() && initial_inputs[0] != nullptr) {
+    auto& tensor = initial_inputs[0]->getVariableRef();
+    printf("[Initial Forward_getOutput][IN-PLACE] Layer name: %s, idx: %d (using initial_inputs[0]), tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
            std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), (void*)&tensor, (void*)tensor.getData());
     return tensor;
   }
-  // For in-place layers during initial forward, return input instead of output
-  if (is_initial_forward && is_inplace && idx < initial_inputs.size() && initial_inputs[idx] != nullptr) {
-    auto& tensor = initial_inputs[idx]->getVariableRef();
-    printf("[Initial Forward_getOutput][IN-PLACE] Layer name: %s, idx: %d, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
+  if (is_checkpointed && is_initial_forward && !initial_outputs.empty()) {
+    auto& tensor = initial_outputs[idx]->getVariableRef();
+    printf("[Initial Forward_getOutput] Layer name: %s, idx: %d, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
            std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), (void*)&tensor, (void*)tensor.getData());
     return tensor;
   }
   auto& tensor = outputs[idx]->getVariableRef();
   printf("[Normal OR Recompute Forward_getOutput] Layer name: %s, idx: %d, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
          std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), (void*)&tensor, (void*)tensor.getData());
+  
+  // Debug: Print first few values for embedding layer to track value changes
+  std::string layer_name = std::get<props::Name>(props).get();
+  if (layer_name == "embedding" && tensor.getData() != nullptr && tensor.size() > 0) {
+    printf("[EMBEDDING-OUTPUT-VALUES] embedding output[0..2] = [%f, %f, %f]\n",
+           tensor.getData()[0], tensor.getData()[1], tensor.getData()[2]);
+  }
+  
   return tensor;
 }
 
 const Tensor &RunLayerContext::getOutput(unsigned int idx) const {
-  if (is_checkpointed && is_initial_forward && !initial_outputs.empty()) {
-    auto& tensor = initial_outputs[idx]->getVariableRef();
-    printf("[Initial Forward_getOutput] Layer name: %s, idx: %d, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
+  // For in-place layers during initial forward, return input instead of output
+  // This takes priority over checkpointed initial_outputs for in-place layers
+  // For multi-output in-place layers, all outputs share initial_inputs[0]
+  if (is_initial_forward && is_inplace && !initial_inputs.empty() && initial_inputs[0] != nullptr) {
+    auto& tensor = initial_inputs[0]->getVariableRef();
+    printf("[Initial Forward_getOutput][IN-PLACE] Layer name: %s, idx: %d (using initial_inputs[0]), tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
            std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), (void*)&tensor, (void*)tensor.getData());
     return tensor;
   }
-  // For in-place layers during initial forward, return input instead of output
-  if (is_initial_forward && is_inplace && idx < initial_inputs.size() && initial_inputs[idx] != nullptr) {
-    auto& tensor = initial_inputs[idx]->getVariableRef();
-    printf("[Initial Forward_getOutput][IN-PLACE] Layer name: %s, idx: %d, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
+  if (is_checkpointed && is_initial_forward && !initial_outputs.empty()) {
+    auto& tensor = initial_outputs[idx]->getVariableRef();
+    printf("[Initial Forward_getOutput] Layer name: %s, idx: %d, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n", 
            std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), (void*)&tensor, (void*)tensor.getData());
     return tensor;
   }
@@ -351,8 +373,21 @@ Tensor &RunLayerContext::getInput(unsigned int idx) {
   if (is_initial_forward) {
     if (idx < initial_inputs.size() && initial_inputs[idx] != nullptr) {
       auto &tensor = initial_inputs[idx]->getVariableRef();
-      printf("[Initial Forward_getInput] Layer name: %s, idx: %u, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n",
-             std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), (void *)&tensor, (void *)tensor.getData());
+      // Also show what the normal input would be for comparison
+      auto &normal_tensor = inputs[idx]->getVariableRef();
+      printf("[Initial Forward_getInput] Layer: %s, idx: %u\n", std::get<props::Name>(props).get().c_str(), idx);
+      printf("  -> Using INITIAL_INPUT: name='%s', ptr=%p, data_ptr=%p\n",
+             tensor.getName().c_str(), (void *)&tensor, (void *)tensor.getData());
+      printf("  -> Normal input would be: name='%s', ptr=%p, data_ptr=%p\n",
+             normal_tensor.getName().c_str(), (void *)&normal_tensor, (void *)normal_tensor.getData());
+      
+      // Debug: Print first few values for layer0/add1 input[0] during initial forward
+      std::string layer_name = std::get<props::Name>(props).get();
+      if (layer_name == "layer0/add1" && idx == 0 && tensor.getData() != nullptr && tensor.size() > 0) {
+        printf("[ADD1-INPUT0-VALUES-INITIAL] layer0/add1 input[0][0..2] = [%f, %f, %f]\n",
+               tensor.getData()[0], tensor.getData()[1], tensor.getData()[2]);
+      }
+      
       return tensor; // Initial forward: use initial outputs from previous layer
     } else {
       printf("[Initial Forward_getInput][FALLBACK] Layer name: %s, idx: %u, initial_inputs missing (size=%zu). Using default input.\n",
@@ -362,6 +397,14 @@ Tensor &RunLayerContext::getInput(unsigned int idx) {
   auto &tensor = inputs[idx]->getVariableRef();
   printf("[Normal OR Recompute Forward_getInput] Layer name: %s, idx: %u, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n",
          std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), (void *)&tensor, (void *)tensor.getData());
+  
+  // Debug: Print first few values for layer0/add1 input[0] to track value changes
+  std::string layer_name = std::get<props::Name>(props).get();
+  if (layer_name == "layer0/add1" && idx == 0 && tensor.getData() != nullptr && tensor.size() > 0) {
+    printf("[ADD1-INPUT0-VALUES] layer0/add1 input[0][0..2] = [%f, %f, %f]\n",
+           tensor.getData()[0], tensor.getData()[1], tensor.getData()[2]);
+  }
+  
   return tensor; // Normal/Recompute: pointer to recompute outputs
 }
 
@@ -438,9 +481,12 @@ Tensor &RunLayerContext::getTensor(unsigned int idx) {
       printf("[Initial Forward_getTensor] Layer name: %s, idx: %u, tensor_name: %s, tensor_ptr: %p, data_ptr: %p\n",
              std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), (void *)&tensor, (void *)tensor.getData());
       return tensor;
-    } else if (!initial_tensors.empty()) {
-      printf("[Initial Forward_getTensor][FALLBACK] Layer name: %s, idx: %u, initial_tensors missing (size=%zu). Using default tensor.\n",
-             std::get<props::Name>(props).get().c_str(), idx, initial_tensors.size());
+    } else {
+      // Fallback to tensors if initial_tensors not available
+      auto &tensor = tensors[idx]->getVariableRef();
+      printf("[Initial Forward_getTensor][FALLBACK] Layer name: %s, idx: %u, tensor_name: %s, initial_tensors missing (size=%zu). Using tensors.\n",
+             std::get<props::Name>(props).get().c_str(), idx, tensor.getName().c_str(), initial_tensors.size());
+      return tensor;
     }
   }
   auto &tensor = tensors[idx]->getVariableRef();

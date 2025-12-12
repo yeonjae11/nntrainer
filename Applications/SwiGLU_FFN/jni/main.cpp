@@ -3,6 +3,7 @@
 #include <optimizer.h>
 #include <cifar_dataloader.h>
 #include <profiler.h>
+#include <neuralnet.h>
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
@@ -13,6 +14,8 @@
 #include <unistd.h>
 #include <iomanip>
 #include <iteration_profiler.h>
+#include <random>
+#include <cmath>
 
 // Default values (increased for better performance)
 int number_of_db = 32;
@@ -26,6 +29,11 @@ int num_heads = 8;
 int num_layers = 6;
 int ffn_dim = 1024;
 bool enable_profile = false;
+bool enable_tensor_dump = false;  // Enable tensor dump for debugging
+std::string tensor_dump_path = "./tensor_dump_normal";  // Path for tensor dump
+unsigned int random_seed = 42;  // Fixed seed for reproducibility
+std::string save_weights_path = "";  // Path to save weights after initialization
+std::string load_weights_path = "";  // Path to load weights before training
 
 // Performance measurement utilities
 class PerformanceMonitor {
@@ -105,6 +113,15 @@ void parseArguments(int argc, char* argv[]) {
             // Set global flag for iteration profiling
             nntrainer::g_enable_iteration_profile = true;
             printf("profile activate\n");
+        } else if (arg == "--save-weights" && i + 1 < argc) {
+            save_weights_path = argv[++i];
+        } else if (arg == "--load-weights" && i + 1 < argc) {
+            load_weights_path = argv[++i];
+        } else if (arg == "--enable-tensor-dump") {
+            enable_tensor_dump = true;
+            std::cout << "[INFO] Tensor dump enabled" << std::endl;
+        } else if (arg == "--tensor-dump-path" && i + 1 < argc) {
+            tensor_dump_path = argv[++i];
         } else if (arg == "--help" || arg == "-h") {
             std::cout << "Usage: " << argv[0] << " [options]\n"
                       << "Options:\n"
@@ -118,6 +135,10 @@ void parseArguments(int argc, char* argv[]) {
                       << "  --epochs <int>         Number of epochs (default: 10)\n"
                       << "  --learning_rate <float> Learning rate (default: 0.0001)\n"
                       << "  --enable-profile       Enable detailed profiling output\n"
+                      << "  --enable-tensor-dump   Enable tensor dump for debugging\n"
+                      << "  --tensor-dump-path <path> Path for tensor dump (default: ./tensor_dump_normal)\n"
+                      << "  --save-weights <path>  Save weights after initialization\n"
+                      << "  --load-weights <path>  Load weights before training\n"
                       << "  --help, -h             Show this help message\n";
             exit(0);
         }
@@ -327,26 +348,63 @@ std::unique_ptr<ml::train::Model> create_model() {
     return model;
 }
 
-std::unique_ptr<nntrainer::util::DataLoader> getRandomDataGenerator() {
-    // 더 안전한 방법: RandomDataLoader를 사용하되 범위를 제한
+// Fixed data generator for reproducible testing
+class FixedDataGenerator {
+public:
+    FixedDataGenerator(int bs, int sl, int num_batches) 
+        : batch_size_(bs), seq_len_(sl), num_batches_(num_batches), current_batch_(0) {
+        // Allocate fixed data
+        data_size_ = batch_size_ * seq_len_;
+        input_data_.resize(data_size_);
+        label_data_.resize(data_size_);
+        
+        // Generate deterministic pattern data
+        for (int i = 0; i < data_size_; i++) {
+            // Simple sine wave pattern for input
+            input_data_[i] = 0.5f + 0.5f * std::sin(static_cast<float>(i) * 0.1f);
+            // Shifted pattern for label
+            label_data_[i] = 0.5f + 0.5f * std::sin(static_cast<float>(i + 1) * 0.1f);
+        }
+        std::cout << "[DEBUG] FixedDataGenerator created with " << num_batches_ << " batches" << std::endl;
+        std::cout << "[DEBUG] Input sample [0..2]: " << input_data_[0] << ", " << input_data_[1] << ", " << input_data_[2] << std::endl;
+        std::cout << "[DEBUG] Label sample [0..2]: " << label_data_[0] << ", " << label_data_[1] << ", " << label_data_[2] << std::endl;
+    }
+    
+    void next(float **input, float **label, bool *last) {
+        *input = input_data_.data();
+        *label = label_data_.data();
+        *last = (current_batch_ >= num_batches_ - 1);
+        current_batch_++;
+        if (current_batch_ >= num_batches_) {
+            current_batch_ = 0;
+        }
+    }
+    
+private:
+    int batch_size_;
+    int seq_len_;
+    int num_batches_;
+    int current_batch_;
+    int data_size_;
+    std::vector<float> input_data_;
+    std::vector<float> label_data_;
+};
+
+// Global fixed data generator
+std::unique_ptr<FixedDataGenerator> g_fixed_data_gen;
+
+FixedDataGenerator* getFixedDataGenerator() {
     std::cout << "[DEBUG] Data shapes - Input: [" << batch_size << ", 1, " << seq_len << ", 1]" << std::endl;
     std::cout << "[DEBUG] Data shapes - Label: [" << batch_size << ", 1, " << seq_len << ", 1]" << std::endl;
-    std::cout << "[DEBUG] Using safer RandomDataLoader with post-processing..." << std::endl;
+    std::cout << "[DEBUG] Using FixedDataGenerator for reproducibility..." << std::endl;
     
-    std::unique_ptr<nntrainer::util::DataLoader> random_db(
-        new nntrainer::util::RandomDataLoader(
-            {{static_cast<unsigned int>(batch_size), 1, static_cast<unsigned int>(seq_len), 1}}, 
-            {{static_cast<unsigned int>(batch_size), 1, static_cast<unsigned int>(seq_len), 1}}, 
-            static_cast<unsigned int>(number_of_db)
-        )
-    );
-
-    return random_db;
+    g_fixed_data_gen = std::make_unique<FixedDataGenerator>(batch_size, seq_len, number_of_db);
+    return g_fixed_data_gen.get();
 }
 
-// Dataset callback - timing is now handled in neuralnet.cpp
+// Dataset callback
 int dataset_cb(float **input, float **label, bool *last, void *user_data) {
-    auto data = reinterpret_cast<nntrainer::util::DataLoader *>(user_data);
+    auto data = reinterpret_cast<FixedDataGenerator *>(user_data);
     data->next(input, label, last);
     return 0;
 }
@@ -405,12 +463,36 @@ int main(int argc, char *argv[]) {
         PerformanceMonitor::printElapsed("Model Initialization", timer_start);
         PerformanceMonitor::printMemoryInfo("After Initialization");
 
+        // Load weights if specified
+        if (!load_weights_path.empty()) {
+            std::cout << "[DEBUG] Loading weights from: " << load_weights_path << std::endl;
+            model->load(load_weights_path);
+            std::cout << "[DEBUG] Weights loaded successfully" << std::endl;
+        }
+        
+        // Save weights if specified
+        if (!save_weights_path.empty()) {
+            std::cout << "[DEBUG] Saving weights to: " << save_weights_path << std::endl;
+            model->save(save_weights_path);
+            std::cout << "[DEBUG] Weights saved successfully" << std::endl;
+        }
+
+        // Enable tensor dump if requested
+        if (enable_tensor_dump) {
+            auto *nn_model = dynamic_cast<nntrainer::NeuralNetwork*>(model.get());
+            if (nn_model) {
+                nn_model->getNetworkGraph().enableTensorDump(true, tensor_dump_path);
+                // Only dump first iteration
+                nn_model->getNetworkGraph().setTensorDumpIteration(0);
+            }
+        }
+
         // Data Setup
         timer_start = PerformanceMonitor::startTimer();
-        std::cout << "[DEBUG] Creating data generator..." << std::endl;
-        auto random_generator = getRandomDataGenerator();
+        std::cout << "[DEBUG] Creating fixed data generator..." << std::endl;
+        auto fixed_generator = getFixedDataGenerator();
         auto train_dataset = ml::train::createDataset(
-        ml::train::DatasetType::GENERATOR, dataset_cb, random_generator.get());
+        ml::train::DatasetType::GENERATOR, dataset_cb, fixed_generator);
         std::cout << "[DEBUG] Data generator created successfully" << std::endl;
 
         std::cout << "[DEBUG] Setting dataset..." << std::endl;

@@ -120,6 +120,16 @@ public:
    */
   void setBatch(RunLayerContext &context, unsigned int batch) override;
 
+  /**
+   * @copydoc Layer::getForwardTensorIndices()
+   * @details LayerNormalization uses tensors 0-2 (deviation, variance, inv_std_dev)
+   *          in forward pass. Tensors 3-4 (temp_origin_size, temp_normalized_size)
+   *          are only used in backward pass.
+   */
+  std::vector<unsigned int> getForwardTensorIndices() const override {
+    return {0, 1, 2}; // deviation, variance, inv_std_dev
+  }
+
   static constexpr const char *type = "layer_normalization";
 
 private:

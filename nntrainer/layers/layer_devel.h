@@ -343,6 +343,18 @@ public:
   virtual bool supportBackwarding() const = 0;
 
   /**
+   * @brief     Get tensor indices used during forward pass
+   * @return    Vector of tensor indices used in forwarding. Empty vector means
+   *            all tensors should be verified during recomputation.
+   * @details   Override this in layers where some tensors are only used in
+   *            backward pass (e.g., LayerNormalization's temp tensors).
+   *            This is used for gradient checkpointing verification.
+   */
+  virtual std::vector<unsigned int> getForwardTensorIndices() const {
+    return {}; // Empty means verify all tensors
+  }
+
+  /**
    * @brief     save layer Weight & Bias data from file
    * @param file output file stream
    * @param run_context run context for the layer
