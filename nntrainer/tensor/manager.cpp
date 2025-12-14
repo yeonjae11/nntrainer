@@ -683,7 +683,9 @@ std::vector<Var_Grad *> Manager::requestTensors(
 std::vector<Var_Grad *>
 Manager::requestInputs(const GraphNode &node,
                        const std::vector<TensorDim> &inputs_dim,
-                       const std::vector<std::string> &outputs_name) {
+                       const std::vector<std::string> &outputs_name,
+                       bool is_checkpoint_layer,
+                       bool is_first_in_checkpoint_block) {
   using RT = TensorSpecV2::RequestType;
 
   bool is_train_mode = exec_mode == ExecutionMode::TRAIN;
@@ -716,6 +718,27 @@ Manager::requestInputs(const GraphNode &node,
 
   if (node.getType() == GRUCellLayer::type) {
     grad_common_spec.ls = TensorLifespan::CALC_GRAD_DERIV_LIFESPAN;
+  }
+
+  // For checkpoint layers (except first in block), inputs only need to exist
+  // during recompute forward and backward, not initial forward
+  // First layer in block: initial_inputs = inputs, so needs initial forward too
+  if (is_checkpoint_layer && !is_first_in_checkpoint_block) {
+    // Convert to recompute-based lifespan (removes initial forward)
+    if (var_common_spec.ls == TensorLifespan::FORWARD_GRAD_LIFESPAN) {
+      // FORWARD_RECOMPUTE + CALC_GRAD = recompute forward + backward
+      var_common_spec.ls = static_cast<TensorLifespan>(
+        static_cast<int>(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN) |
+        static_cast<int>(TensorLifespan::CALC_GRAD_LIFESPAN));
+    } else if (var_common_spec.ls == TensorLifespan::FORWARD_FUNC_LIFESPAN) {
+      // Only recompute forward needed
+      var_common_spec.ls = TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN;
+    } else if (var_common_spec.ls == TensorLifespan::FORWARD_DERIV_LIFESPAN) {
+      // FORWARD_RECOMPUTE + CALC_DERIV = recompute forward + calcDerivative
+      var_common_spec.ls = static_cast<TensorLifespan>(
+        static_cast<int>(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN) |
+        static_cast<int>(TensorLifespan::CALC_DERIV_LIFESPAN));
+    }
   }
 
   std::vector<Var_Grad *> ret;

@@ -1062,7 +1062,8 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
     prev_inputs.begin(), prev_inputs.end(), std::back_inserter(input_names),
     [](auto const &vg) -> const auto & { return vg->getName(); });
   const std::vector<Var_Grad *> &inputs = tensor_manager->requestInputs(
-    gnode, init_context.getInputDimensions(), input_names);
+    gnode, init_context.getInputDimensions(), input_names,
+    lnode->isCheckpointed(), lnode->isFirstInCheckpointBlock());
   
   // Gradient checkpointing: Extend input gradient lifespan for first layer in checkpoint block
   // The input gradient of the first layer in a checkpoint block must remain valid until
@@ -1274,11 +1275,19 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
     }
   }
 
+  // For checkpoint layers, convert output lifespan to recompute-based
+  // For last layer in block: output = initial_output, so also add FORWARD_FUNC_LIFESPAN
   if (is_checkpoint_layer) {
     std::for_each(out_specs.begin(), out_specs.end(),
-                  [](VarGradSpecV2 &spec) {
+                  [is_last_checkpoint_layer](VarGradSpecV2 &spec) {
                     spec.variable_spec.ls =
                       promoteToRecompute(spec.variable_spec.ls);
+                    // Last layer: output = initial_output, needs initial forward too
+                    if (is_last_checkpoint_layer) {
+                      spec.variable_spec.ls = static_cast<TensorLifespan>(
+                        static_cast<unsigned int>(spec.variable_spec.ls) |
+                        static_cast<unsigned int>(TensorLifespan::FORWARD_FUNC_LIFESPAN));
+                    }
                   });
   }
 
