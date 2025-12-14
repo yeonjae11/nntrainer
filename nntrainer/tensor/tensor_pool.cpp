@@ -270,17 +270,19 @@ TensorPool::getExecutionOrder(const std::string &name) {
   return std::get<SourceDetails>(getSourceSpec(name).details).exec_order;
 }
 
+TensorLifespan TensorPool::getLifespan(const std::string &name) {
+  return std::get<SourceDetails>(getSourceSpec(name).details).lifespan;
+}
+
 /**
  * @brief     Expand the lifespan of the tensor with the given name
  *
  */
-TensorPool::RequestSpec &
-TensorPool::expandLifespan(const std::string &name,
-                           const std::vector<unsigned> &exec_order,
-                           TensorLifespan lifespan) {
+void TensorPool::expandLifespan(const std::string &name,
+                                const std::vector<unsigned> &exec_order,
+                                TensorLifespan lifespan) {
   auto &spec = getSourceSpec(name);
   expandLifespan(spec, exec_order, lifespan);
-  return spec;
 }
 
 void TensorPool::expandLifespan(RequestSpec &spec,

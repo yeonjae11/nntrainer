@@ -271,6 +271,38 @@ public:
                                                 bool is_weight);
 
   /**
+   * @brief Expand the lifespan of a tensor by adding additional execution orders
+   *
+   * @param name name of the tensor
+   * @param exec_order additional execution orders to add
+   * @param lifespan lifespan to expand to
+   * @param is_weight check if this should be queried in weight pool
+   */
+  void expandTensorLifespan(const std::string &name,
+                            const std::vector<unsigned int> &exec_order,
+                            TensorLifespan lifespan,
+                            bool is_weight = false);
+
+  /**
+   * @brief Generate tensor lifetime report to file
+   *
+   * @param filename output file path
+   */
+  void generateTensorLifetimeReport(const std::string &filename);
+
+  /**
+   * @brief Generate final tensor lifetime report with actual exec orders from TensorPool
+   *
+   * @param filename output file path
+   */
+  void generateFinalTensorLifetimeReport(const std::string &filename);
+
+  /**
+   * @brief Clear tensor lifetime report data
+   */
+  void clearTensorLifetimeReport();
+
+  /**
    * @brief check if given execution order is the first access
    *
    * @param name tensor name

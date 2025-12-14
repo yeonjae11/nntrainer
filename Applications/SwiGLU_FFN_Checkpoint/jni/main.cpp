@@ -4,6 +4,7 @@
 #include <cifar_dataloader.h>
 #include <profiler.h>
 #include <neuralnet.h>
+#include <tensor_lifetime_report.h>
 #include <iostream>
 #include <cstdlib>
 #include <algorithm>
@@ -518,6 +519,16 @@ int main(int argc, char *argv[]) {
                 nn_model->getNetworkGraph().enableTensorDump(true, tensor_dump_path);
                 // Only dump first iteration
                 nn_model->getNetworkGraph().setTensorDumpIteration(0);
+            }
+        }
+        
+        // Generate tensor lifetime report (with final exec_order from TensorPool)
+        {
+            auto *nn_model = dynamic_cast<nntrainer::NeuralNetwork*>(model.get());
+            if (nn_model) {
+                std::string report_path = "/tmp/tensor_lifetime_report_checkpoint.txt";
+                nn_model->getNetworkGraph().generateFinalTensorLifetimeReport(report_path);
+                std::cout << "[DEBUG] Final tensor lifetime report saved to: " << report_path << std::endl;
             }
         }
 

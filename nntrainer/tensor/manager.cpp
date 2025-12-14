@@ -48,6 +48,7 @@
 #include <optimized_v1_planner.h>
 #include <optimized_v2_planner.h>
 #include <optimized_v3_planner.h>
+#include <tensor_lifetime_report.h>
 #include <tensor_pool.h>
 #include <tensor_wrap_specs.h>
 #include <util_func.h>
@@ -163,7 +164,9 @@ void Manager::deallocateWeights() { weight_pool.deallocate(); }
 static Tensor *requestTensor_(const TensorSpecV2 &spec,
                               const GraphNode::ExecutionOrder &exec_order,
                               const std::string &scope, TensorPool &tp,
-                              bool expose, bool trainable) {
+                              bool expose, bool trainable,
+                              const std::string &tensor_type = "TENSOR",
+                              bool is_gradient = false) {
   using RT = TensorSpecV2::RequestType;
   using LS = TensorLifespan;
   NNTR_THROW_IF(spec.request_type == RT::MAYBE_MODIFYING_VIEW,
@@ -195,21 +198,44 @@ static Tensor *requestTensor_(const TensorSpecV2 &spec,
     order.push_back(apply_grad);
   }
 
+  Tensor *result = nullptr;
+  bool is_view = false;
+  
   switch (spec.request_type) {
   case RT::PLACEHOLDER:
-    return tp.placeholder(name, spec.dim);
+    result = tp.placeholder(name, spec.dim);
+    break;
   case RT::UNIQUE:
-    return tp.request(name, spec.dim, order, spec.ls, spec.initializer);
+    result = tp.request(name, spec.dim, order, spec.ls, spec.initializer);
+    break;
   case RT::SHARED:
-    return tp.requestOrExtend(name, spec.dim, order, spec.ls, spec.initializer);
+    result = tp.requestOrExtend(name, spec.dim, order, spec.ls, spec.initializer);
+    break;
   case RT::READ_ONLY_VIEW:
-    return tp.view(name, spec.reference_name, spec.dim, order, spec.ls);
+    result = tp.view(name, spec.reference_name, spec.dim, order, spec.ls);
+    is_view = true;
+    break;
   case RT::MAYBE_MODIFYING_VIEW:
   default:
     throw std::logic_error("requestTensor_ should not reach here");
   }
 
-  return nullptr;
+  // Collect tensor allocation info for reporting
+  if (result != nullptr) {
+    TensorAllocationInfo info;
+    info.name = name;
+    info.layer_name = scope;
+    info.type = tensor_type;
+    info.lifespan = spec.ls;
+    info.exec_order = order;
+    info.size_bytes = spec.dim.getDataLen() * sizeof(float);
+    info.is_gradient = is_gradient;
+    info.reference_name = spec.reference_name;
+    info.is_view = is_view;
+    TensorLifetimeReport::getInstance().addAllocation(info);
+  }
+
+  return result;
 }
 
 Var_Grad *Manager::requestTensor(const VarGradSpecV2 &spec,
@@ -230,10 +256,10 @@ Var_Grad *Manager::requestTensor(const VarGradSpecV2 &spec,
   bool is_train_mode = (exec_mode == ExecutionMode::TRAIN) ? true : false;
 
   Tensor *var = requestTensor_(spec.variable_spec, exec_order, scope,
-                               tensor_pool, expose_var, false);
+                               tensor_pool, expose_var, false, "OUTPUT", false);
   Tensor *grad = (spec.gradient_spec && is_train_mode)
                    ? requestTensor_(*spec.gradient_spec, exec_order, scope,
-                                    tensor_pool, expose_grad, false)
+                                    tensor_pool, expose_grad, false, "OUTPUT", true)
                    : nullptr;
 
   /// @note as only supporting identify_as == TensorGroupType::output, only
@@ -506,6 +532,32 @@ std::vector<Weight *> Manager::requestWeights(
       }
     }
 
+    // Collect weight allocation info
+    if (var != nullptr) {
+      TensorAllocationInfo info;
+      info.name = name;
+      info.layer_name = node.getName();
+      info.type = "WEIGHT";
+      info.lifespan = var_ls;
+      info.exec_order = var_exec_order;
+      info.size_bytes = dim_v.getDataLen() * sizeof(float);
+      info.is_gradient = false;
+      info.is_view = false;
+      TensorLifetimeReport::getInstance().addAllocation(info);
+    }
+    if (grad != nullptr) {
+      TensorAllocationInfo info;
+      info.name = name + Var_Grad::grad_suffix;
+      info.layer_name = node.getName();
+      info.type = "WEIGHT";
+      info.lifespan = grad_ls;
+      info.exec_order = grad_exec_order;
+      info.size_bytes = dim_g.getDataLen() * sizeof(float);
+      info.is_gradient = true;
+      info.is_view = false;
+      TensorLifetimeReport::getInstance().addAllocation(info);
+    }
+
     weights_v2.emplace_back(std::make_unique<Weight>(
       var, grad, var32, w_reg, w_reg_const, decay, is_dependent,
       clip_by_global_norm, axis, loss_scale, is_mixed));
@@ -567,8 +619,10 @@ std::vector<Var_Grad *> Manager::requestTensors(
 
     bool is_dependent = !shared_names.empty();
     Tensor *var = nullptr, *grad = nullptr;
+    std::string tensor_name;
     if (is_dependent) {
       const auto &shared_name = shared_names.at(i);
+      tensor_name = shared_name;
       var = tensor_pool.requestOrExtend(shared_name, dim, var_exec_order, tspan,
                                         t_init);
       if (need_grad && tspan > TensorLifespan::FORWARD_FUNC_LIFESPAN) {
@@ -577,6 +631,7 @@ std::vector<Var_Grad *> Manager::requestTensors(
                                            Initializer::ZEROS);
       }
     } else {
+      tensor_name = name;
       var = tensor_pool.request(name, dim, var_exec_order, tspan, t_init);
       if (is_train_mode && need_grad &&
           tspan > TensorLifespan::FORWARD_FUNC_LIFESPAN) {
@@ -585,6 +640,32 @@ std::vector<Var_Grad *> Manager::requestTensors(
                                    Initializer::ZEROS /// tensor initializer
         );
       }
+    }
+
+    // Collect tensor allocation info
+    if (var != nullptr) {
+      TensorAllocationInfo info;
+      info.name = tensor_name;
+      info.layer_name = node.getName();
+      info.type = "INTERMEDIATE";
+      info.lifespan = tspan;
+      info.exec_order = var_exec_order;
+      info.size_bytes = dim.getDataLen() * sizeof(float);
+      info.is_gradient = false;
+      info.is_view = false;
+      TensorLifetimeReport::getInstance().addAllocation(info);
+    }
+    if (grad != nullptr) {
+      TensorAllocationInfo info;
+      info.name = tensor_name + Var_Grad::grad_suffix;
+      info.layer_name = node.getName();
+      info.type = "INTERMEDIATE";
+      info.lifespan = tspan;
+      info.exec_order = grad_exec_order;
+      info.size_bytes = dim.getDataLen() * sizeof(float);
+      info.is_gradient = true;
+      info.is_view = false;
+      TensorLifetimeReport::getInstance().addAllocation(info);
     }
 
     tensors_v2.emplace_back(std::make_unique<Var_Grad>(var, grad));
@@ -666,10 +747,10 @@ Manager::requestInputs(const GraphNode &node,
     }
     inputs_v2.emplace_back(std::make_unique<Var_Grad>(
       requestTensor_(var_spec, node.getExecutionOrder(), node.getName(),
-                     tensor_pool, false, node.getTrainable()),
+                     tensor_pool, false, node.getTrainable(), "INPUT", false),
       is_train_mode
         ? requestTensor_(grad_spec, node.getExecutionOrder(), node.getName(),
-                         tensor_pool, false, node.getTrainable())
+                         tensor_pool, false, node.getTrainable(), "INPUT", true)
         : nullptr));
   }
 
@@ -730,6 +811,60 @@ bool Manager::isSecondLastAccess(const std::string &name,
                                  unsigned current_execution, bool is_weight) {
   /// @todo add cache mechanism, eg) sort at finalizing requesting
   return getSecondMaxTensorExecutionOrder(name, is_weight) == current_execution;
+}
+
+void Manager::expandTensorLifespan(const std::string &name,
+                                   const std::vector<unsigned int> &exec_order,
+                                   TensorLifespan lifespan,
+                                   bool is_weight) {
+  if (is_weight) {
+    weight_pool.expandLifespan(name, exec_order, lifespan);
+  } else {
+    tensor_pool.expandLifespan(name, exec_order, lifespan);
+  }
+}
+
+void Manager::generateTensorLifetimeReport(const std::string &filename) {
+  TensorLifetimeReport::getInstance().generateReport(filename);
+}
+
+void Manager::generateFinalTensorLifetimeReport(const std::string &filename) {
+  // Update all allocations with final exec_order and lifespan from TensorPool
+  auto &report = TensorLifetimeReport::getInstance();
+  auto &allocations = report.getAllocations();
+  
+  for (auto &alloc : allocations) {
+    try {
+      // Try to get from tensor_pool first, then weight_pool
+      bool found = false;
+      if (tensor_pool.tensorExist(alloc.name)) {
+        alloc.exec_order = std::vector<unsigned int>(
+          tensor_pool.getExecutionOrder(alloc.name).begin(),
+          tensor_pool.getExecutionOrder(alloc.name).end());
+        alloc.lifespan = tensor_pool.getLifespan(alloc.name);
+        found = true;
+      } else if (weight_pool.tensorExist(alloc.name)) {
+        alloc.exec_order = std::vector<unsigned int>(
+          weight_pool.getExecutionOrder(alloc.name).begin(),
+          weight_pool.getExecutionOrder(alloc.name).end());
+        alloc.lifespan = weight_pool.getLifespan(alloc.name);
+        found = true;
+      }
+      
+      if (!found) {
+        // Tensor might be a view, try to find source
+        // For now, just skip
+      }
+    } catch (const std::exception &e) {
+      // Tensor not found in pool, keep original values
+    }
+  }
+  
+  report.generateReport(filename);
+}
+
+void Manager::clearTensorLifetimeReport() {
+  TensorLifetimeReport::getInstance().clear();
 }
 
 /**

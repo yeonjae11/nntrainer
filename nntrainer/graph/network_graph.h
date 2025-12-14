@@ -748,6 +748,12 @@ public:
   void dumpTensor(const std::string &layer_name, const std::string &tensor_type,
                   unsigned int index, const Tensor &tensor);
 
+  /**
+   * @brief Generate final tensor lifetime report with actual exec orders from TensorPool
+   * @param filename Output file path
+   */
+  void generateFinalTensorLifetimeReport(const std::string &filename);
+
 private:
 
   /**

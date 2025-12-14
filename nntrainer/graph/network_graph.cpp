@@ -549,6 +549,15 @@ sharedConstTensors NetworkGraph::forwarding(
     forwarding_op(*iter, training);
     PROFILE_TIME_END(profile_keys.at(ln->getType()));
     
+    // Debug: print layer0/add2 output after initial forward
+    if (ln->getName() == "layer0/add2" && ln->getNumOutputs() > 0) {
+      Tensor &out = ln->getOutput(0);
+      if (out.getData() != nullptr && out.size() > 0) {
+        fprintf(stderr, "[DEBUG-INITIAL-FWD] layer0/add2 output[0][0]=%.6f, data_ptr=%p\n",
+                out.getData()[0], (void*)out.getData());
+      }
+    }
+    
     // Tensor dump for debugging:
     // - For checkpointed layers: dump after initial forward (before setInitialForward(false))
     // - For non-checkpointed layers: dump after normal forward
@@ -1055,15 +1064,46 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   const std::vector<Var_Grad *> &inputs = tensor_manager->requestInputs(
     gnode, init_context.getInputDimensions(), input_names);
   
-  // Print input allocation info
-  printf("[TENSOR-ALLOC] ===== Layer: %s - INPUTS =====\n", lnode->getName().c_str());
-  for (size_t i = 0; i < inputs.size(); i++) {
-    // Note: inputs are typically READ_ONLY_VIEW references to previous layer outputs
-    // Their actual lifespan is determined by the source output tensor
-    printf("[TENSOR-ALLOC] Layer: %s, Type: INPUT, Name: %s, Ptr: %p (reference to prev output)\n",
-           lnode->getName().c_str(), 
-           inputs[i]->getName().c_str(),
-           (void*)inputs[i]);
+  // Gradient checkpointing: Extend input gradient lifespan for first layer in checkpoint block
+  // The input gradient of the first layer in a checkpoint block must remain valid until
+  // the previous block's last layer completes its calcDerivative (which uses this gradient
+  // as its incoming derivative).
+  //
+  // Note: We only need to extend for checkpoint blocks that have a PREVIOUS checkpoint block.
+  // The first checkpoint block in the model doesn't need this extension because there's no
+  // previous checkpointed block waiting to use its gradient.
+  if (lnode->isCheckpointed() && lnode->isFirstInCheckpointBlock()) {
+    // Find the previous layer (boundary layer of previous block)
+    auto input_conns = lnode->getInputConnections();
+    for (const auto &conn : input_conns) {
+      auto prev_node = getLayerNode(conn);  // conn is already a string (layer name)
+      if (prev_node) {
+        // Only extend if the previous layer is also part of a checkpoint block
+        // (i.e., this is not the first checkpoint block in the model)
+        // The previous layer should be the last layer of the previous checkpoint block
+        if (!prev_node->getCheckpointBlockId().empty()) {
+          // Get the calcDerivative order of the previous layer
+          auto prev_exec_order = prev_node->getExecutionOrder();
+          unsigned int prev_calc_deriv_order = std::get<3>(prev_exec_order);
+          
+          // Extend the input gradient's lifespan to include the previous layer's calcDerivative
+          // This is done by extending the SOURCE tensor (output_grad of prev layer) which
+          // the input_grad references via READ_ONLY_VIEW
+          for (size_t i = 0; i < inputs.size(); i++) {
+            std::string grad_name = inputs[i]->getGradientName();
+            try {
+              tensor_manager->expandTensorLifespan(
+                grad_name,
+                {prev_calc_deriv_order},
+                TensorLifespan::CALC_DERIV_LIFESPAN,
+                false);
+            } catch (const std::exception &e) {
+              // Gradient not found in pool, skip
+            }
+          }
+        }
+      }
+    }
   }
 
   /** In-Place optimizations */
@@ -1210,11 +1250,13 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   }
 
   // CRITICAL: If this layer feeds a FIRST checkpoint layer, its normal output
-  // must be kept alive until recompute. The first checkpoint layer uses
-  // saved_inputs (normal inputs) instead of initial_outputs, so the producer's
-  // normal output must persist until recompute time.
+  // must be kept alive until the sink layer's backward pass completes.
+  // The first checkpoint layer uses saved_inputs (normal inputs) instead of
+  // initial_outputs, so the producer's normal output must persist until
+  // recompute AND calc_grad time (just like normal FORWARD_GRAD_LIFESPAN).
   bool feeds_first_checkpoint_layer = false;
   unsigned int first_checkpoint_recompute_order = 0;
+  unsigned int first_checkpoint_calc_grad_order = 0;
   for (unsigned int i = 0; i < lnode->getNumOutputConnections(); ++i) {
     auto conn = lnode->getOutputConnection(i);
     if (!conn)
@@ -1222,9 +1264,12 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
     auto sink_node = getLayerNode(conn->getName());
     if (sink_node && sink_node->isCheckpointed() && sink_node->isFirstInCheckpointBlock()) {
       feeds_first_checkpoint_layer = true;
-      first_checkpoint_recompute_order = std::get<1>(sink_node->getExecutionOrder());
-      printf("[CHECKPOINT] Layer '%s' feeds FIRST checkpoint layer '%s' - extending normal output lifespan to recompute order %u\n",
-             lnode->getName().c_str(), sink_node->getName().c_str(), first_checkpoint_recompute_order);
+      auto sink_exec_order = sink_node->getExecutionOrder();
+      first_checkpoint_recompute_order = std::get<1>(sink_exec_order);
+      first_checkpoint_calc_grad_order = std::get<2>(sink_exec_order);
+      printf("[CHECKPOINT] Layer '%s' feeds FIRST checkpoint layer '%s' - extending lifespan to recompute=%u, calc_grad=%u\n",
+             lnode->getName().c_str(), sink_node->getName().c_str(), 
+             first_checkpoint_recompute_order, first_checkpoint_calc_grad_order);
       break;
     }
   }
@@ -1237,13 +1282,18 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
                   });
   }
 
-  // Extend normal output lifespan if feeding first checkpoint layer
-  if (feeds_first_checkpoint_layer && !is_checkpoint_layer) {
+  // Extend output lifespan if feeding first checkpoint layer
+  // Add the sink layer's recompute AND calc_grad orders to additional_exec_order
+  // so that the output tensor stays valid until the sink layer's backward pass
+  if (feeds_first_checkpoint_layer) {
     for (auto &spec : out_specs) {
       // Add recompute order to keep output alive until recompute
       spec.variable_spec.additional_exec_order.push_back(first_checkpoint_recompute_order);
-      printf("[CHECKPOINT] Layer '%s' output '%s' - added recompute order %u to additional_exec_order\n",
-             lnode->getName().c_str(), spec.variable_spec.name.c_str(), first_checkpoint_recompute_order);
+      // Add calc_grad order to keep output alive until backward pass (like FORWARD_GRAD_LIFESPAN)
+      spec.variable_spec.additional_exec_order.push_back(first_checkpoint_calc_grad_order);
+      printf("[CHECKPOINT] Layer '%s' output '%s' - added recompute=%u, calc_grad=%u to additional_exec_order\n",
+             lnode->getName().c_str(), spec.variable_spec.name.c_str(), 
+             first_checkpoint_recompute_order, first_checkpoint_calc_grad_order);
     }
   }
 
@@ -2608,8 +2658,8 @@ void NetworkGraph::recomputeCheckpointBlock(const std::string &block_id) {
               layer->getName().c_str(), rc_debug.isInitialForward());
       Tensor &input = layer->getInput(0);
       if (input.getData() != nullptr && input.size() > 0) {
-        fprintf(stderr, "[DEBUG-RECOMPUTE] First checkpoint layer '%s' input[0][0]=%.6f\n",
-                layer->getName().c_str(), input.getData()[0]);
+        fprintf(stderr, "[DEBUG-RECOMPUTE] First checkpoint layer '%s' input[0][0]=%.6f, data_ptr=%p\n",
+                layer->getName().c_str(), input.getData()[0], (void*)input.getData());
       }
     }
     
@@ -2637,21 +2687,7 @@ void NetworkGraph::recomputeCheckpointBlock(const std::string &block_id) {
         recomputed_weights.push_back(rc.getWeight(j));
       }
       verifyRecomputedWeights(layer->getName(), recomputed_weights);
-    }
-    
-    // Reset ITERATION_LIFESPAN tensors before recompute to match initial forward state
-    // This is critical for layers like MHA that have internal state tensors
-    printf("[DEBUG] Resetting %u tensors for layer '%s' before recompute\n", 
-           rc.getNumTensors(), layer->getName().c_str());
-    for (unsigned int j = 0; j < rc.getNumTensors(); ++j) {
-      Tensor &tensor = rc.getTensor(j);
-      std::string tensor_name = tensor.getName();
-      
-      printf("[DEBUG] Zeroing tensor[%u] '%s' (size=%zu)\n", 
-             j, tensor_name.c_str(), tensor.size());
-      // Zero out the tensor to ensure clean state
-      tensor.setZero();
-    }
+    } 
     
     layer->forwarding(true);
     
@@ -3305,6 +3341,10 @@ void NetworkGraph::dumpTensor(const std::string &layer_name,
   file << "\n";
   
   file.close();
+}
+
+void NetworkGraph::generateFinalTensorLifetimeReport(const std::string &filename) {
+  tensor_manager->generateFinalTensorLifetimeReport(filename);
 }
 
 } /* namespace nntrainer */

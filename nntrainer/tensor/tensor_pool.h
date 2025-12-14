@@ -111,6 +111,13 @@ public:
   const std::vector<unsigned int> &getExecutionOrder(const std::string &name);
 
   /**
+   * @brief     Get lifespan for the given tensor
+   *
+   * @return The lifespan of the tensor
+   */
+  TensorLifespan getLifespan(const std::string &name);
+
+  /**
    * @brief Get the maximum real memory requirement
    *
    * @return The real memory requirement with this strategy in bytes
@@ -344,6 +351,26 @@ public:
     }
   }
 
+  /**
+   * @brief     Expand the lifespan of the tensor with the given name
+   *
+   * @param name The name of the tensor
+   * @param exec_order The execution orders
+   * @param lifespan The lifespan to be expanded to
+   */
+  void expandLifespan(const std::string &name,
+                      const std::vector<unsigned int> &exec_order,
+                      TensorLifespan lifespan);
+
+  /**
+   * @brief check if a tensor exist with the given identifier
+   *
+   * @param name name name to check
+   * @retval true if exist
+   * @retval false if do not exist
+   */
+  bool tensorExist(const std::string &name);
+
 private:
   /**
    * @brief Source tensor detailed specification
@@ -378,15 +405,6 @@ private:
   };
 
   /**
-   * @brief check if a tensor exist with the given identifier
-   *
-   * @param name name name to check
-   * @retval true if exist
-   * @retval false if do not exist
-   */
-  bool tensorExist(const std::string &name);
-
-  /**
    * @brief Get the view of source Spec from the name
    *
    * @param name name to get source spec
@@ -395,19 +413,7 @@ private:
   RequestSpec &getSourceSpec(const std::string &name);
 
   /**
-   * @brief     Expand the lifespan of the tensor with the given name
-   *
-   * @param name The name of the tensor
-   * @param exec_order The execution orders
-   * @param lifespan The lifespan to be expanded to
-   * @return source spec for the name
-   */
-  RequestSpec &expandLifespan(const std::string &name,
-                              const std::vector<unsigned int> &exec_order,
-                              TensorLifespan lifespan);
-
-  /**
-   * @brief expand life span with execution time
+   * @brief expand life span with execution time (internal use)
    *
    * @param spec specification
    * @param exec_order exec order
