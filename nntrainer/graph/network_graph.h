@@ -205,7 +205,8 @@ public:
    * @param checkpoint_blocks Vector of checkpoint blocks to apply
    * @note This should be called before compile()
    */
-  void applyCheckpointBlocks(const std::vector<CheckpointBlock> &checkpoint_blocks);
+  void
+  applyCheckpointBlocks(const std::vector<CheckpointBlock> &checkpoint_blocks);
 
   /**
    * @brief Recompute forward pass for a checkpoint block
@@ -213,7 +214,7 @@ public:
    * @note This is called during backwarding to restore activations
    */
   void recomputeCheckpointBlock(const std::string &block_id);
-  
+
   /**
    * @brief     forwarding network graph
    * @param[in] training true if forwarding is on training

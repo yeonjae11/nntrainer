@@ -249,28 +249,30 @@ bool RunLayerContext::weightHasGradient(unsigned int idx) const {
  *   - Backward: returns outputs (default)
  */
 Tensor &RunLayerContext::getOutput(unsigned int idx) {
-  if (is_initial_forward && is_inplace && !initial_inputs.empty() && initial_inputs[0] != nullptr) {
-    auto& tensor = initial_inputs[0]->getVariableRef();
+  if (is_initial_forward && is_inplace && !initial_inputs.empty() &&
+      initial_inputs[0] != nullptr) {
+    auto &tensor = initial_inputs[0]->getVariableRef();
     return tensor;
   }
   if (is_checkpointed && is_initial_forward && !initial_outputs.empty()) {
-    auto& tensor = initial_outputs[idx]->getVariableRef();
+    auto &tensor = initial_outputs[idx]->getVariableRef();
     return tensor;
   }
-  auto& tensor = outputs[idx]->getVariableRef();
+  auto &tensor = outputs[idx]->getVariableRef();
   return tensor;
 }
 
 const Tensor &RunLayerContext::getOutput(unsigned int idx) const {
-  if (is_initial_forward && is_inplace && !initial_inputs.empty() && initial_inputs[0] != nullptr) {
-    auto& tensor = initial_inputs[0]->getVariableRef();
+  if (is_initial_forward && is_inplace && !initial_inputs.empty() &&
+      initial_inputs[0] != nullptr) {
+    auto &tensor = initial_inputs[0]->getVariableRef();
     return tensor;
   }
   if (is_checkpointed && is_initial_forward && !initial_outputs.empty()) {
-    auto& tensor = initial_outputs[idx]->getVariableRef();
+    auto &tensor = initial_outputs[idx]->getVariableRef();
     return tensor;
   }
-  auto& tensor = outputs[idx]->getVariableRef();
+  auto &tensor = outputs[idx]->getVariableRef();
   return tensor;
 }
 
@@ -337,10 +339,10 @@ Tensor &RunLayerContext::getInput(unsigned int idx) {
     if (idx < initial_inputs.size() && initial_inputs[idx] != nullptr) {
       auto &tensor = initial_inputs[idx]->getVariableRef();
       return tensor; // Initial forward: use initial outputs from previous layer
-    } 
+    }
   }
   auto &tensor = inputs[idx]->getVariableRef();
-  
+
   return tensor; // Normal/Recompute: pointer to recompute outputs
 }
 
@@ -349,7 +351,7 @@ const Tensor &RunLayerContext::getInput(unsigned int idx) const {
     if (idx < initial_inputs.size() && initial_inputs[idx] != nullptr) {
       auto &tensor = initial_inputs[idx]->getVariableRef();
       return tensor;
-    } 
+    }
   }
   auto &tensor = inputs[idx]->getVariableRef();
   return tensor;

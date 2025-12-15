@@ -55,7 +55,8 @@ public:
    * type.
    * @param loss_scale loss scale value for mixed precision training
    * @param mode execution mode.
-   * @param is_checkpointed_ true if layer is checkpointed for gradient checkpointing
+   * @param is_checkpointed_ true if layer is checkpointed for gradient
+   * checkpointing
    */
   InitLayerContext(
     const std::vector<TensorDim> &dim,
@@ -444,7 +445,8 @@ private:
     tensors_spec; /**< Specification for the var_grad (trainable/non-trainable
                      variables) */
   std::vector<TensorSpec>
-    recompute_tensors_spec; /**< Specification for recompute tensors (gradient checkpointing) */
+    recompute_tensors_spec; /**< Specification for recompute tensors (gradient
+                               checkpointing) */
 
   std::vector<bool> req_out_is_connected;
   /**< a bool vector to tell if requested out is actually connected to others */
@@ -454,7 +456,8 @@ private:
   float loss_scale; /**< loss_scale value */
   ml::train::ExecutionMode mode;
   ml::train::LayerComputeEngine engine;
-  bool is_checkpointed = false; /**< true if layer is checkpointed for gradient checkpointing */
+  bool is_checkpointed =
+    false; /**< true if layer is checkpointed for gradient checkpointing */
 };
 
 /**
@@ -995,7 +998,6 @@ public:
    */
   bool reStoreData() { return restoreData; }
 
-
   /**
    * @brief Set checkpointed flag
    * @param checkpointed true if this layer is checkpointed
@@ -1037,13 +1039,13 @@ public:
   void setInitialTensors(const std::vector<Var_Grad *> &initial_t) {
     initial_tensors = initial_t;
   }
-  
+
   /**
    * @brief Set recompute outputs (called during initialization)
    * @param recompute_outs Recompute forward outputs
    */
   void setRecomputeOutputs(const std::vector<Var_Grad *> &recompute_outs) {
-    outputs = recompute_outs;  // outputs is used for recompute & backward
+    outputs = recompute_outs; // outputs is used for recompute & backward
   }
 
   /**
@@ -1066,10 +1068,7 @@ public:
    * @brief Get outputs
    * @return Layer outputs
    */
-  const std::vector<Var_Grad *> &getOutputs() const {
-    return outputs;
-  }
-
+  const std::vector<Var_Grad *> &getOutputs() const { return outputs; }
 
 private:
   std::tuple<props::Name, props::Trainable> props; /**< props of the layer */
@@ -1078,19 +1077,27 @@ private:
   bool is_inplace;  /**< if the layer is expected to run in-place */
   float loss_scale; /**< loss_scale of the layer */
   bool restoreData; /**< reset output for mixed precsion */
-  bool is_initial_forward = false; /**< true if in initial forward mode for gradient checkpointing */
+  bool is_initial_forward =
+    false; /**< true if in initial forward mode for gradient checkpointing */
 
-  std::vector<Weight *> weights;   /**< weights of the layer */
-  std::vector<Var_Grad *> inputs;  /**< inputs of the layer (default: recompute & backward) */
-  std::vector<Var_Grad *> outputs; /**< outputs of the layer (default: recompute & backward) */
-  std::vector<Var_Grad *> tensors; /**< tensors of the layer (default: recompute & backward) */
-  
+  std::vector<Weight *> weights; /**< weights of the layer */
+  std::vector<Var_Grad *>
+    inputs; /**< inputs of the layer (default: recompute & backward) */
+  std::vector<Var_Grad *>
+    outputs; /**< outputs of the layer (default: recompute & backward) */
+  std::vector<Var_Grad *>
+    tensors; /**< tensors of the layer (default: recompute & backward) */
+
   bool is_checkpointed = false; /**< true if this layer is checkpointed */
-  
-  // Gradient checkpointing: initial forward tensors (short-lived, used only in initial forward)
-  std::vector<Var_Grad *> initial_inputs;  /**< Initial forward inputs (short-lived) */
-  std::vector<Var_Grad *> initial_outputs; /**< Initial forward outputs (short-lived) */
-  std::vector<Var_Grad *> initial_tensors; /**< Initial forward intermediate tensors (short-lived) */
+
+  // Gradient checkpointing: initial forward tensors (short-lived, used only in
+  // initial forward)
+  std::vector<Var_Grad *>
+    initial_inputs; /**< Initial forward inputs (short-lived) */
+  std::vector<Var_Grad *>
+    initial_outputs; /**< Initial forward outputs (short-lived) */
+  std::vector<Var_Grad *>
+    initial_tensors; /**< Initial forward intermediate tensors (short-lived) */
 
 #ifdef DEBUG
   std::map<std::string, const void *>

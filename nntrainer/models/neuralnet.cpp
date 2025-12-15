@@ -1549,12 +1549,13 @@ int NeuralNetwork::addCheckpointBlock(
 
   try {
     // Create checkpoint block with auto-generated ID
-    std::string block_id = "checkpoint_block_" + std::to_string(checkpoint_blocks.size());
+    std::string block_id =
+      "checkpoint_block_" + std::to_string(checkpoint_blocks.size());
     CheckpointBlock block(layer_names, block_id);
     checkpoint_blocks.push_back(block);
 
-    ml_logi("Added checkpoint block '%s' with %zu layers", 
-            block_id.c_str(), layer_names.size());
+    ml_logi("Added checkpoint block '%s' with %zu layers", block_id.c_str(),
+            layer_names.size());
   } catch (const std::exception &e) {
     ml_loge("Failed to create checkpoint block: %s", e.what());
     return ML_ERROR_INVALID_PARAMETER;

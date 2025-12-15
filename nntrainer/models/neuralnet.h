@@ -485,8 +485,7 @@ public:
    * @retval #ML_ERROR_NONE Successful.
    * @retval #ML_ERROR_INVALID_PARAMETER invalid parameter.
    */
-  int addCheckpointBlock(
-    const std::vector<std::string> &layer_names) override;
+  int addCheckpointBlock(const std::vector<std::string> &layer_names) override;
 
   /**
    * @brief     set optimizer for the neural network model

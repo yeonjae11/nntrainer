@@ -661,7 +661,7 @@ InitLayerContext LayerNode::finalize(const std::vector<TensorDim> &input_dims,
 
   // Pass checkpoint information to InitLayerContext
   bool is_checkpointed = isCheckpointed();
-  
+
   auto context = InitLayerContext(
     actual_input_dims, out_info, getInPlaceType() != InPlaceType::NONE,
     getName(), scope, max_norm, tensor_type, loss_scale, mode, compute_engine,

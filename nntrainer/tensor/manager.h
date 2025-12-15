@@ -219,7 +219,8 @@ public:
    * @param inputs_dim Specification for the tensors
    * @param outputs_name Name of the already requested output tensors
    * @param is_checkpoint_layer True if this is a checkpointed layer
-   * @param is_first_in_checkpoint_block True if this is the first layer in checkpoint block
+   * @param is_first_in_checkpoint_block True if this is the first layer in
+   * checkpoint block
    *
    * @return created tensors list
    *

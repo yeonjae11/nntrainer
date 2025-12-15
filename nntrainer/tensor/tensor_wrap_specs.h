@@ -79,7 +79,8 @@ enum class TensorLifespan {
  * @details Converts FORWARD_FUNC_LIFESPAN to FORWARD_RECOMPUTE_LIFESPAN
  *          while preserving other lifespan bits (CALC_GRAD, CALC_DERIV, etc.)
  * @param span Original tensor lifespan
- * @return Promoted tensor lifespan with FORWARD_RECOMPUTE instead of FORWARD_FUNC
+ * @return Promoted tensor lifespan with FORWARD_RECOMPUTE instead of
+ * FORWARD_FUNC
  */
 constexpr TensorLifespan promoteToRecompute(TensorLifespan span) {
   auto mask = static_cast<unsigned>(span);
