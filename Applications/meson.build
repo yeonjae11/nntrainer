@@ -59,3 +59,7 @@ if get_option('enable-transformer')
     subdir('CausalLM')
   endif
 endif
+
+if enable_ccapi
+  subdir('GC_Test/jni')
+endif

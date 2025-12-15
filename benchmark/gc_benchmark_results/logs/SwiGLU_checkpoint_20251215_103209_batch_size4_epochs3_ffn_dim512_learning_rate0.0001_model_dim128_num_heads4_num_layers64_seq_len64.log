@@ -1,0 +1,1091 @@
+Command: nntrainer/build/Applications/GC_Test/jni/swiglu_gc_test --seq_len 64 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 64 --batch_size 4 --enable-checkpoint
+Timestamp: 20251215_103209
+Return code: 0
+
+=== STDOUT ===
+[CONFIG] Parsed arguments:
+  seq_len=64, vocab_size=1000, model_dim=128
+  num_heads=4, num_layers=64, ffn_dim=512
+  batch_size=4, epochs=3, learning_rate=0.0001
+[DEBUG] Starting main function...
+[MEMORY] Program Start - Peak: 4274 MB, Current: 4274 MB, RSS: 12 MB
+[DEBUG] Creating model...
+[DEBUG] Starting model creation...
+[DEBUG] Model created successfully
+[DEBUG] Adding input layer...
+[DEBUG] Input layer added successfully
+[DEBUG] Adding simple embedding layer...
+[DEBUG] Embedding layer (FC) added successfully
+[DEBUG] Creating transformer layer 0
+[DEBUG] Adding ln_multiout1 for layer 0
+[DEBUG] Adding ln1 for layer 0
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 0
+[DEBUG] Adding multi_head_attention for layer 0
+[DEBUG] Adding add1 (residual after attention) for layer 0
+[DEBUG] Adding ln_multiout2 for layer 0
+[DEBUG] Adding ln2 for layer 0
+[DEBUG] Adding multi_out3 for layer 0
+[DEBUG] Adding SwiGLU gate projection for layer 0
+[DEBUG] Adding SwiGLU up projection for layer 0
+[DEBUG] Adding multiply (gating) for layer 0
+[DEBUG] Adding SwiGLU down projection for layer 0
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 0
+[DEBUG] Creating transformer layer 1
+[DEBUG] Adding ln_multiout1 for layer 1
+[DEBUG] Adding ln1 for layer 1
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 1
+[DEBUG] Adding multi_head_attention for layer 1
+[DEBUG] Adding add1 (residual after attention) for layer 1
+[DEBUG] Adding ln_multiout2 for layer 1
+[DEBUG] Adding ln2 for layer 1
+[DEBUG] Adding multi_out3 for layer 1
+[DEBUG] Adding SwiGLU gate projection for layer 1
+[DEBUG] Adding SwiGLU up projection for layer 1
+[DEBUG] Adding multiply (gating) for layer 1
+[DEBUG] Adding SwiGLU down projection for layer 1
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 1
+[DEBUG] Creating transformer layer 2
+[DEBUG] Adding ln_multiout1 for layer 2
+[DEBUG] Adding ln1 for layer 2
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 2
+[DEBUG] Adding multi_head_attention for layer 2
+[DEBUG] Adding add1 (residual after attention) for layer 2
+[DEBUG] Adding ln_multiout2 for layer 2
+[DEBUG] Adding ln2 for layer 2
+[DEBUG] Adding multi_out3 for layer 2
+[DEBUG] Adding SwiGLU gate projection for layer 2
+[DEBUG] Adding SwiGLU up projection for layer 2
+[DEBUG] Adding multiply (gating) for layer 2
+[DEBUG] Adding SwiGLU down projection for layer 2
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 2
+[DEBUG] Creating transformer layer 3
+[DEBUG] Adding ln_multiout1 for layer 3
+[DEBUG] Adding ln1 for layer 3
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 3
+[DEBUG] Adding multi_head_attention for layer 3
+[DEBUG] Adding add1 (residual after attention) for layer 3
+[DEBUG] Adding ln_multiout2 for layer 3
+[DEBUG] Adding ln2 for layer 3
+[DEBUG] Adding multi_out3 for layer 3
+[DEBUG] Adding SwiGLU gate projection for layer 3
+[DEBUG] Adding SwiGLU up projection for layer 3
+[DEBUG] Adding multiply (gating) for layer 3
+[DEBUG] Adding SwiGLU down projection for layer 3
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 3
+[DEBUG] Creating transformer layer 4
+[DEBUG] Adding ln_multiout1 for layer 4
+[DEBUG] Adding ln1 for layer 4
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 4
+[DEBUG] Adding multi_head_attention for layer 4
+[DEBUG] Adding add1 (residual after attention) for layer 4
+[DEBUG] Adding ln_multiout2 for layer 4
+[DEBUG] Adding ln2 for layer 4
+[DEBUG] Adding multi_out3 for layer 4
+[DEBUG] Adding SwiGLU gate projection for layer 4
+[DEBUG] Adding SwiGLU up projection for layer 4
+[DEBUG] Adding multiply (gating) for layer 4
+[DEBUG] Adding SwiGLU down projection for layer 4
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 4
+[DEBUG] Creating transformer layer 5
+[DEBUG] Adding ln_multiout1 for layer 5
+[DEBUG] Adding ln1 for layer 5
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 5
+[DEBUG] Adding multi_head_attention for layer 5
+[DEBUG] Adding add1 (residual after attention) for layer 5
+[DEBUG] Adding ln_multiout2 for layer 5
+[DEBUG] Adding ln2 for layer 5
+[DEBUG] Adding multi_out3 for layer 5
+[DEBUG] Adding SwiGLU gate projection for layer 5
+[DEBUG] Adding SwiGLU up projection for layer 5
+[DEBUG] Adding multiply (gating) for layer 5
+[DEBUG] Adding SwiGLU down projection for layer 5
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 5
+[DEBUG] Creating transformer layer 6
+[DEBUG] Adding ln_multiout1 for layer 6
+[DEBUG] Adding ln1 for layer 6
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 6
+[DEBUG] Adding multi_head_attention for layer 6
+[DEBUG] Adding add1 (residual after attention) for layer 6
+[DEBUG] Adding ln_multiout2 for layer 6
+[DEBUG] Adding ln2 for layer 6
+[DEBUG] Adding multi_out3 for layer 6
+[DEBUG] Adding SwiGLU gate projection for layer 6
+[DEBUG] Adding SwiGLU up projection for layer 6
+[DEBUG] Adding multiply (gating) for layer 6
+[DEBUG] Adding SwiGLU down projection for layer 6
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 6
+[DEBUG] Creating transformer layer 7
+[DEBUG] Adding ln_multiout1 for layer 7
+[DEBUG] Adding ln1 for layer 7
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 7
+[DEBUG] Adding multi_head_attention for layer 7
+[DEBUG] Adding add1 (residual after attention) for layer 7
+[DEBUG] Adding ln_multiout2 for layer 7
+[DEBUG] Adding ln2 for layer 7
+[DEBUG] Adding multi_out3 for layer 7
+[DEBUG] Adding SwiGLU gate projection for layer 7
+[DEBUG] Adding SwiGLU up projection for layer 7
+[DEBUG] Adding multiply (gating) for layer 7
+[DEBUG] Adding SwiGLU down projection for layer 7
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 7
+[DEBUG] Creating transformer layer 8
+[DEBUG] Adding ln_multiout1 for layer 8
+[DEBUG] Adding ln1 for layer 8
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 8
+[DEBUG] Adding multi_head_attention for layer 8
+[DEBUG] Adding add1 (residual after attention) for layer 8
+[DEBUG] Adding ln_multiout2 for layer 8
+[DEBUG] Adding ln2 for layer 8
+[DEBUG] Adding multi_out3 for layer 8
+[DEBUG] Adding SwiGLU gate projection for layer 8
+[DEBUG] Adding SwiGLU up projection for layer 8
+[DEBUG] Adding multiply (gating) for layer 8
+[DEBUG] Adding SwiGLU down projection for layer 8
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 8
+[DEBUG] Creating transformer layer 9
+[DEBUG] Adding ln_multiout1 for layer 9
+[DEBUG] Adding ln1 for layer 9
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 9
+[DEBUG] Adding multi_head_attention for layer 9
+[DEBUG] Adding add1 (residual after attention) for layer 9
+[DEBUG] Adding ln_multiout2 for layer 9
+[DEBUG] Adding ln2 for layer 9
+[DEBUG] Adding multi_out3 for layer 9
+[DEBUG] Adding SwiGLU gate projection for layer 9
+[DEBUG] Adding SwiGLU up projection for layer 9
+[DEBUG] Adding multiply (gating) for layer 9
+[DEBUG] Adding SwiGLU down projection for layer 9
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 9
+[DEBUG] Creating transformer layer 10
+[DEBUG] Adding ln_multiout1 for layer 10
+[DEBUG] Adding ln1 for layer 10
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 10
+[DEBUG] Adding multi_head_attention for layer 10
+[DEBUG] Adding add1 (residual after attention) for layer 10
+[DEBUG] Adding ln_multiout2 for layer 10
+[DEBUG] Adding ln2 for layer 10
+[DEBUG] Adding multi_out3 for layer 10
+[DEBUG] Adding SwiGLU gate projection for layer 10
+[DEBUG] Adding SwiGLU up projection for layer 10
+[DEBUG] Adding multiply (gating) for layer 10
+[DEBUG] Adding SwiGLU down projection for layer 10
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 10
+[DEBUG] Creating transformer layer 11
+[DEBUG] Adding ln_multiout1 for layer 11
+[DEBUG] Adding ln1 for layer 11
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 11
+[DEBUG] Adding multi_head_attention for layer 11
+[DEBUG] Adding add1 (residual after attention) for layer 11
+[DEBUG] Adding ln_multiout2 for layer 11
+[DEBUG] Adding ln2 for layer 11
+[DEBUG] Adding multi_out3 for layer 11
+[DEBUG] Adding SwiGLU gate projection for layer 11
+[DEBUG] Adding SwiGLU up projection for layer 11
+[DEBUG] Adding multiply (gating) for layer 11
+[DEBUG] Adding SwiGLU down projection for layer 11
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 11
+[DEBUG] Creating transformer layer 12
+[DEBUG] Adding ln_multiout1 for layer 12
+[DEBUG] Adding ln1 for layer 12
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 12
+[DEBUG] Adding multi_head_attention for layer 12
+[DEBUG] Adding add1 (residual after attention) for layer 12
+[DEBUG] Adding ln_multiout2 for layer 12
+[DEBUG] Adding ln2 for layer 12
+[DEBUG] Adding multi_out3 for layer 12
+[DEBUG] Adding SwiGLU gate projection for layer 12
+[DEBUG] Adding SwiGLU up projection for layer 12
+[DEBUG] Adding multiply (gating) for layer 12
+[DEBUG] Adding SwiGLU down projection for layer 12
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 12
+[DEBUG] Creating transformer layer 13
+[DEBUG] Adding ln_multiout1 for layer 13
+[DEBUG] Adding ln1 for layer 13
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 13
+[DEBUG] Adding multi_head_attention for layer 13
+[DEBUG] Adding add1 (residual after attention) for layer 13
+[DEBUG] Adding ln_multiout2 for layer 13
+[DEBUG] Adding ln2 for layer 13
+[DEBUG] Adding multi_out3 for layer 13
+[DEBUG] Adding SwiGLU gate projection for layer 13
+[DEBUG] Adding SwiGLU up projection for layer 13
+[DEBUG] Adding multiply (gating) for layer 13
+[DEBUG] Adding SwiGLU down projection for layer 13
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 13
+[DEBUG] Creating transformer layer 14
+[DEBUG] Adding ln_multiout1 for layer 14
+[DEBUG] Adding ln1 for layer 14
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 14
+[DEBUG] Adding multi_head_attention for layer 14
+[DEBUG] Adding add1 (residual after attention) for layer 14
+[DEBUG] Adding ln_multiout2 for layer 14
+[DEBUG] Adding ln2 for layer 14
+[DEBUG] Adding multi_out3 for layer 14
+[DEBUG] Adding SwiGLU gate projection for layer 14
+[DEBUG] Adding SwiGLU up projection for layer 14
+[DEBUG] Adding multiply (gating) for layer 14
+[DEBUG] Adding SwiGLU down projection for layer 14
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 14
+[DEBUG] Creating transformer layer 15
+[DEBUG] Adding ln_multiout1 for layer 15
+[DEBUG] Adding ln1 for layer 15
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 15
+[DEBUG] Adding multi_head_attention for layer 15
+[DEBUG] Adding add1 (residual after attention) for layer 15
+[DEBUG] Adding ln_multiout2 for layer 15
+[DEBUG] Adding ln2 for layer 15
+[DEBUG] Adding multi_out3 for layer 15
+[DEBUG] Adding SwiGLU gate projection for layer 15
+[DEBUG] Adding SwiGLU up projection for layer 15
+[DEBUG] Adding multiply (gating) for layer 15
+[DEBUG] Adding SwiGLU down projection for layer 15
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 15
+[DEBUG] Creating transformer layer 16
+[DEBUG] Adding ln_multiout1 for layer 16
+[DEBUG] Adding ln1 for layer 16
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 16
+[DEBUG] Adding multi_head_attention for layer 16
+[DEBUG] Adding add1 (residual after attention) for layer 16
+[DEBUG] Adding ln_multiout2 for layer 16
+[DEBUG] Adding ln2 for layer 16
+[DEBUG] Adding multi_out3 for layer 16
+[DEBUG] Adding SwiGLU gate projection for layer 16
+[DEBUG] Adding SwiGLU up projection for layer 16
+[DEBUG] Adding multiply (gating) for layer 16
+[DEBUG] Adding SwiGLU down projection for layer 16
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 16
+[DEBUG] Creating transformer layer 17
+[DEBUG] Adding ln_multiout1 for layer 17
+[DEBUG] Adding ln1 for layer 17
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 17
+[DEBUG] Adding multi_head_attention for layer 17
+[DEBUG] Adding add1 (residual after attention) for layer 17
+[DEBUG] Adding ln_multiout2 for layer 17
+[DEBUG] Adding ln2 for layer 17
+[DEBUG] Adding multi_out3 for layer 17
+[DEBUG] Adding SwiGLU gate projection for layer 17
+[DEBUG] Adding SwiGLU up projection for layer 17
+[DEBUG] Adding multiply (gating) for layer 17
+[DEBUG] Adding SwiGLU down projection for layer 17
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 17
+[DEBUG] Creating transformer layer 18
+[DEBUG] Adding ln_multiout1 for layer 18
+[DEBUG] Adding ln1 for layer 18
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 18
+[DEBUG] Adding multi_head_attention for layer 18
+[DEBUG] Adding add1 (residual after attention) for layer 18
+[DEBUG] Adding ln_multiout2 for layer 18
+[DEBUG] Adding ln2 for layer 18
+[DEBUG] Adding multi_out3 for layer 18
+[DEBUG] Adding SwiGLU gate projection for layer 18
+[DEBUG] Adding SwiGLU up projection for layer 18
+[DEBUG] Adding multiply (gating) for layer 18
+[DEBUG] Adding SwiGLU down projection for layer 18
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 18
+[DEBUG] Creating transformer layer 19
+[DEBUG] Adding ln_multiout1 for layer 19
+[DEBUG] Adding ln1 for layer 19
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 19
+[DEBUG] Adding multi_head_attention for layer 19
+[DEBUG] Adding add1 (residual after attention) for layer 19
+[DEBUG] Adding ln_multiout2 for layer 19
+[DEBUG] Adding ln2 for layer 19
+[DEBUG] Adding multi_out3 for layer 19
+[DEBUG] Adding SwiGLU gate projection for layer 19
+[DEBUG] Adding SwiGLU up projection for layer 19
+[DEBUG] Adding multiply (gating) for layer 19
+[DEBUG] Adding SwiGLU down projection for layer 19
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 19
+[DEBUG] Creating transformer layer 20
+[DEBUG] Adding ln_multiout1 for layer 20
+[DEBUG] Adding ln1 for layer 20
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 20
+[DEBUG] Adding multi_head_attention for layer 20
+[DEBUG] Adding add1 (residual after attention) for layer 20
+[DEBUG] Adding ln_multiout2 for layer 20
+[DEBUG] Adding ln2 for layer 20
+[DEBUG] Adding multi_out3 for layer 20
+[DEBUG] Adding SwiGLU gate projection for layer 20
+[DEBUG] Adding SwiGLU up projection for layer 20
+[DEBUG] Adding multiply (gating) for layer 20
+[DEBUG] Adding SwiGLU down projection for layer 20
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 20
+[DEBUG] Creating transformer layer 21
+[DEBUG] Adding ln_multiout1 for layer 21
+[DEBUG] Adding ln1 for layer 21
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 21
+[DEBUG] Adding multi_head_attention for layer 21
+[DEBUG] Adding add1 (residual after attention) for layer 21
+[DEBUG] Adding ln_multiout2 for layer 21
+[DEBUG] Adding ln2 for layer 21
+[DEBUG] Adding multi_out3 for layer 21
+[DEBUG] Adding SwiGLU gate projection for layer 21
+[DEBUG] Adding SwiGLU up projection for layer 21
+[DEBUG] Adding multiply (gating) for layer 21
+[DEBUG] Adding SwiGLU down projection for layer 21
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 21
+[DEBUG] Creating transformer layer 22
+[DEBUG] Adding ln_multiout1 for layer 22
+[DEBUG] Adding ln1 for layer 22
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 22
+[DEBUG] Adding multi_head_attention for layer 22
+[DEBUG] Adding add1 (residual after attention) for layer 22
+[DEBUG] Adding ln_multiout2 for layer 22
+[DEBUG] Adding ln2 for layer 22
+[DEBUG] Adding multi_out3 for layer 22
+[DEBUG] Adding SwiGLU gate projection for layer 22
+[DEBUG] Adding SwiGLU up projection for layer 22
+[DEBUG] Adding multiply (gating) for layer 22
+[DEBUG] Adding SwiGLU down projection for layer 22
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 22
+[DEBUG] Creating transformer layer 23
+[DEBUG] Adding ln_multiout1 for layer 23
+[DEBUG] Adding ln1 for layer 23
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 23
+[DEBUG] Adding multi_head_attention for layer 23
+[DEBUG] Adding add1 (residual after attention) for layer 23
+[DEBUG] Adding ln_multiout2 for layer 23
+[DEBUG] Adding ln2 for layer 23
+[DEBUG] Adding multi_out3 for layer 23
+[DEBUG] Adding SwiGLU gate projection for layer 23
+[DEBUG] Adding SwiGLU up projection for layer 23
+[DEBUG] Adding multiply (gating) for layer 23
+[DEBUG] Adding SwiGLU down projection for layer 23
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 23
+[DEBUG] Creating transformer layer 24
+[DEBUG] Adding ln_multiout1 for layer 24
+[DEBUG] Adding ln1 for layer 24
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 24
+[DEBUG] Adding multi_head_attention for layer 24
+[DEBUG] Adding add1 (residual after attention) for layer 24
+[DEBUG] Adding ln_multiout2 for layer 24
+[DEBUG] Adding ln2 for layer 24
+[DEBUG] Adding multi_out3 for layer 24
+[DEBUG] Adding SwiGLU gate projection for layer 24
+[DEBUG] Adding SwiGLU up projection for layer 24
+[DEBUG] Adding multiply (gating) for layer 24
+[DEBUG] Adding SwiGLU down projection for layer 24
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 24
+[DEBUG] Creating transformer layer 25
+[DEBUG] Adding ln_multiout1 for layer 25
+[DEBUG] Adding ln1 for layer 25
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 25
+[DEBUG] Adding multi_head_attention for layer 25
+[DEBUG] Adding add1 (residual after attention) for layer 25
+[DEBUG] Adding ln_multiout2 for layer 25
+[DEBUG] Adding ln2 for layer 25
+[DEBUG] Adding multi_out3 for layer 25
+[DEBUG] Adding SwiGLU gate projection for layer 25
+[DEBUG] Adding SwiGLU up projection for layer 25
+[DEBUG] Adding multiply (gating) for layer 25
+[DEBUG] Adding SwiGLU down projection for layer 25
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 25
+[DEBUG] Creating transformer layer 26
+[DEBUG] Adding ln_multiout1 for layer 26
+[DEBUG] Adding ln1 for layer 26
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 26
+[DEBUG] Adding multi_head_attention for layer 26
+[DEBUG] Adding add1 (residual after attention) for layer 26
+[DEBUG] Adding ln_multiout2 for layer 26
+[DEBUG] Adding ln2 for layer 26
+[DEBUG] Adding multi_out3 for layer 26
+[DEBUG] Adding SwiGLU gate projection for layer 26
+[DEBUG] Adding SwiGLU up projection for layer 26
+[DEBUG] Adding multiply (gating) for layer 26
+[DEBUG] Adding SwiGLU down projection for layer 26
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 26
+[DEBUG] Creating transformer layer 27
+[DEBUG] Adding ln_multiout1 for layer 27
+[DEBUG] Adding ln1 for layer 27
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 27
+[DEBUG] Adding multi_head_attention for layer 27
+[DEBUG] Adding add1 (residual after attention) for layer 27
+[DEBUG] Adding ln_multiout2 for layer 27
+[DEBUG] Adding ln2 for layer 27
+[DEBUG] Adding multi_out3 for layer 27
+[DEBUG] Adding SwiGLU gate projection for layer 27
+[DEBUG] Adding SwiGLU up projection for layer 27
+[DEBUG] Adding multiply (gating) for layer 27
+[DEBUG] Adding SwiGLU down projection for layer 27
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 27
+[DEBUG] Creating transformer layer 28
+[DEBUG] Adding ln_multiout1 for layer 28
+[DEBUG] Adding ln1 for layer 28
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 28
+[DEBUG] Adding multi_head_attention for layer 28
+[DEBUG] Adding add1 (residual after attention) for layer 28
+[DEBUG] Adding ln_multiout2 for layer 28
+[DEBUG] Adding ln2 for layer 28
+[DEBUG] Adding multi_out3 for layer 28
+[DEBUG] Adding SwiGLU gate projection for layer 28
+[DEBUG] Adding SwiGLU up projection for layer 28
+[DEBUG] Adding multiply (gating) for layer 28
+[DEBUG] Adding SwiGLU down projection for layer 28
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 28
+[DEBUG] Creating transformer layer 29
+[DEBUG] Adding ln_multiout1 for layer 29
+[DEBUG] Adding ln1 for layer 29
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 29
+[DEBUG] Adding multi_head_attention for layer 29
+[DEBUG] Adding add1 (residual after attention) for layer 29
+[DEBUG] Adding ln_multiout2 for layer 29
+[DEBUG] Adding ln2 for layer 29
+[DEBUG] Adding multi_out3 for layer 29
+[DEBUG] Adding SwiGLU gate projection for layer 29
+[DEBUG] Adding SwiGLU up projection for layer 29
+[DEBUG] Adding multiply (gating) for layer 29
+[DEBUG] Adding SwiGLU down projection for layer 29
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 29
+[DEBUG] Creating transformer layer 30
+[DEBUG] Adding ln_multiout1 for layer 30
+[DEBUG] Adding ln1 for layer 30
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 30
+[DEBUG] Adding multi_head_attention for layer 30
+[DEBUG] Adding add1 (residual after attention) for layer 30
+[DEBUG] Adding ln_multiout2 for layer 30
+[DEBUG] Adding ln2 for layer 30
+[DEBUG] Adding multi_out3 for layer 30
+[DEBUG] Adding SwiGLU gate projection for layer 30
+[DEBUG] Adding SwiGLU up projection for layer 30
+[DEBUG] Adding multiply (gating) for layer 30
+[DEBUG] Adding SwiGLU down projection for layer 30
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 30
+[DEBUG] Creating transformer layer 31
+[DEBUG] Adding ln_multiout1 for layer 31
+[DEBUG] Adding ln1 for layer 31
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 31
+[DEBUG] Adding multi_head_attention for layer 31
+[DEBUG] Adding add1 (residual after attention) for layer 31
+[DEBUG] Adding ln_multiout2 for layer 31
+[DEBUG] Adding ln2 for layer 31
+[DEBUG] Adding multi_out3 for layer 31
+[DEBUG] Adding SwiGLU gate projection for layer 31
+[DEBUG] Adding SwiGLU up projection for layer 31
+[DEBUG] Adding multiply (gating) for layer 31
+[DEBUG] Adding SwiGLU down projection for layer 31
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 31
+[DEBUG] Creating transformer layer 32
+[DEBUG] Adding ln_multiout1 for layer 32
+[DEBUG] Adding ln1 for layer 32
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 32
+[DEBUG] Adding multi_head_attention for layer 32
+[DEBUG] Adding add1 (residual after attention) for layer 32
+[DEBUG] Adding ln_multiout2 for layer 32
+[DEBUG] Adding ln2 for layer 32
+[DEBUG] Adding multi_out3 for layer 32
+[DEBUG] Adding SwiGLU gate projection for layer 32
+[DEBUG] Adding SwiGLU up projection for layer 32
+[DEBUG] Adding multiply (gating) for layer 32
+[DEBUG] Adding SwiGLU down projection for layer 32
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 32
+[DEBUG] Creating transformer layer 33
+[DEBUG] Adding ln_multiout1 for layer 33
+[DEBUG] Adding ln1 for layer 33
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 33
+[DEBUG] Adding multi_head_attention for layer 33
+[DEBUG] Adding add1 (residual after attention) for layer 33
+[DEBUG] Adding ln_multiout2 for layer 33
+[DEBUG] Adding ln2 for layer 33
+[DEBUG] Adding multi_out3 for layer 33
+[DEBUG] Adding SwiGLU gate projection for layer 33
+[DEBUG] Adding SwiGLU up projection for layer 33
+[DEBUG] Adding multiply (gating) for layer 33
+[DEBUG] Adding SwiGLU down projection for layer 33
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 33
+[DEBUG] Creating transformer layer 34
+[DEBUG] Adding ln_multiout1 for layer 34
+[DEBUG] Adding ln1 for layer 34
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 34
+[DEBUG] Adding multi_head_attention for layer 34
+[DEBUG] Adding add1 (residual after attention) for layer 34
+[DEBUG] Adding ln_multiout2 for layer 34
+[DEBUG] Adding ln2 for layer 34
+[DEBUG] Adding multi_out3 for layer 34
+[DEBUG] Adding SwiGLU gate projection for layer 34
+[DEBUG] Adding SwiGLU up projection for layer 34
+[DEBUG] Adding multiply (gating) for layer 34
+[DEBUG] Adding SwiGLU down projection for layer 34
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 34
+[DEBUG] Creating transformer layer 35
+[DEBUG] Adding ln_multiout1 for layer 35
+[DEBUG] Adding ln1 for layer 35
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 35
+[DEBUG] Adding multi_head_attention for layer 35
+[DEBUG] Adding add1 (residual after attention) for layer 35
+[DEBUG] Adding ln_multiout2 for layer 35
+[DEBUG] Adding ln2 for layer 35
+[DEBUG] Adding multi_out3 for layer 35
+[DEBUG] Adding SwiGLU gate projection for layer 35
+[DEBUG] Adding SwiGLU up projection for layer 35
+[DEBUG] Adding multiply (gating) for layer 35
+[DEBUG] Adding SwiGLU down projection for layer 35
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 35
+[DEBUG] Creating transformer layer 36
+[DEBUG] Adding ln_multiout1 for layer 36
+[DEBUG] Adding ln1 for layer 36
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 36
+[DEBUG] Adding multi_head_attention for layer 36
+[DEBUG] Adding add1 (residual after attention) for layer 36
+[DEBUG] Adding ln_multiout2 for layer 36
+[DEBUG] Adding ln2 for layer 36
+[DEBUG] Adding multi_out3 for layer 36
+[DEBUG] Adding SwiGLU gate projection for layer 36
+[DEBUG] Adding SwiGLU up projection for layer 36
+[DEBUG] Adding multiply (gating) for layer 36
+[DEBUG] Adding SwiGLU down projection for layer 36
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 36
+[DEBUG] Creating transformer layer 37
+[DEBUG] Adding ln_multiout1 for layer 37
+[DEBUG] Adding ln1 for layer 37
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 37
+[DEBUG] Adding multi_head_attention for layer 37
+[DEBUG] Adding add1 (residual after attention) for layer 37
+[DEBUG] Adding ln_multiout2 for layer 37
+[DEBUG] Adding ln2 for layer 37
+[DEBUG] Adding multi_out3 for layer 37
+[DEBUG] Adding SwiGLU gate projection for layer 37
+[DEBUG] Adding SwiGLU up projection for layer 37
+[DEBUG] Adding multiply (gating) for layer 37
+[DEBUG] Adding SwiGLU down projection for layer 37
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 37
+[DEBUG] Creating transformer layer 38
+[DEBUG] Adding ln_multiout1 for layer 38
+[DEBUG] Adding ln1 for layer 38
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 38
+[DEBUG] Adding multi_head_attention for layer 38
+[DEBUG] Adding add1 (residual after attention) for layer 38
+[DEBUG] Adding ln_multiout2 for layer 38
+[DEBUG] Adding ln2 for layer 38
+[DEBUG] Adding multi_out3 for layer 38
+[DEBUG] Adding SwiGLU gate projection for layer 38
+[DEBUG] Adding SwiGLU up projection for layer 38
+[DEBUG] Adding multiply (gating) for layer 38
+[DEBUG] Adding SwiGLU down projection for layer 38
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 38
+[DEBUG] Creating transformer layer 39
+[DEBUG] Adding ln_multiout1 for layer 39
+[DEBUG] Adding ln1 for layer 39
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 39
+[DEBUG] Adding multi_head_attention for layer 39
+[DEBUG] Adding add1 (residual after attention) for layer 39
+[DEBUG] Adding ln_multiout2 for layer 39
+[DEBUG] Adding ln2 for layer 39
+[DEBUG] Adding multi_out3 for layer 39
+[DEBUG] Adding SwiGLU gate projection for layer 39
+[DEBUG] Adding SwiGLU up projection for layer 39
+[DEBUG] Adding multiply (gating) for layer 39
+[DEBUG] Adding SwiGLU down projection for layer 39
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 39
+[DEBUG] Creating transformer layer 40
+[DEBUG] Adding ln_multiout1 for layer 40
+[DEBUG] Adding ln1 for layer 40
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 40
+[DEBUG] Adding multi_head_attention for layer 40
+[DEBUG] Adding add1 (residual after attention) for layer 40
+[DEBUG] Adding ln_multiout2 for layer 40
+[DEBUG] Adding ln2 for layer 40
+[DEBUG] Adding multi_out3 for layer 40
+[DEBUG] Adding SwiGLU gate projection for layer 40
+[DEBUG] Adding SwiGLU up projection for layer 40
+[DEBUG] Adding multiply (gating) for layer 40
+[DEBUG] Adding SwiGLU down projection for layer 40
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 40
+[DEBUG] Creating transformer layer 41
+[DEBUG] Adding ln_multiout1 for layer 41
+[DEBUG] Adding ln1 for layer 41
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 41
+[DEBUG] Adding multi_head_attention for layer 41
+[DEBUG] Adding add1 (residual after attention) for layer 41
+[DEBUG] Adding ln_multiout2 for layer 41
+[DEBUG] Adding ln2 for layer 41
+[DEBUG] Adding multi_out3 for layer 41
+[DEBUG] Adding SwiGLU gate projection for layer 41
+[DEBUG] Adding SwiGLU up projection for layer 41
+[DEBUG] Adding multiply (gating) for layer 41
+[DEBUG] Adding SwiGLU down projection for layer 41
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 41
+[DEBUG] Creating transformer layer 42
+[DEBUG] Adding ln_multiout1 for layer 42
+[DEBUG] Adding ln1 for layer 42
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 42
+[DEBUG] Adding multi_head_attention for layer 42
+[DEBUG] Adding add1 (residual after attention) for layer 42
+[DEBUG] Adding ln_multiout2 for layer 42
+[DEBUG] Adding ln2 for layer 42
+[DEBUG] Adding multi_out3 for layer 42
+[DEBUG] Adding SwiGLU gate projection for layer 42
+[DEBUG] Adding SwiGLU up projection for layer 42
+[DEBUG] Adding multiply (gating) for layer 42
+[DEBUG] Adding SwiGLU down projection for layer 42
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 42
+[DEBUG] Creating transformer layer 43
+[DEBUG] Adding ln_multiout1 for layer 43
+[DEBUG] Adding ln1 for layer 43
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 43
+[DEBUG] Adding multi_head_attention for layer 43
+[DEBUG] Adding add1 (residual after attention) for layer 43
+[DEBUG] Adding ln_multiout2 for layer 43
+[DEBUG] Adding ln2 for layer 43
+[DEBUG] Adding multi_out3 for layer 43
+[DEBUG] Adding SwiGLU gate projection for layer 43
+[DEBUG] Adding SwiGLU up projection for layer 43
+[DEBUG] Adding multiply (gating) for layer 43
+[DEBUG] Adding SwiGLU down projection for layer 43
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 43
+[DEBUG] Creating transformer layer 44
+[DEBUG] Adding ln_multiout1 for layer 44
+[DEBUG] Adding ln1 for layer 44
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 44
+[DEBUG] Adding multi_head_attention for layer 44
+[DEBUG] Adding add1 (residual after attention) for layer 44
+[DEBUG] Adding ln_multiout2 for layer 44
+[DEBUG] Adding ln2 for layer 44
+[DEBUG] Adding multi_out3 for layer 44
+[DEBUG] Adding SwiGLU gate projection for layer 44
+[DEBUG] Adding SwiGLU up projection for layer 44
+[DEBUG] Adding multiply (gating) for layer 44
+[DEBUG] Adding SwiGLU down projection for layer 44
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 44
+[DEBUG] Creating transformer layer 45
+[DEBUG] Adding ln_multiout1 for layer 45
+[DEBUG] Adding ln1 for layer 45
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 45
+[DEBUG] Adding multi_head_attention for layer 45
+[DEBUG] Adding add1 (residual after attention) for layer 45
+[DEBUG] Adding ln_multiout2 for layer 45
+[DEBUG] Adding ln2 for layer 45
+[DEBUG] Adding multi_out3 for layer 45
+[DEBUG] Adding SwiGLU gate projection for layer 45
+[DEBUG] Adding SwiGLU up projection for layer 45
+[DEBUG] Adding multiply (gating) for layer 45
+[DEBUG] Adding SwiGLU down projection for layer 45
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 45
+[DEBUG] Creating transformer layer 46
+[DEBUG] Adding ln_multiout1 for layer 46
+[DEBUG] Adding ln1 for layer 46
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 46
+[DEBUG] Adding multi_head_attention for layer 46
+[DEBUG] Adding add1 (residual after attention) for layer 46
+[DEBUG] Adding ln_multiout2 for layer 46
+[DEBUG] Adding ln2 for layer 46
+[DEBUG] Adding multi_out3 for layer 46
+[DEBUG] Adding SwiGLU gate projection for layer 46
+[DEBUG] Adding SwiGLU up projection for layer 46
+[DEBUG] Adding multiply (gating) for layer 46
+[DEBUG] Adding SwiGLU down projection for layer 46
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 46
+[DEBUG] Creating transformer layer 47
+[DEBUG] Adding ln_multiout1 for layer 47
+[DEBUG] Adding ln1 for layer 47
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 47
+[DEBUG] Adding multi_head_attention for layer 47
+[DEBUG] Adding add1 (residual after attention) for layer 47
+[DEBUG] Adding ln_multiout2 for layer 47
+[DEBUG] Adding ln2 for layer 47
+[DEBUG] Adding multi_out3 for layer 47
+[DEBUG] Adding SwiGLU gate projection for layer 47
+[DEBUG] Adding SwiGLU up projection for layer 47
+[DEBUG] Adding multiply (gating) for layer 47
+[DEBUG] Adding SwiGLU down projection for layer 47
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 47
+[DEBUG] Creating transformer layer 48
+[DEBUG] Adding ln_multiout1 for layer 48
+[DEBUG] Adding ln1 for layer 48
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 48
+[DEBUG] Adding multi_head_attention for layer 48
+[DEBUG] Adding add1 (residual after attention) for layer 48
+[DEBUG] Adding ln_multiout2 for layer 48
+[DEBUG] Adding ln2 for layer 48
+[DEBUG] Adding multi_out3 for layer 48
+[DEBUG] Adding SwiGLU gate projection for layer 48
+[DEBUG] Adding SwiGLU up projection for layer 48
+[DEBUG] Adding multiply (gating) for layer 48
+[DEBUG] Adding SwiGLU down projection for layer 48
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 48
+[DEBUG] Creating transformer layer 49
+[DEBUG] Adding ln_multiout1 for layer 49
+[DEBUG] Adding ln1 for layer 49
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 49
+[DEBUG] Adding multi_head_attention for layer 49
+[DEBUG] Adding add1 (residual after attention) for layer 49
+[DEBUG] Adding ln_multiout2 for layer 49
+[DEBUG] Adding ln2 for layer 49
+[DEBUG] Adding multi_out3 for layer 49
+[DEBUG] Adding SwiGLU gate projection for layer 49
+[DEBUG] Adding SwiGLU up projection for layer 49
+[DEBUG] Adding multiply (gating) for layer 49
+[DEBUG] Adding SwiGLU down projection for layer 49
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 49
+[DEBUG] Creating transformer layer 50
+[DEBUG] Adding ln_multiout1 for layer 50
+[DEBUG] Adding ln1 for layer 50
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 50
+[DEBUG] Adding multi_head_attention for layer 50
+[DEBUG] Adding add1 (residual after attention) for layer 50
+[DEBUG] Adding ln_multiout2 for layer 50
+[DEBUG] Adding ln2 for layer 50
+[DEBUG] Adding multi_out3 for layer 50
+[DEBUG] Adding SwiGLU gate projection for layer 50
+[DEBUG] Adding SwiGLU up projection for layer 50
+[DEBUG] Adding multiply (gating) for layer 50
+[DEBUG] Adding SwiGLU down projection for layer 50
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 50
+[DEBUG] Creating transformer layer 51
+[DEBUG] Adding ln_multiout1 for layer 51
+[DEBUG] Adding ln1 for layer 51
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 51
+[DEBUG] Adding multi_head_attention for layer 51
+[DEBUG] Adding add1 (residual after attention) for layer 51
+[DEBUG] Adding ln_multiout2 for layer 51
+[DEBUG] Adding ln2 for layer 51
+[DEBUG] Adding multi_out3 for layer 51
+[DEBUG] Adding SwiGLU gate projection for layer 51
+[DEBUG] Adding SwiGLU up projection for layer 51
+[DEBUG] Adding multiply (gating) for layer 51
+[DEBUG] Adding SwiGLU down projection for layer 51
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 51
+[DEBUG] Creating transformer layer 52
+[DEBUG] Adding ln_multiout1 for layer 52
+[DEBUG] Adding ln1 for layer 52
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 52
+[DEBUG] Adding multi_head_attention for layer 52
+[DEBUG] Adding add1 (residual after attention) for layer 52
+[DEBUG] Adding ln_multiout2 for layer 52
+[DEBUG] Adding ln2 for layer 52
+[DEBUG] Adding multi_out3 for layer 52
+[DEBUG] Adding SwiGLU gate projection for layer 52
+[DEBUG] Adding SwiGLU up projection for layer 52
+[DEBUG] Adding multiply (gating) for layer 52
+[DEBUG] Adding SwiGLU down projection for layer 52
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 52
+[DEBUG] Creating transformer layer 53
+[DEBUG] Adding ln_multiout1 for layer 53
+[DEBUG] Adding ln1 for layer 53
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 53
+[DEBUG] Adding multi_head_attention for layer 53
+[DEBUG] Adding add1 (residual after attention) for layer 53
+[DEBUG] Adding ln_multiout2 for layer 53
+[DEBUG] Adding ln2 for layer 53
+[DEBUG] Adding multi_out3 for layer 53
+[DEBUG] Adding SwiGLU gate projection for layer 53
+[DEBUG] Adding SwiGLU up projection for layer 53
+[DEBUG] Adding multiply (gating) for layer 53
+[DEBUG] Adding SwiGLU down projection for layer 53
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 53
+[DEBUG] Creating transformer layer 54
+[DEBUG] Adding ln_multiout1 for layer 54
+[DEBUG] Adding ln1 for layer 54
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 54
+[DEBUG] Adding multi_head_attention for layer 54
+[DEBUG] Adding add1 (residual after attention) for layer 54
+[DEBUG] Adding ln_multiout2 for layer 54
+[DEBUG] Adding ln2 for layer 54
+[DEBUG] Adding multi_out3 for layer 54
+[DEBUG] Adding SwiGLU gate projection for layer 54
+[DEBUG] Adding SwiGLU up projection for layer 54
+[DEBUG] Adding multiply (gating) for layer 54
+[DEBUG] Adding SwiGLU down projection for layer 54
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 54
+[DEBUG] Creating transformer layer 55
+[DEBUG] Adding ln_multiout1 for layer 55
+[DEBUG] Adding ln1 for layer 55
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 55
+[DEBUG] Adding multi_head_attention for layer 55
+[DEBUG] Adding add1 (residual after attention) for layer 55
+[DEBUG] Adding ln_multiout2 for layer 55
+[DEBUG] Adding ln2 for layer 55
+[DEBUG] Adding multi_out3 for layer 55
+[DEBUG] Adding SwiGLU gate projection for layer 55
+[DEBUG] Adding SwiGLU up projection for layer 55
+[DEBUG] Adding multiply (gating) for layer 55
+[DEBUG] Adding SwiGLU down projection for layer 55
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 55
+[DEBUG] Creating transformer layer 56
+[DEBUG] Adding ln_multiout1 for layer 56
+[DEBUG] Adding ln1 for layer 56
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 56
+[DEBUG] Adding multi_head_attention for layer 56
+[DEBUG] Adding add1 (residual after attention) for layer 56
+[DEBUG] Adding ln_multiout2 for layer 56
+[DEBUG] Adding ln2 for layer 56
+[DEBUG] Adding multi_out3 for layer 56
+[DEBUG] Adding SwiGLU gate projection for layer 56
+[DEBUG] Adding SwiGLU up projection for layer 56
+[DEBUG] Adding multiply (gating) for layer 56
+[DEBUG] Adding SwiGLU down projection for layer 56
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 56
+[DEBUG] Creating transformer layer 57
+[DEBUG] Adding ln_multiout1 for layer 57
+[DEBUG] Adding ln1 for layer 57
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 57
+[DEBUG] Adding multi_head_attention for layer 57
+[DEBUG] Adding add1 (residual after attention) for layer 57
+[DEBUG] Adding ln_multiout2 for layer 57
+[DEBUG] Adding ln2 for layer 57
+[DEBUG] Adding multi_out3 for layer 57
+[DEBUG] Adding SwiGLU gate projection for layer 57
+[DEBUG] Adding SwiGLU up projection for layer 57
+[DEBUG] Adding multiply (gating) for layer 57
+[DEBUG] Adding SwiGLU down projection for layer 57
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 57
+[DEBUG] Creating transformer layer 58
+[DEBUG] Adding ln_multiout1 for layer 58
+[DEBUG] Adding ln1 for layer 58
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 58
+[DEBUG] Adding multi_head_attention for layer 58
+[DEBUG] Adding add1 (residual after attention) for layer 58
+[DEBUG] Adding ln_multiout2 for layer 58
+[DEBUG] Adding ln2 for layer 58
+[DEBUG] Adding multi_out3 for layer 58
+[DEBUG] Adding SwiGLU gate projection for layer 58
+[DEBUG] Adding SwiGLU up projection for layer 58
+[DEBUG] Adding multiply (gating) for layer 58
+[DEBUG] Adding SwiGLU down projection for layer 58
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 58
+[DEBUG] Creating transformer layer 59
+[DEBUG] Adding ln_multiout1 for layer 59
+[DEBUG] Adding ln1 for layer 59
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 59
+[DEBUG] Adding multi_head_attention for layer 59
+[DEBUG] Adding add1 (residual after attention) for layer 59
+[DEBUG] Adding ln_multiout2 for layer 59
+[DEBUG] Adding ln2 for layer 59
+[DEBUG] Adding multi_out3 for layer 59
+[DEBUG] Adding SwiGLU gate projection for layer 59
+[DEBUG] Adding SwiGLU up projection for layer 59
+[DEBUG] Adding multiply (gating) for layer 59
+[DEBUG] Adding SwiGLU down projection for layer 59
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 59
+[DEBUG] Creating transformer layer 60
+[DEBUG] Adding ln_multiout1 for layer 60
+[DEBUG] Adding ln1 for layer 60
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 60
+[DEBUG] Adding multi_head_attention for layer 60
+[DEBUG] Adding add1 (residual after attention) for layer 60
+[DEBUG] Adding ln_multiout2 for layer 60
+[DEBUG] Adding ln2 for layer 60
+[DEBUG] Adding multi_out3 for layer 60
+[DEBUG] Adding SwiGLU gate projection for layer 60
+[DEBUG] Adding SwiGLU up projection for layer 60
+[DEBUG] Adding multiply (gating) for layer 60
+[DEBUG] Adding SwiGLU down projection for layer 60
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 60
+[DEBUG] Creating transformer layer 61
+[DEBUG] Adding ln_multiout1 for layer 61
+[DEBUG] Adding ln1 for layer 61
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 61
+[DEBUG] Adding multi_head_attention for layer 61
+[DEBUG] Adding add1 (residual after attention) for layer 61
+[DEBUG] Adding ln_multiout2 for layer 61
+[DEBUG] Adding ln2 for layer 61
+[DEBUG] Adding multi_out3 for layer 61
+[DEBUG] Adding SwiGLU gate projection for layer 61
+[DEBUG] Adding SwiGLU up projection for layer 61
+[DEBUG] Adding multiply (gating) for layer 61
+[DEBUG] Adding SwiGLU down projection for layer 61
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 61
+[DEBUG] Creating transformer layer 62
+[DEBUG] Adding ln_multiout1 for layer 62
+[DEBUG] Adding ln1 for layer 62
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 62
+[DEBUG] Adding multi_head_attention for layer 62
+[DEBUG] Adding add1 (residual after attention) for layer 62
+[DEBUG] Adding ln_multiout2 for layer 62
+[DEBUG] Adding ln2 for layer 62
+[DEBUG] Adding multi_out3 for layer 62
+[DEBUG] Adding SwiGLU gate projection for layer 62
+[DEBUG] Adding SwiGLU up projection for layer 62
+[DEBUG] Adding multiply (gating) for layer 62
+[DEBUG] Adding SwiGLU down projection for layer 62
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 62
+[DEBUG] Creating transformer layer 63
+[DEBUG] Adding ln_multiout1 for layer 63
+[DEBUG] Adding ln1 for layer 63
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 63
+[DEBUG] Adding multi_head_attention for layer 63
+[DEBUG] Adding add1 (residual after attention) for layer 63
+[DEBUG] Adding ln_multiout2 for layer 63
+[DEBUG] Adding ln2 for layer 63
+[DEBUG] Adding multi_out3 for layer 63
+[DEBUG] Adding SwiGLU gate projection for layer 63
+[DEBUG] Adding SwiGLU up projection for layer 63
+[DEBUG] Adding multiply (gating) for layer 63
+[DEBUG] Adding SwiGLU down projection for layer 63
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 63
+[DEBUG] Adding final layer normalization...
+[DEBUG] Final layer normalization added successfully
+[DEBUG] Skipping pooling2d layer for debugging...
+[DEBUG] Adding simple output projection...
+[DEBUG] Output projection added successfully
+
+[CHECKPOINT] Setting up gradient checkpointing for transformer blocks...
+[CHECKPOINT] Added checkpoint block for transformer layer 0 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 1 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 2 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 3 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 4 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 5 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 6 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 7 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 8 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 9 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 10 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 11 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 12 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 13 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 14 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 15 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 16 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 17 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 18 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 19 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 20 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 21 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 22 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 23 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 24 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 25 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 26 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 27 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 28 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 29 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 30 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 31 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 32 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 33 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 34 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 35 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 36 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 37 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 38 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 39 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 40 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 41 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 42 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 43 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 44 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 45 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 46 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 47 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 48 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 49 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 50 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 51 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 52 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 53 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 54 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 55 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 56 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 57 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 58 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 59 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 60 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 61 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 62 (13 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 63 (13 layers)
+[CHECKPOINT] Gradient checkpointing setup complete!
+[CHECKPOINT] Total checkpoint blocks: 64
+[CHECKPOINT] Expected memory savings: ~98%
+[DEBUG] Model creation completed successfully!
+[DEBUG] Model created successfully!
+[TIMING] Model Creation took: 99 ms
+[MEMORY] After Model Creation - Peak: 4276 MB, Current: 4276 MB, RSS: 16 MB
+[DEBUG] Setting model properties...
+[DEBUG] Model properties set successfully
+[DEBUG] Creating optimizer...
+[DEBUG] Optimizer set successfully
+[TIMING] Model Configuration took: 0 ms
+[DEBUG] Compiling model...
+[DEBUG] Model compiled with status: 0
+[TIMING] Model Compilation took: 69 ms
+[MEMORY] After Compilation - Peak: 4276 MB, Current: 4276 MB, RSS: 16 MB
+[DEBUG] Initializing model...
+[DEBUG] Model initialized with status: 0
+[TIMING] Model Initialization took: 307 ms
+[MEMORY] After Initialization - Peak: 4482 MB, Current: 4482 MB, RSS: 221 MB
+[DEBUG] Creating fixed data generator...
+[DEBUG] Data shapes - Input: [4, 1, 64, 1]
+[DEBUG] Data shapes - Label: [4, 1, 64, 1]
+[DEBUG] Using FixedDataGenerator for reproducibility...
+[DEBUG] FixedDataGenerator created with 32 batches
+[DEBUG] Input sample [0..2]: 0.5, 0.549917, 0.599335
+[DEBUG] Label sample [0..2]: 0.549917, 0.599335, 0.64776
+[DEBUG] Data generator created successfully
+[DEBUG] Setting dataset...
+[DEBUG] Dataset set successfully
+[TIMING] Data Setup took: 0 ms
+[DEBUG] Starting training...
+[INFO] Iteration stats are printed from neuralnet.cpp (once per batch)
+#1/3 [          0           ]  ( Training Loss: 0.102265 )
+ [ITER] #1 - Total: 6361003 μs, Forward: 787109 μs, Backward: 5573893 μs, Memory: 333 MB
+#1/3 [          1           ]  ( Training Loss: 54.5504 )
+ [ITER] #2 - Total: 6023740 μs, Forward: 669701 μs, Backward: 5354038 μs, Memory: 334 MB
+#1/3 [          2           ]  ( Training Loss: 8.74632 )
+ [ITER] #3 - Total: 6204575 μs, Forward: 893304 μs, Backward: 5311271 μs, Memory: 334 MB
+#1/3 [          3           ]  ( Training Loss: 0.361742 )
+ [ITER] #4 - Total: 6164158 μs, Forward: 683671 μs, Backward: 5480487 μs, Memory: 334 MB
+#1/3 [          4           ]  ( Training Loss: 4.48328 )
+ [ITER] #5 - Total: 6152311 μs, Forward: 749071 μs, Backward: 5403239 μs, Memory: 334 MB
+#1/3 [          5           ]  ( Training Loss: 3.74749 )
+ [ITER] #6 - Total: 6332938 μs, Forward: 717216 μs, Backward: 5615721 μs, Memory: 334 MB
+#1/3 [          6           ]  ( Training Loss: 1.36911 )
+ [ITER] #7 - Total: 6151652 μs, Forward: 683988 μs, Backward: 5467664 μs, Memory: 334 MB
+#1/3 [          7           ]  ( Training Loss: 0.0960218 )
+ [ITER] #8 - Total: 6343878 μs, Forward: 765359 μs, Backward: 5578518 μs, Memory: 334 MB
+#1/3 - Training Loss: 9.18208
+#2/3 [          0           ]  ( Training Loss: 0.170808 )
+ [ITER] #9 - Total: 6166997 μs, Forward: 831288 μs, Backward: 5335708 μs, Memory: 334 MB
+#2/3 [          1           ]  ( Training Loss: 0.775633 )
+ [ITER] #10 - Total: 6402849 μs, Forward: 690313 μs, Backward: 5712535 μs, Memory: 334 MB
+#2/3 [          2           ]  ( Training Loss: 1.143 )
+ [ITER] #11 - Total: 6181651 μs, Forward: 732799 μs, Backward: 5448852 μs, Memory: 334 MB
+#2/3 [          3           ]  ( Training Loss: 1.06595 )
+ [ITER] #12 - Total: 6145681 μs, Forward: 681639 μs, Backward: 5464041 μs, Memory: 334 MB
+#2/3 [          4           ]  ( Training Loss: 0.715689 )
+ [ITER] #13 - Total: 6343663 μs, Forward: 871483 μs, Backward: 5472179 μs, Memory: 334 MB
+#2/3 [          5           ]  ( Training Loss: 0.333789 )
+ [ITER] #14 - Total: 7578040 μs, Forward: 763288 μs, Backward: 6814751 μs, Memory: 334 MB
+#2/3 [          6           ]  ( Training Loss: 0.0793688 )
+ [ITER] #15 - Total: 6384309 μs, Forward: 896155 μs, Backward: 5488153 μs, Memory: 334 MB
+#2/3 [          7           ]  ( Training Loss: 3.28643e-06 )
+ [ITER] #16 - Total: 6176330 μs, Forward: 727125 μs, Backward: 5449204 μs, Memory: 334 MB
+#2/3 - Training Loss: 0.535529
+#3/3 [          0           ]  ( Training Loss: 0.0597828 )
+ [ITER] #17 - Total: 6228950 μs, Forward: 769819 μs, Backward: 5459130 μs, Memory: 334 MB
+#3/3 [          1           ]  ( Training Loss: 0.183434 )
+ [ITER] #18 - Total: 6560835 μs, Forward: 852533 μs, Backward: 5708301 μs, Memory: 334 MB
+#3/3 [          2           ]  ( Training Loss: 0.296328 )
+ [ITER] #19 - Total: 6309736 μs, Forward: 652159 μs, Backward: 5657575 μs, Memory: 334 MB
+#3/3 [          3           ]  ( Training Loss: 0.350558 )
+ [ITER] #20 - Total: 6522105 μs, Forward: 881859 μs, Backward: 5640245 μs, Memory: 334 MB
+#3/3 [          4           ]  ( Training Loss: 0.33343 )
+ [ITER] #21 - Total: 6228209 μs, Forward: 689210 μs, Backward: 5538998 μs, Memory: 334 MB
+#3/3 [          5           ]  ( Training Loss: 0.261197 )
+ [ITER] #22 - Total: 6446542 μs, Forward: 823325 μs, Backward: 5623216 μs, Memory: 334 MB
+#3/3 [          6           ]  ( Training Loss: 0.165138 )
+ [ITER] #23 - Total: 6224599 μs, Forward: 743625 μs, Backward: 5480973 μs, Memory: 334 MB
+#3/3 [          7           ]  ( Training Loss: 0.0771489 )
+ [ITER] #24 - Total: 6012381 μs, Forward: 686584 μs, Backward: 5325796 μs, Memory: 334 MB
+#3/3 - Training Loss: 0.215877
+[DEBUG] Training completed successfully
+[TIMING] Training took: 151732 ms
+[MEMORY] After Training - Peak: 4857 MB, Current: 4780 MB, RSS: 321 MB
+
+=== PERFORMANCE SUMMARY ===
+Model Configuration:
+  - Sequence Length: 64
+  - Vocab Size: 1000
+  - Model Dimension: 128
+  - Number of Heads: 4
+  - Number of Layers: 64
+  - FFN Dimension: 512
+  - Batch Size: 4
+  - Epochs: 3
+
+Approximate Model Parameters (SwiGLU FFN):
+  - Embedding: 8192
+  - Attention: 4194304
+  - SwiGLU FFN: 12582912 (3 projections: gate+up+down)
+  - Total: 16785408 (~64 MB)
+
+=== STDERR ===

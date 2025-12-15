@@ -1,0 +1,137 @@
+Command: bash -c ulimit -v 8388608 && nntrainer/build/Applications/GC_Test/jni/gelu_gc_test --seq_len 128 --model_dim 256 --num_heads 4 --ffn_dim 1024 --epochs 1 --learning_rate 0.0001 --num_layers 4 --batch_size 4
+Timestamp: 20251215_120403
+Memory Limit: 8192 MB
+Return code: 0
+
+=== STDOUT ===
+[CONFIG] Parsed arguments:
+  seq_len=128, vocab_size=1000, model_dim=256
+  num_heads=4, num_layers=4, ffn_dim=1024
+  batch_size=4, epochs=1, learning_rate=0.0001
+[DEBUG] Starting main function...
+[MEMORY] Program Start - Peak: 4274 MB, Current: 4274 MB, RSS: 12 MB
+[DEBUG] Creating model...
+[DEBUG] Starting model creation...
+[DEBUG] Model created successfully
+[DEBUG] Adding input layer...
+[DEBUG] Input layer added successfully
+[DEBUG] Adding simple embedding layer...
+[DEBUG] Embedding layer (FC) added successfully
+[DEBUG] Creating transformer layer 0
+[DEBUG] Adding ln_multiout1 for layer 0
+[DEBUG] Adding ln1 for layer 0
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 0
+[DEBUG] Adding multi_head_attention for layer 0
+[DEBUG] Adding add1 (residual after attention) for layer 0
+[DEBUG] Adding ln_multiout2 for layer 0
+[DEBUG] Adding ln2 for layer 0
+[DEBUG] Adding multi_out3 for layer 0
+[DEBUG] Adding FFN fc1 for layer 0
+[DEBUG] Adding FFN fc2 for layer 0
+[DEBUG] Adding add2 (residual after FFN) for layer 0
+[DEBUG] Creating transformer layer 1
+[DEBUG] Adding ln_multiout1 for layer 1
+[DEBUG] Adding ln1 for layer 1
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 1
+[DEBUG] Adding multi_head_attention for layer 1
+[DEBUG] Adding add1 (residual after attention) for layer 1
+[DEBUG] Adding ln_multiout2 for layer 1
+[DEBUG] Adding ln2 for layer 1
+[DEBUG] Adding multi_out3 for layer 1
+[DEBUG] Adding FFN fc1 for layer 1
+[DEBUG] Adding FFN fc2 for layer 1
+[DEBUG] Adding add2 (residual after FFN) for layer 1
+[DEBUG] Creating transformer layer 2
+[DEBUG] Adding ln_multiout1 for layer 2
+[DEBUG] Adding ln1 for layer 2
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 2
+[DEBUG] Adding multi_head_attention for layer 2
+[DEBUG] Adding add1 (residual after attention) for layer 2
+[DEBUG] Adding ln_multiout2 for layer 2
+[DEBUG] Adding ln2 for layer 2
+[DEBUG] Adding multi_out3 for layer 2
+[DEBUG] Adding FFN fc1 for layer 2
+[DEBUG] Adding FFN fc2 for layer 2
+[DEBUG] Adding add2 (residual after FFN) for layer 2
+[DEBUG] Creating transformer layer 3
+[DEBUG] Adding ln_multiout1 for layer 3
+[DEBUG] Adding ln1 for layer 3
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 3
+[DEBUG] Adding multi_head_attention for layer 3
+[DEBUG] Adding add1 (residual after attention) for layer 3
+[DEBUG] Adding ln_multiout2 for layer 3
+[DEBUG] Adding ln2 for layer 3
+[DEBUG] Adding multi_out3 for layer 3
+[DEBUG] Adding FFN fc1 for layer 3
+[DEBUG] Adding FFN fc2 for layer 3
+[DEBUG] Adding add2 (residual after FFN) for layer 3
+[DEBUG] Adding final layer normalization...
+[DEBUG] Final layer normalization added successfully
+[DEBUG] Skipping pooling2d layer for debugging...
+[DEBUG] Adding simple output projection...
+[DEBUG] Output projection added successfully
+
+[INFO] Gradient checkpointing is DISABLED
+[DEBUG] Model creation completed successfully!
+[DEBUG] Model created successfully!
+[TIMING] Model Creation took: 9 ms
+[MEMORY] After Model Creation - Peak: 4275 MB, Current: 4275 MB, RSS: 15 MB
+[DEBUG] Setting model properties...
+[DEBUG] Model properties set successfully
+[DEBUG] Creating optimizer...
+[DEBUG] Optimizer set successfully
+[TIMING] Model Configuration took: 0 ms
+[DEBUG] Compiling model...
+[DEBUG] Model compiled with status: 0
+[TIMING] Model Compilation took: 3 ms
+[MEMORY] After Compilation - Peak: 4275 MB, Current: 4275 MB, RSS: 15 MB
+[DEBUG] Initializing model...
+[DEBUG] Model initialized with status: 0
+[TIMING] Model Initialization took: 84 ms
+[MEMORY] After Initialization - Peak: 4312 MB, Current: 4312 MB, RSS: 51 MB
+[DEBUG] Creating data generator...
+[DEBUG] Data generator created successfully
+[DEBUG] Setting dataset...
+[DEBUG] Dataset set successfully
+[TIMING] Data Setup took: 0 ms
+[DEBUG] Starting training...
+[INFO] Iteration stats are printed from neuralnet.cpp (once per batch)
+#1/1 [          0           ]  ( Training Loss: 0.0391204 )
+ [ITER] #1 - Total: 1498360 μs, Forward: 215610 μs, Backward: 1282750 μs, Memory: 124 MB
+#1/1 [          1           ]  ( Training Loss: 29.3242 )
+ [ITER] #2 - Total: 1411909 μs, Forward: 151906 μs, Backward: 1260002 μs, Memory: 126 MB
+#1/1 [          2           ]  ( Training Loss: 3.52598 )
+ [ITER] #3 - Total: 1451175 μs, Forward: 159147 μs, Backward: 1292027 μs, Memory: 126 MB
+#1/1 [          3           ]  ( Training Loss: 2.38976 )
+ [ITER] #4 - Total: 1419823 μs, Forward: 155228 μs, Backward: 1264594 μs, Memory: 126 MB
+#1/1 [          4           ]  ( Training Loss: 7.95759 )
+ [ITER] #5 - Total: 1429910 μs, Forward: 156938 μs, Backward: 1272972 μs, Memory: 126 MB
+#1/1 [          5           ]  ( Training Loss: 6.73097 )
+ [ITER] #6 - Total: 1432532 μs, Forward: 154617 μs, Backward: 1277914 μs, Memory: 126 MB
+#1/1 [          6           ]  ( Training Loss: 3.26044 )
+ [ITER] #7 - Total: 1469338 μs, Forward: 175377 μs, Backward: 1293960 μs, Memory: 126 MB
+#1/1 [          7           ]  ( Training Loss: 0.775852 )
+ [ITER] #8 - Total: 1437784 μs, Forward: 158215 μs, Backward: 1279568 μs, Memory: 126 MB
+#1/1 - Training Loss: 6.75049
+[DEBUG] Training completed successfully
+[TIMING] Training took: 11593 ms
+[MEMORY] After Training - Peak: 4651 MB, Current: 4513 MB, RSS: 56 MB
+
+=== PERFORMANCE SUMMARY ===
+Model Configuration:
+  - Sequence Length: 128
+  - Vocab Size: 1000
+  - Model Dimension: 256
+  - Number of Heads: 4
+  - Number of Layers: 4
+  - FFN Dimension: 1024
+  - Batch Size: 4
+  - Epochs: 1
+
+Approximate Model Parameters (GELU FFN):
+  - Embedding: 32768
+  - Attention: 1048576
+  - GELU FFN: 2097152 (2 projections: fc1+fc2)
+  - Total: 3178496 (~12 MB)
+
+=== STDERR ===

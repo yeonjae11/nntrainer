@@ -1,0 +1,421 @@
+[INFO] Results will be saved to: memory_limit_results
+
+
+################################################################################
+# Running with 8192 MB (8.0 GB) memory limit
+# Will test all model sizes and visualize with 1/2/4/8GB reference lines
+################################################################################
+
+================================================================================
+Finding max model for GELU (normal)
+Memory limit: 8192 MB (8.0 GB)
+================================================================================
+
+[1/12] Testing 10M: model_dim=256, num_layers=4
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 256, 'num_heads': 4, 'ffn_dim': 1024, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 4, 'batch_size': 4}
+  [SUCCESS] Peak memory: 126 MB, Loss: 6.750490
+  ✓ SUCCESS - Can train 10M model
+
+[2/12] Testing 20M: model_dim=256, num_layers=8
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 256, 'num_heads': 4, 'ffn_dim': 1024, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 8, 'batch_size': 4}
+  [SUCCESS] Peak memory: 227 MB, Loss: 8.024670
+  ✓ SUCCESS - Can train 20M model
+
+[3/12] Testing 60M: model_dim=384, num_layers=12
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 384, 'num_heads': 6, 'ffn_dim': 1536, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 565 MB, Loss: 24.723100
+  ✓ SUCCESS - Can train 60M model
+
+[4/12] Testing 120M: model_dim=512, num_layers=12
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 512, 'num_heads': 8, 'ffn_dim': 2048, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 852 MB, Loss: 38.309200
+  ✓ SUCCESS - Can train 120M model
+
+[5/12] Testing 220M: model_dim=768, num_layers=12
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 768, 'num_heads': 12, 'ffn_dim': 3072, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 1606 MB, Loss: 71.223000
+  ✓ SUCCESS - Can train 220M model
+
+[6/12] Testing 360M: model_dim=768, num_layers=20
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 768, 'num_heads': 12, 'ffn_dim': 3072, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [SUCCESS] Peak memory: 2640 MB, Loss: 66.214600
+  ✓ SUCCESS - Can train 360M model
+
+[7/12] Testing 480M: model_dim=1024, num_layers=16
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 16, 'batch_size': 4}
+  [SUCCESS] Peak memory: 3408 MB, Loss: 72.711300
+  ✓ SUCCESS - Can train 480M model
+
+[8/12] Testing 600M: model_dim=1024, num_layers=20
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[9/12] Testing 720M: model_dim=1024, num_layers=24
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 24, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[10/12] Testing 900M: model_dim=1280, num_layers=20
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1280, 'num_heads': 16, 'ffn_dim': 5120, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[11/12] Testing 1.2B: model_dim=1536, num_layers=20
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1536, 'num_heads': 16, 'ffn_dim': 6144, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[12/12] Testing 1.5B: model_dim=1536, num_layers=24
+
+Running GELU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1536, 'num_heads': 16, 'ffn_dim': 6144, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 24, 'batch_size': 4}
+  [FAILED] Return code 255
+
+================================================================================
+Maximum trainable model: 480M
+  model_dim=1024, num_layers=16
+================================================================================
+
+================================================================================
+Finding max model for GELU (checkpoint)
+Memory limit: 8192 MB (8.0 GB)
+================================================================================
+
+[1/12] Testing 10M: model_dim=256, num_layers=4
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 256, 'num_heads': 4, 'ffn_dim': 1024, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 4, 'batch_size': 4}
+  [SUCCESS] Peak memory: 101 MB, Loss: 6.750490
+  ✓ SUCCESS - Can train 10M model
+
+[2/12] Testing 20M: model_dim=256, num_layers=8
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 256, 'num_heads': 4, 'ffn_dim': 1024, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 8, 'batch_size': 4}
+  [SUCCESS] Peak memory: 163 MB, Loss: 8.024670
+  ✓ SUCCESS - Can train 20M model
+
+[3/12] Testing 60M: model_dim=384, num_layers=12
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 384, 'num_heads': 6, 'ffn_dim': 1536, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 412 MB, Loss: 24.723100
+  ✓ SUCCESS - Can train 60M model
+
+[4/12] Testing 120M: model_dim=512, num_layers=12
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 512, 'num_heads': 8, 'ffn_dim': 2048, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 651 MB, Loss: 38.309200
+  ✓ SUCCESS - Can train 120M model
+
+[5/12] Testing 220M: model_dim=768, num_layers=12
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 768, 'num_heads': 12, 'ffn_dim': 3072, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 1300 MB, Loss: 71.223000
+  ✓ SUCCESS - Can train 220M model
+
+[6/12] Testing 360M: model_dim=768, num_layers=20
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 768, 'num_heads': 12, 'ffn_dim': 3072, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [SUCCESS] Peak memory: 2109 MB, Loss: 66.214600
+  ✓ SUCCESS - Can train 360M model
+
+[7/12] Testing 480M: model_dim=1024, num_layers=16
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 16, 'batch_size': 4}
+  [SUCCESS] Peak memory: 2850 MB, Loss: 72.711300
+  ✓ SUCCESS - Can train 480M model
+
+[8/12] Testing 600M: model_dim=1024, num_layers=20
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [SUCCESS] Peak memory: 3536 MB, Loss: 83.712200
+  ✓ SUCCESS - Can train 600M model
+
+[9/12] Testing 720M: model_dim=1024, num_layers=24
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 24, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[10/12] Testing 900M: model_dim=1280, num_layers=20
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1280, 'num_heads': 16, 'ffn_dim': 5120, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[11/12] Testing 1.2B: model_dim=1536, num_layers=20
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1536, 'num_heads': 16, 'ffn_dim': 6144, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[12/12] Testing 1.5B: model_dim=1536, num_layers=24
+
+Running GELU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1536, 'num_heads': 16, 'ffn_dim': 6144, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 24, 'batch_size': 4}
+  [FAILED] Return code 255
+
+================================================================================
+Maximum trainable model: 600M
+  model_dim=1024, num_layers=20
+================================================================================
+
+================================================================================
+Finding max model for SwiGLU (normal)
+Memory limit: 8192 MB (8.0 GB)
+================================================================================
+
+[1/12] Testing 10M: model_dim=256, num_layers=4
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 256, 'num_heads': 4, 'ffn_dim': 1024, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 4, 'batch_size': 4}
+  [SUCCESS] Peak memory: 153 MB, Loss: 7.137510
+  ✓ SUCCESS - Can train 10M model
+
+[2/12] Testing 20M: model_dim=256, num_layers=8
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 256, 'num_heads': 4, 'ffn_dim': 1024, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 8, 'batch_size': 4}
+  [SUCCESS] Peak memory: 282 MB, Loss: 7.403990
+  ✓ SUCCESS - Can train 20M model
+
+[3/12] Testing 60M: model_dim=384, num_layers=12
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 384, 'num_heads': 6, 'ffn_dim': 1536, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 716 MB, Loss: 20.211200
+  ✓ SUCCESS - Can train 60M model
+
+[4/12] Testing 120M: model_dim=512, num_layers=12
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 512, 'num_heads': 8, 'ffn_dim': 2048, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 1089 MB, Loss: 31.354000
+  ✓ SUCCESS - Can train 120M model
+
+[5/12] Testing 220M: model_dim=768, num_layers=12
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 768, 'num_heads': 12, 'ffn_dim': 3072, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 2070 MB, Loss: 52.129100
+  ✓ SUCCESS - Can train 220M model
+
+[6/12] Testing 360M: model_dim=768, num_layers=20
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 768, 'num_heads': 12, 'ffn_dim': 3072, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [SUCCESS] Peak memory: 3417 MB, Loss: 54.730700
+  ✓ SUCCESS - Can train 360M model
+
+[7/12] Testing 480M: model_dim=1024, num_layers=16
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 16, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[8/12] Testing 600M: model_dim=1024, num_layers=20
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[9/12] Testing 720M: model_dim=1024, num_layers=24
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 24, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[10/12] Testing 900M: model_dim=1280, num_layers=20
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1280, 'num_heads': 16, 'ffn_dim': 5120, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[11/12] Testing 1.2B: model_dim=1536, num_layers=20
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1536, 'num_heads': 16, 'ffn_dim': 6144, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[12/12] Testing 1.5B: model_dim=1536, num_layers=24
+
+Running SwiGLU (normal)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1536, 'num_heads': 16, 'ffn_dim': 6144, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 24, 'batch_size': 4}
+  [FAILED] Return code 255
+
+================================================================================
+Maximum trainable model: 360M
+  model_dim=768, num_layers=20
+================================================================================
+
+================================================================================
+Finding max model for SwiGLU (checkpoint)
+Memory limit: 8192 MB (8.0 GB)
+================================================================================
+
+[1/12] Testing 10M: model_dim=256, num_layers=4
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 256, 'num_heads': 4, 'ffn_dim': 1024, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 4, 'batch_size': 4}
+  [SUCCESS] Peak memory: 115 MB, Loss: 7.137510
+  ✓ SUCCESS - Can train 10M model
+
+[2/12] Testing 20M: model_dim=256, num_layers=8
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 256, 'num_heads': 4, 'ffn_dim': 1024, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 8, 'batch_size': 4}
+  [SUCCESS] Peak memory: 190 MB, Loss: 7.403990
+  ✓ SUCCESS - Can train 20M model
+
+[3/12] Testing 60M: model_dim=384, num_layers=12
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 384, 'num_heads': 6, 'ffn_dim': 1536, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 496 MB, Loss: 20.211200
+  ✓ SUCCESS - Can train 60M model
+
+[4/12] Testing 120M: model_dim=512, num_layers=12
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 512, 'num_heads': 8, 'ffn_dim': 2048, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 802 MB, Loss: 31.354000
+  ✓ SUCCESS - Can train 120M model
+
+[5/12] Testing 220M: model_dim=768, num_layers=12
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 768, 'num_heads': 12, 'ffn_dim': 3072, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 12, 'batch_size': 4}
+  [SUCCESS] Peak memory: 1631 MB, Loss: 52.129100
+  ✓ SUCCESS - Can train 220M model
+
+[6/12] Testing 360M: model_dim=768, num_layers=20
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 768, 'num_heads': 12, 'ffn_dim': 3072, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [SUCCESS] Peak memory: 2653 MB, Loss: 54.730700
+  ✓ SUCCESS - Can train 360M model
+
+[7/12] Testing 480M: model_dim=1024, num_layers=16
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 16, 'batch_size': 4}
+  [SUCCESS] Peak memory: 3640 MB, Loss: 62.947400
+  ✓ SUCCESS - Can train 480M model
+
+[8/12] Testing 600M: model_dim=1024, num_layers=20
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[9/12] Testing 720M: model_dim=1024, num_layers=24
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1024, 'num_heads': 16, 'ffn_dim': 4096, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 24, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[10/12] Testing 900M: model_dim=1280, num_layers=20
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1280, 'num_heads': 16, 'ffn_dim': 5120, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[11/12] Testing 1.2B: model_dim=1536, num_layers=20
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1536, 'num_heads': 16, 'ffn_dim': 6144, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 20, 'batch_size': 4}
+  [FAILED] Return code 255
+
+[12/12] Testing 1.5B: model_dim=1536, num_layers=24
+
+Running SwiGLU (checkpoint)
+  Memory limit: 8192 MB (8.0 GB)
+  Config: {'seq_len': 128, 'model_dim': 1536, 'num_heads': 16, 'ffn_dim': 6144, 'epochs': 1, 'learning_rate': 0.0001, 'num_layers': 24, 'batch_size': 4}
+  [FAILED] Return code 255
+
+================================================================================
+Maximum trainable model: 480M
+  model_dim=1024, num_layers=16
+================================================================================
+
+[SAVED] Full results CSV: memory_limit_results/csv/memory_limit_results.csv
+[SAVED] Summary CSV: memory_limit_results/csv/memory_limit_summary.csv
+[SAVED] Plot: memory_limit_results/plots/memory_scaling_analysis.png
+[SAVED] Plot: memory_limit_results/plots/memory_limit_summary.png
+
+================================================================================
+Memory limit benchmark completed!
+Results saved in: memory_limit_results
+================================================================================

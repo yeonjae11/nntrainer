@@ -1,0 +1,185 @@
+Command: nntrainer/build/Applications/GC_Test/jni/swiglu_gc_test --seq_len 64 --model_dim 2048 --num_heads 16 --ffn_dim 8192 --epochs 3 --learning_rate 0.0001 --num_layers 4 --batch_size 4
+Timestamp: 20251215_112939
+Return code: 0
+
+=== STDOUT ===
+[CONFIG] Parsed arguments:
+  seq_len=64, vocab_size=1000, model_dim=2048
+  num_heads=16, num_layers=4, ffn_dim=8192
+  batch_size=4, epochs=3, learning_rate=0.0001
+[DEBUG] Starting main function...
+[MEMORY] Program Start - Peak: 4274 MB, Current: 4274 MB, RSS: 12 MB
+[DEBUG] Creating model...
+[DEBUG] Starting model creation...
+[DEBUG] Model created successfully
+[DEBUG] Adding input layer...
+[DEBUG] Input layer added successfully
+[DEBUG] Adding simple embedding layer...
+[DEBUG] Embedding layer (FC) added successfully
+[DEBUG] Creating transformer layer 0
+[DEBUG] Adding ln_multiout1 for layer 0
+[DEBUG] Adding ln1 for layer 0
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 0
+[DEBUG] Adding multi_head_attention for layer 0
+[DEBUG] Adding add1 (residual after attention) for layer 0
+[DEBUG] Adding ln_multiout2 for layer 0
+[DEBUG] Adding ln2 for layer 0
+[DEBUG] Adding multi_out3 for layer 0
+[DEBUG] Adding SwiGLU gate projection for layer 0
+[DEBUG] Adding SwiGLU up projection for layer 0
+[DEBUG] Adding multiply (gating) for layer 0
+[DEBUG] Adding SwiGLU down projection for layer 0
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 0
+[DEBUG] Creating transformer layer 1
+[DEBUG] Adding ln_multiout1 for layer 1
+[DEBUG] Adding ln1 for layer 1
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 1
+[DEBUG] Adding multi_head_attention for layer 1
+[DEBUG] Adding add1 (residual after attention) for layer 1
+[DEBUG] Adding ln_multiout2 for layer 1
+[DEBUG] Adding ln2 for layer 1
+[DEBUG] Adding multi_out3 for layer 1
+[DEBUG] Adding SwiGLU gate projection for layer 1
+[DEBUG] Adding SwiGLU up projection for layer 1
+[DEBUG] Adding multiply (gating) for layer 1
+[DEBUG] Adding SwiGLU down projection for layer 1
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 1
+[DEBUG] Creating transformer layer 2
+[DEBUG] Adding ln_multiout1 for layer 2
+[DEBUG] Adding ln1 for layer 2
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 2
+[DEBUG] Adding multi_head_attention for layer 2
+[DEBUG] Adding add1 (residual after attention) for layer 2
+[DEBUG] Adding ln_multiout2 for layer 2
+[DEBUG] Adding ln2 for layer 2
+[DEBUG] Adding multi_out3 for layer 2
+[DEBUG] Adding SwiGLU gate projection for layer 2
+[DEBUG] Adding SwiGLU up projection for layer 2
+[DEBUG] Adding multiply (gating) for layer 2
+[DEBUG] Adding SwiGLU down projection for layer 2
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 2
+[DEBUG] Creating transformer layer 3
+[DEBUG] Adding ln_multiout1 for layer 3
+[DEBUG] Adding ln1 for layer 3
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 3
+[DEBUG] Adding multi_head_attention for layer 3
+[DEBUG] Adding add1 (residual after attention) for layer 3
+[DEBUG] Adding ln_multiout2 for layer 3
+[DEBUG] Adding ln2 for layer 3
+[DEBUG] Adding multi_out3 for layer 3
+[DEBUG] Adding SwiGLU gate projection for layer 3
+[DEBUG] Adding SwiGLU up projection for layer 3
+[DEBUG] Adding multiply (gating) for layer 3
+[DEBUG] Adding SwiGLU down projection for layer 3
+[DEBUG] Adding add2 (residual after SwiGLU FFN) for layer 3
+[DEBUG] Adding final layer normalization...
+[DEBUG] Final layer normalization added successfully
+[DEBUG] Skipping pooling2d layer for debugging...
+[DEBUG] Adding simple output projection...
+[DEBUG] Output projection added successfully
+
+[INFO] Gradient checkpointing is DISABLED
+[DEBUG] Model creation completed successfully!
+[DEBUG] Model created successfully!
+[TIMING] Model Creation took: 15 ms
+[MEMORY] After Model Creation - Peak: 4275 MB, Current: 4275 MB, RSS: 15 MB
+[DEBUG] Setting model properties...
+[DEBUG] Model properties set successfully
+[DEBUG] Creating optimizer...
+[DEBUG] Optimizer set successfully
+[TIMING] Model Configuration took: 0 ms
+[DEBUG] Compiling model...
+[DEBUG] Model compiled with status: 0
+[TIMING] Model Compilation took: 7 ms
+[MEMORY] After Compilation - Peak: 4275 MB, Current: 4275 MB, RSS: 15 MB
+[DEBUG] Initializing model...
+[DEBUG] Model initialized with status: 0
+[TIMING] Model Initialization took: 3909 ms
+[MEMORY] After Initialization - Peak: 7349 MB, Current: 7349 MB, RSS: 3089 MB
+[DEBUG] Creating fixed data generator...
+[DEBUG] Data shapes - Input: [4, 1, 64, 1]
+[DEBUG] Data shapes - Label: [4, 1, 64, 1]
+[DEBUG] Using FixedDataGenerator for reproducibility...
+[DEBUG] FixedDataGenerator created with 32 batches
+[DEBUG] Input sample [0..2]: 0.5, 0.549917, 0.599335
+[DEBUG] Label sample [0..2]: 0.549917, 0.599335, 0.64776
+[DEBUG] Data generator created successfully
+[DEBUG] Setting dataset...
+[DEBUG] Dataset set successfully
+[TIMING] Data Setup took: 0 ms
+[DEBUG] Starting training...
+[INFO] Iteration stats are printed from neuralnet.cpp (once per batch)
+#1/3 [          0           ]  ( Training Loss: 4.24441 )
+ [ITER] #1 - Total: 10272947 μs, Forward: 883550 μs, Backward: 9389396 μs, Memory: 3506 MB
+#1/3 [          1           ]  ( Training Loss: 992.927 )
+ [ITER] #2 - Total: 9593977 μs, Forward: 763162 μs, Backward: 8830814 μs, Memory: 3508 MB
+#1/3 [          2           ]  ( Training Loss: 2.59624 )
+ [ITER] #3 - Total: 12869511 μs, Forward: 805277 μs, Backward: 12064234 μs, Memory: 3508 MB
+#1/3 [          3           ]  ( Training Loss: 60.8626 )
+ [ITER] #4 - Total: 9630989 μs, Forward: 777979 μs, Backward: 8853010 μs, Memory: 3508 MB
+#1/3 [          4           ]  ( Training Loss: 10.7908 )
+ [ITER] #5 - Total: 9903825 μs, Forward: 886768 μs, Backward: 9017056 μs, Memory: 3508 MB
+#1/3 [          5           ]  ( Training Loss: 4.85733 )
+ [ITER] #6 - Total: 9764556 μs, Forward: 852625 μs, Backward: 8911930 μs, Memory: 3508 MB
+#1/3 [          6           ]  ( Training Loss: 20.6077 )
+ [ITER] #7 - Total: 9666167 μs, Forward: 769564 μs, Backward: 8896602 μs, Memory: 3508 MB
+#1/3 [          7           ]  ( Training Loss: 12.0092 )
+ [ITER] #8 - Total: 9750700 μs, Forward: 876846 μs, Backward: 8873853 μs, Memory: 3508 MB
+#1/3 - Training Loss: 138.612
+#2/3 [          0           ]  ( Training Loss: 0.987708 )
+ [ITER] #9 - Total: 9740159 μs, Forward: 777972 μs, Backward: 8962187 μs, Memory: 3508 MB
+#2/3 [          1           ]  ( Training Loss: 1.96965 )
+ [ITER] #10 - Total: 9707218 μs, Forward: 753585 μs, Backward: 8953633 μs, Memory: 3508 MB
+#2/3 [          2           ]  ( Training Loss: 8.3212 )
+ [ITER] #11 - Total: 9700894 μs, Forward: 894864 μs, Backward: 8806029 μs, Memory: 3508 MB
+#2/3 [          3           ]  ( Training Loss: 10.201 )
+ [ITER] #12 - Total: 9516947 μs, Forward: 710370 μs, Backward: 8806577 μs, Memory: 3508 MB
+#2/3 [          4           ]  ( Training Loss: 6.44213 )
+ [ITER] #13 - Total: 9510820 μs, Forward: 706825 μs, Backward: 8803995 μs, Memory: 3508 MB
+#2/3 [          5           ]  ( Training Loss: 1.69523 )
+ [ITER] #14 - Total: 9821180 μs, Forward: 864080 μs, Backward: 8957099 μs, Memory: 3508 MB
+#2/3 [          6           ]  ( Training Loss: 0.0107367 )
+ [ITER] #15 - Total: 9607717 μs, Forward: 788266 μs, Backward: 8819450 μs, Memory: 3508 MB
+#2/3 [          7           ]  ( Training Loss: 1.70599 )
+ [ITER] #16 - Total: 9659785 μs, Forward: 764170 μs, Backward: 8895614 μs, Memory: 3508 MB
+#2/3 - Training Loss: 3.9167
+#3/3 [          0           ]  ( Training Loss: 4.12005 )
+ [ITER] #17 - Total: 9657355 μs, Forward: 841021 μs, Backward: 8816333 μs, Memory: 3508 MB
+#3/3 [          1           ]  ( Training Loss: 4.6773 )
+ [ITER] #18 - Total: 9697019 μs, Forward: 727388 μs, Backward: 8969630 μs, Memory: 3508 MB
+#3/3 [          2           ]  ( Training Loss: 3.11397 )
+ [ITER] #19 - Total: 10210928 μs, Forward: 907259 μs, Backward: 9303668 μs, Memory: 3508 MB
+#3/3 [          3           ]  ( Training Loss: 1.01812 )
+ [ITER] #20 - Total: 10157933 μs, Forward: 867690 μs, Backward: 9290242 μs, Memory: 3508 MB
+#3/3 [          4           ]  ( Training Loss: 0.0133636 )
+ [ITER] #21 - Total: 9670590 μs, Forward: 884945 μs, Backward: 8785644 μs, Memory: 3508 MB
+#3/3 [          5           ]  ( Training Loss: 0.493505 )
+ [ITER] #22 - Total: 9689564 μs, Forward: 768884 μs, Backward: 8920679 μs, Memory: 3508 MB
+#3/3 [          6           ]  ( Training Loss: 1.63497 )
+ [ITER] #23 - Total: 9657508 μs, Forward: 791902 μs, Backward: 8865604 μs, Memory: 3508 MB
+#3/3 [          7           ]  ( Training Loss: 2.30988 )
+ [ITER] #24 - Total: 9746622 μs, Forward: 875051 μs, Backward: 8871570 μs, Memory: 3508 MB
+#3/3 - Training Loss: 2.17264
+[DEBUG] Training completed successfully
+[TIMING] Training took: 237952 ms
+[MEMORY] After Training - Peak: 8030 MB, Current: 7549 MB, RSS: 3108 MB
+[INFO] Saving weights to swiglu_weights.bin
+
+=== PERFORMANCE SUMMARY ===
+Model Configuration:
+  - Sequence Length: 64
+  - Vocab Size: 1000
+  - Model Dimension: 2048
+  - Number of Heads: 16
+  - Number of Layers: 4
+  - FFN Dimension: 8192
+  - Batch Size: 4
+  - Epochs: 3
+
+Approximate Model Parameters (SwiGLU FFN):
+  - Embedding: 131072
+  - Attention: 67108864
+  - SwiGLU FFN: 201326592 (3 projections: gate+up+down)
+  - Total: 268566528 (~1024 MB)
+
+=== STDERR ===

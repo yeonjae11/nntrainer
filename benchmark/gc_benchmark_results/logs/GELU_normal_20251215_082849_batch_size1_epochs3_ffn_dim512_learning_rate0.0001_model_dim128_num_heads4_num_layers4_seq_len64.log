@@ -1,0 +1,314 @@
+Command: nntrainer/build/Applications/GC_Test/jni/gelu_gc_test --seq_len 64 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 4 --batch_size 1
+Timestamp: 20251215_082849
+Return code: 0
+
+=== STDOUT ===
+[CONFIG] Parsed arguments:
+  seq_len=64, vocab_size=1000, model_dim=128
+  num_heads=4, num_layers=4, ffn_dim=512
+  batch_size=1, epochs=3, learning_rate=0.0001
+[DEBUG] Starting main function...
+[MEMORY] Program Start - Peak: 4274 MB, Current: 4274 MB, RSS: 12 MB
+[DEBUG] Creating model...
+[DEBUG] Starting model creation...
+[DEBUG] Model created successfully
+[DEBUG] Adding input layer...
+[DEBUG] Input layer added successfully
+[DEBUG] Adding simple embedding layer...
+[DEBUG] Embedding layer (FC) added successfully
+[DEBUG] Creating transformer layer 0
+[DEBUG] Adding ln_multiout1 for layer 0
+[DEBUG] Adding ln1 for layer 0
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 0
+[DEBUG] Adding multi_head_attention for layer 0
+[DEBUG] Adding add1 (residual after attention) for layer 0
+[DEBUG] Adding ln_multiout2 for layer 0
+[DEBUG] Adding ln2 for layer 0
+[DEBUG] Adding multi_out3 for layer 0
+[DEBUG] Adding FFN fc1 for layer 0
+[DEBUG] Adding FFN fc2 for layer 0
+[DEBUG] Adding add2 (residual after FFN) for layer 0
+[DEBUG] Creating transformer layer 1
+[DEBUG] Adding ln_multiout1 for layer 1
+[DEBUG] Adding ln1 for layer 1
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 1
+[DEBUG] Adding multi_head_attention for layer 1
+[DEBUG] Adding add1 (residual after attention) for layer 1
+[DEBUG] Adding ln_multiout2 for layer 1
+[DEBUG] Adding ln2 for layer 1
+[DEBUG] Adding multi_out3 for layer 1
+[DEBUG] Adding FFN fc1 for layer 1
+[DEBUG] Adding FFN fc2 for layer 1
+[DEBUG] Adding add2 (residual after FFN) for layer 1
+[DEBUG] Creating transformer layer 2
+[DEBUG] Adding ln_multiout1 for layer 2
+[DEBUG] Adding ln1 for layer 2
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 2
+[DEBUG] Adding multi_head_attention for layer 2
+[DEBUG] Adding add1 (residual after attention) for layer 2
+[DEBUG] Adding ln_multiout2 for layer 2
+[DEBUG] Adding ln2 for layer 2
+[DEBUG] Adding multi_out3 for layer 2
+[DEBUG] Adding FFN fc1 for layer 2
+[DEBUG] Adding FFN fc2 for layer 2
+[DEBUG] Adding add2 (residual after FFN) for layer 2
+[DEBUG] Creating transformer layer 3
+[DEBUG] Adding ln_multiout1 for layer 3
+[DEBUG] Adding ln1 for layer 3
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 3
+[DEBUG] Adding multi_head_attention for layer 3
+[DEBUG] Adding add1 (residual after attention) for layer 3
+[DEBUG] Adding ln_multiout2 for layer 3
+[DEBUG] Adding ln2 for layer 3
+[DEBUG] Adding multi_out3 for layer 3
+[DEBUG] Adding FFN fc1 for layer 3
+[DEBUG] Adding FFN fc2 for layer 3
+[DEBUG] Adding add2 (residual after FFN) for layer 3
+[DEBUG] Adding final layer normalization...
+[DEBUG] Final layer normalization added successfully
+[DEBUG] Skipping pooling2d layer for debugging...
+[DEBUG] Adding simple output projection...
+[DEBUG] Output projection added successfully
+
+[INFO] Gradient checkpointing is DISABLED
+[DEBUG] Model creation completed successfully!
+[DEBUG] Model created successfully!
+[TIMING] Model Creation took: 8 ms
+[MEMORY] After Model Creation - Peak: 4275 MB, Current: 4275 MB, RSS: 15 MB
+[DEBUG] Setting model properties...
+[DEBUG] Model properties set successfully
+[DEBUG] Creating optimizer...
+[DEBUG] Optimizer set successfully
+[TIMING] Model Configuration took: 0 ms
+[DEBUG] Compiling model...
+[DEBUG] Model compiled with status: 0
+[TIMING] Model Compilation took: 3 ms
+[MEMORY] After Compilation - Peak: 4275 MB, Current: 4275 MB, RSS: 15 MB
+[DEBUG] Initializing model...
+[DEBUG] Model initialized with status: 0
+[TIMING] Model Initialization took: 26 ms
+[MEMORY] After Initialization - Peak: 4285 MB, Current: 4285 MB, RSS: 24 MB
+[DEBUG] Creating data generator...
+[DEBUG] Data generator created successfully
+[DEBUG] Setting dataset...
+[DEBUG] Dataset set successfully
+[TIMING] Data Setup took: 0 ms
+[DEBUG] Starting training...
+[INFO] Iteration stats are printed from neuralnet.cpp (once per batch)
+#1/3 [          0           ]  ( Training Loss: 1.50921 )
+ [ITER] #1 - Total: 117114 μs, Forward: 16930 μs, Backward: 100183 μs, Memory: 31 MB
+#1/3 [          1           ]  ( Training Loss: 2.26365 )
+ [ITER] #2 - Total: 110648 μs, Forward: 12402 μs, Backward: 98246 μs, Memory: 31 MB
+#1/3 [          2           ]  ( Training Loss: 1.13733 )
+ [ITER] #3 - Total: 111966 μs, Forward: 13268 μs, Backward: 98698 μs, Memory: 31 MB
+#1/3 [          3           ]  ( Training Loss: 0.0275584 )
+ [ITER] #4 - Total: 111208 μs, Forward: 11634 μs, Backward: 99574 μs, Memory: 31 MB
+#1/3 [          4           ]  ( Training Loss: 0.312556 )
+ [ITER] #5 - Total: 110826 μs, Forward: 14849 μs, Backward: 95977 μs, Memory: 31 MB
+#1/3 [          5           ]  ( Training Loss: 0.757119 )
+ [ITER] #6 - Total: 109802 μs, Forward: 11089 μs, Backward: 98712 μs, Memory: 31 MB
+#1/3 [          6           ]  ( Training Loss: 0.666287 )
+ [ITER] #7 - Total: 137612 μs, Forward: 12925 μs, Backward: 124686 μs, Memory: 31 MB
+#1/3 [          7           ]  ( Training Loss: 0.297178 )
+ [ITER] #8 - Total: 132803 μs, Forward: 11933 μs, Backward: 120870 μs, Memory: 31 MB
+#1/3 [          8           ]  ( Training Loss: 0.0351833 )
+ [ITER] #9 - Total: 108377 μs, Forward: 12424 μs, Backward: 95952 μs, Memory: 31 MB
+#1/3 [          9           ]  ( Training Loss: 0.0240923 )
+ [ITER] #10 - Total: 176826 μs, Forward: 20748 μs, Backward: 156077 μs, Memory: 31 MB
+#1/3 [          10          ]  ( Training Loss: 0.169255 )
+ [ITER] #11 - Total: 116688 μs, Forward: 13765 μs, Backward: 102922 μs, Memory: 31 MB
+#1/3 [          11          ]  ( Training Loss: 0.295493 )
+ [ITER] #12 - Total: 107509 μs, Forward: 12561 μs, Backward: 94947 μs, Memory: 31 MB
+#1/3 [          12          ]  ( Training Loss: 0.30209 )
+ [ITER] #13 - Total: 108903 μs, Forward: 11016 μs, Backward: 97887 μs, Memory: 31 MB
+#1/3 [          13          ]  ( Training Loss: 0.204818 )
+ [ITER] #14 - Total: 106279 μs, Forward: 11102 μs, Backward: 95176 μs, Memory: 31 MB
+#1/3 [          14          ]  ( Training Loss: 0.0827593 )
+ [ITER] #15 - Total: 109313 μs, Forward: 13094 μs, Backward: 96218 μs, Memory: 31 MB
+#1/3 [          15          ]  ( Training Loss: 0.0087409 )
+ [ITER] #16 - Total: 108006 μs, Forward: 11396 μs, Backward: 96609 μs, Memory: 31 MB
+#1/3 [          16          ]  ( Training Loss: 0.00876006 )
+ [ITER] #17 - Total: 115633 μs, Forward: 20864 μs, Backward: 94768 μs, Memory: 31 MB
+#1/3 [          17          ]  ( Training Loss: 0.0593136 )
+ [ITER] #18 - Total: 105915 μs, Forward: 11687 μs, Backward: 94227 μs, Memory: 31 MB
+#1/3 [          18          ]  ( Training Loss: 0.113127 )
+ [ITER] #19 - Total: 112646 μs, Forward: 11571 μs, Backward: 101075 μs, Memory: 31 MB
+#1/3 [          19          ]  ( Training Loss: 0.132603 )
+ [ITER] #20 - Total: 117037 μs, Forward: 13071 μs, Backward: 103965 μs, Memory: 31 MB
+#1/3 [          20          ]  ( Training Loss: 0.10937 )
+ [ITER] #21 - Total: 119956 μs, Forward: 11935 μs, Backward: 108020 μs, Memory: 31 MB
+#1/3 [          21          ]  ( Training Loss: 0.0618662 )
+ [ITER] #22 - Total: 116525 μs, Forward: 15391 μs, Backward: 101134 μs, Memory: 31 MB
+#1/3 [          22          ]  ( Training Loss: 0.0186132 )
+ [ITER] #23 - Total: 111694 μs, Forward: 12965 μs, Backward: 98727 μs, Memory: 31 MB
+#1/3 [          23          ]  ( Training Loss: 0.000205606 )
+ [ITER] #24 - Total: 130495 μs, Forward: 28170 μs, Backward: 102324 μs, Memory: 31 MB
+#1/3 [          24          ]  ( Training Loss: 0.00954617 )
+ [ITER] #25 - Total: 108572 μs, Forward: 11201 μs, Backward: 97370 μs, Memory: 31 MB
+#1/3 [          25          ]  ( Training Loss: 0.0335981 )
+ [ITER] #26 - Total: 109751 μs, Forward: 14205 μs, Backward: 95545 μs, Memory: 31 MB
+#1/3 [          26          ]  ( Training Loss: 0.0536855 )
+ [ITER] #27 - Total: 107409 μs, Forward: 12759 μs, Backward: 94649 μs, Memory: 31 MB
+#1/3 [          27          ]  ( Training Loss: 0.0571505 )
+ [ITER] #28 - Total: 116710 μs, Forward: 17521 μs, Backward: 99188 μs, Memory: 31 MB
+#1/3 [          28          ]  ( Training Loss: 0.0433945 )
+ [ITER] #29 - Total: 110518 μs, Forward: 11831 μs, Backward: 98686 μs, Memory: 31 MB
+#1/3 [          29          ]  ( Training Loss: 0.021895 )
+ [ITER] #30 - Total: 112290 μs, Forward: 13818 μs, Backward: 98472 μs, Memory: 31 MB
+#1/3 [          30          ]  ( Training Loss: 0.00493251 )
+ [ITER] #31 - Total: 108505 μs, Forward: 15119 μs, Backward: 93386 μs, Memory: 31 MB
+#1/3 [          31          ]  ( Training Loss: 0.000124146 )
+ [ITER] #32 - Total: 118893 μs, Forward: 12899 μs, Backward: 105993 μs, Memory: 31 MB
+#1/3 - Training Loss: 0.275672
+#2/3 [          0           ]  ( Training Loss: 0.00689103 )
+ [ITER] #33 - Total: 110880 μs, Forward: 13708 μs, Backward: 97172 μs, Memory: 31 MB
+#2/3 [          1           ]  ( Training Loss: 0.0181761 )
+ [ITER] #34 - Total: 110091 μs, Forward: 12982 μs, Backward: 97109 μs, Memory: 31 MB
+#2/3 [          2           ]  ( Training Loss: 0.0256265 )
+ [ITER] #35 - Total: 105413 μs, Forward: 11860 μs, Backward: 93552 μs, Memory: 31 MB
+#2/3 [          3           ]  ( Training Loss: 0.0246895 )
+ [ITER] #36 - Total: 101986 μs, Forward: 12229 μs, Backward: 89756 μs, Memory: 31 MB
+#2/3 [          4           ]  ( Training Loss: 0.0166308 )
+ [ITER] #37 - Total: 108945 μs, Forward: 15785 μs, Backward: 93159 μs, Memory: 31 MB
+#2/3 [          5           ]  ( Training Loss: 0.00678647 )
+ [ITER] #38 - Total: 108873 μs, Forward: 12001 μs, Backward: 96872 μs, Memory: 31 MB
+#2/3 [          6           ]  ( Training Loss: 0.000707572 )
+ [ITER] #39 - Total: 104523 μs, Forward: 11668 μs, Backward: 92855 μs, Memory: 31 MB
+#2/3 [          7           ]  ( Training Loss: 0.000806644 )
+ [ITER] #40 - Total: 104095 μs, Forward: 12006 μs, Backward: 92088 μs, Memory: 31 MB
+#2/3 [          8           ]  ( Training Loss: 0.0054093 )
+ [ITER] #41 - Total: 106125 μs, Forward: 11983 μs, Backward: 94141 μs, Memory: 31 MB
+#2/3 [          9           ]  ( Training Loss: 0.0104264 )
+ [ITER] #42 - Total: 101429 μs, Forward: 11505 μs, Backward: 89923 μs, Memory: 31 MB
+#2/3 [          10          ]  ( Training Loss: 0.0122501 )
+ [ITER] #43 - Total: 101318 μs, Forward: 10849 μs, Backward: 90468 μs, Memory: 31 MB
+#2/3 [          11          ]  ( Training Loss: 0.00990467 )
+ [ITER] #44 - Total: 100367 μs, Forward: 11655 μs, Backward: 88710 μs, Memory: 31 MB
+#2/3 [          12          ]  ( Training Loss: 0.00522002 )
+ [ITER] #45 - Total: 102342 μs, Forward: 10763 μs, Backward: 91578 μs, Memory: 31 MB
+#2/3 [          13          ]  ( Training Loss: 0.00122215 )
+ [ITER] #46 - Total: 98776 μs, Forward: 11136 μs, Backward: 87639 μs, Memory: 31 MB
+#2/3 [          14          ]  ( Training Loss: 2.49833e-05 )
+ [ITER] #47 - Total: 122076 μs, Forward: 11087 μs, Backward: 110988 μs, Memory: 31 MB
+#2/3 [          15          ]  ( Training Loss: 0.00163006 )
+ [ITER] #48 - Total: 180620 μs, Forward: 21294 μs, Backward: 159325 μs, Memory: 31 MB
+#2/3 [          16          ]  ( Training Loss: 0.00426245 )
+ [ITER] #49 - Total: 98611 μs, Forward: 11387 μs, Backward: 87223 μs, Memory: 31 MB
+#2/3 [          17          ]  ( Training Loss: 0.00580303 )
+ [ITER] #50 - Total: 101182 μs, Forward: 11210 μs, Backward: 89971 μs, Memory: 31 MB
+#2/3 [          18          ]  ( Training Loss: 0.00522451 )
+ [ITER] #51 - Total: 101468 μs, Forward: 10777 μs, Backward: 90689 μs, Memory: 31 MB
+#2/3 [          19          ]  ( Training Loss: 0.00308776 )
+ [ITER] #52 - Total: 108090 μs, Forward: 12718 μs, Backward: 95371 μs, Memory: 31 MB
+#2/3 [          20          ]  ( Training Loss: 0.000911455 )
+ [ITER] #53 - Total: 100940 μs, Forward: 10666 μs, Backward: 90273 μs, Memory: 31 MB
+#2/3 [          21          ]  ( Training Loss: 2.4661e-06 )
+ [ITER] #54 - Total: 102388 μs, Forward: 11384 μs, Backward: 91003 μs, Memory: 31 MB
+#2/3 [          22          ]  ( Training Loss: 0.000609839 )
+ [ITER] #55 - Total: 104778 μs, Forward: 12160 μs, Backward: 92617 μs, Memory: 31 MB
+#2/3 [          23          ]  ( Training Loss: 0.00192481 )
+ [ITER] #56 - Total: 102962 μs, Forward: 13126 μs, Backward: 89835 μs, Memory: 31 MB
+#2/3 [          24          ]  ( Training Loss: 0.00280269 )
+ [ITER] #57 - Total: 104402 μs, Forward: 11255 μs, Backward: 93147 μs, Memory: 31 MB
+#2/3 [          25          ]  ( Training Loss: 0.00260457 )
+ [ITER] #58 - Total: 109259 μs, Forward: 13887 μs, Backward: 95371 μs, Memory: 31 MB
+#2/3 [          26          ]  ( Training Loss: 0.00155725 )
+ [ITER] #59 - Total: 104167 μs, Forward: 11403 μs, Backward: 92763 μs, Memory: 31 MB
+#2/3 [          27          ]  ( Training Loss: 0.000453438 )
+ [ITER] #60 - Total: 107167 μs, Forward: 12061 μs, Backward: 95104 μs, Memory: 31 MB
+#2/3 [          28          ]  ( Training Loss: 4.15119e-07 )
+ [ITER] #61 - Total: 103351 μs, Forward: 11015 μs, Backward: 92336 μs, Memory: 31 MB
+#2/3 [          29          ]  ( Training Loss: 0.000331646 )
+ [ITER] #62 - Total: 106350 μs, Forward: 10439 μs, Backward: 95910 μs, Memory: 31 MB
+#2/3 [          30          ]  ( Training Loss: 0.00100412 )
+ [ITER] #63 - Total: 104690 μs, Forward: 13436 μs, Backward: 91253 μs, Memory: 31 MB
+#2/3 [          31          ]  ( Training Loss: 0.00141076 )
+ [ITER] #64 - Total: 107777 μs, Forward: 11560 μs, Backward: 96216 μs, Memory: 31 MB
+#2/3 - Training Loss: 0.0055748
+#3/3 [          0           ]  ( Training Loss: 0.00124609 )
+ [ITER] #65 - Total: 110086 μs, Forward: 11569 μs, Backward: 98516 μs, Memory: 31 MB
+#3/3 [          1           ]  ( Training Loss: 0.000679664 )
+ [ITER] #66 - Total: 108382 μs, Forward: 12908 μs, Backward: 95473 μs, Memory: 31 MB
+#3/3 [          2           ]  ( Training Loss: 0.000152801 )
+ [ITER] #67 - Total: 103591 μs, Forward: 12485 μs, Backward: 91106 μs, Memory: 31 MB
+#3/3 [          3           ]  ( Training Loss: 6.86067e-06 )
+ [ITER] #68 - Total: 106954 μs, Forward: 12965 μs, Backward: 93988 μs, Memory: 31 MB
+#3/3 [          4           ]  ( Training Loss: 0.000245115 )
+ [ITER] #69 - Total: 102106 μs, Forward: 10626 μs, Backward: 91479 μs, Memory: 31 MB
+#3/3 [          5           ]  ( Training Loss: 0.000585381 )
+ [ITER] #70 - Total: 104956 μs, Forward: 11276 μs, Backward: 93679 μs, Memory: 31 MB
+#3/3 [          6           ]  ( Training Loss: 0.000719851 )
+ [ITER] #71 - Total: 108237 μs, Forward: 13388 μs, Backward: 94849 μs, Memory: 31 MB
+#3/3 [          7           ]  ( Training Loss: 0.000553226 )
+ [ITER] #72 - Total: 101392 μs, Forward: 11916 μs, Backward: 89476 μs, Memory: 31 MB
+#3/3 [          8           ]  ( Training Loss: 0.000239938 )
+ [ITER] #73 - Total: 103624 μs, Forward: 10744 μs, Backward: 92879 μs, Memory: 31 MB
+#3/3 [          9           ]  ( Training Loss: 2.37861e-05 )
+ [ITER] #74 - Total: 109557 μs, Forward: 12325 μs, Backward: 97231 μs, Memory: 31 MB
+#3/3 [          10          ]  ( Training Loss: 3.35933e-05 )
+ [ITER] #75 - Total: 109948 μs, Forward: 14058 μs, Backward: 95889 μs, Memory: 31 MB
+#3/3 [          11          ]  ( Training Loss: 0.000201738 )
+ [ITER] #76 - Total: 103455 μs, Forward: 11133 μs, Backward: 92322 μs, Memory: 31 MB
+#3/3 [          12          ]  ( Training Loss: 0.000349575 )
+ [ITER] #77 - Total: 103643 μs, Forward: 11516 μs, Backward: 92126 μs, Memory: 31 MB
+#3/3 [          13          ]  ( Training Loss: 0.000347232 )
+ [ITER] #78 - Total: 101724 μs, Forward: 11936 μs, Backward: 89787 μs, Memory: 31 MB
+#3/3 [          14          ]  ( Training Loss: 0.000208208 )
+ [ITER] #79 - Total: 101252 μs, Forward: 12217 μs, Backward: 89034 μs, Memory: 31 MB
+#3/3 [          15          ]  ( Training Loss: 5.45673e-05 )
+ [ITER] #80 - Total: 103028 μs, Forward: 12787 μs, Backward: 90240 μs, Memory: 31 MB
+#3/3 [          16          ]  ( Training Loss: 4.34392e-07 )
+ [ITER] #81 - Total: 108295 μs, Forward: 11900 μs, Backward: 96394 μs, Memory: 31 MB
+#3/3 [          17          ]  ( Training Loss: 6.07576e-05 )
+ [ITER] #82 - Total: 101503 μs, Forward: 11487 μs, Backward: 90016 μs, Memory: 31 MB
+#3/3 [          18          ]  ( Training Loss: 0.000155717 )
+ [ITER] #83 - Total: 103249 μs, Forward: 11272 μs, Backward: 91977 μs, Memory: 31 MB
+#3/3 [          19          ]  ( Training Loss: 0.000191898 )
+ [ITER] #84 - Total: 104522 μs, Forward: 12520 μs, Backward: 92002 μs, Memory: 31 MB
+#3/3 [          20          ]  ( Training Loss: 0.000141448 )
+ [ITER] #85 - Total: 103274 μs, Forward: 11214 μs, Backward: 92059 μs, Memory: 31 MB
+#3/3 [          21          ]  ( Training Loss: 5.40669e-05 )
+ [ITER] #86 - Total: 181889 μs, Forward: 52659 μs, Backward: 129229 μs, Memory: 31 MB
+#3/3 [          22          ]  ( Training Loss: 2.31314e-06 )
+ [ITER] #87 - Total: 119768 μs, Forward: 24808 μs, Backward: 94960 μs, Memory: 31 MB
+#3/3 [          23          ]  ( Training Loss: 1.69518e-05 )
+ [ITER] #88 - Total: 102640 μs, Forward: 11747 μs, Backward: 90892 μs, Memory: 31 MB
+#3/3 [          24          ]  ( Training Loss: 6.80004e-05 )
+ [ITER] #89 - Total: 103870 μs, Forward: 11965 μs, Backward: 91904 μs, Memory: 31 MB
+#3/3 [          25          ]  ( Training Loss: 0.000100418 )
+ [ITER] #90 - Total: 107569 μs, Forward: 13942 μs, Backward: 93627 μs, Memory: 31 MB
+#3/3 [          26          ]  ( Training Loss: 8.51071e-05 )
+ [ITER] #91 - Total: 100813 μs, Forward: 10842 μs, Backward: 89970 μs, Memory: 31 MB
+#3/3 [          27          ]  ( Training Loss: 3.94616e-05 )
+ [ITER] #92 - Total: 114370 μs, Forward: 12303 μs, Backward: 102067 μs, Memory: 31 MB
+#3/3 [          28          ]  ( Training Loss: 4.40167e-06 )
+ [ITER] #93 - Total: 100176 μs, Forward: 11679 μs, Backward: 88497 μs, Memory: 31 MB
+#3/3 [          29          ]  ( Training Loss: 4.84717e-06 )
+ [ITER] #94 - Total: 106640 μs, Forward: 12530 μs, Backward: 94110 μs, Memory: 31 MB
+#3/3 [          30          ]  ( Training Loss: 3.08411e-05 )
+ [ITER] #95 - Total: 101209 μs, Forward: 11226 μs, Backward: 89982 μs, Memory: 31 MB
+#3/3 [          31          ]  ( Training Loss: 5.21035e-05 )
+ [ITER] #96 - Total: 101769 μs, Forward: 11435 μs, Backward: 90334 μs, Memory: 31 MB
+#3/3 - Training Loss: 0.000208012
+[DEBUG] Training completed successfully
+[TIMING] Training took: 10639 ms
+[MEMORY] After Training - Peak: 4554 MB, Current: 4486 MB, RSS: 27 MB
+
+=== PERFORMANCE SUMMARY ===
+Model Configuration:
+  - Sequence Length: 64
+  - Vocab Size: 1000
+  - Model Dimension: 128
+  - Number of Heads: 4
+  - Number of Layers: 4
+  - FFN Dimension: 512
+  - Batch Size: 1
+  - Epochs: 3
+
+Approximate Model Parameters (GELU FFN):
+  - Embedding: 8192
+  - Attention: 262144
+  - GELU FFN: 524288 (2 projections: fc1+fc2)
+  - Total: 794624 (~3 MB)
+
+=== STDERR ===

@@ -1,0 +1,37 @@
+[INFO] Benchmark results will be saved to: gc_benchmark_results
+Starting Gradient Checkpointing Comparison Benchmark...
+Base configuration: {'seq_len': 64, 'model_dim': 128, 'num_heads': 4, 'ffn_dim': 512, 'epochs': 3, 'learning_rate': 0.0001, 'num_layers': 4, 'batch_size': 4}
+
+================================================================================
+Benchmarking Number of Layers
+================================================================================
+
+=== Testing GELU: {'seq_len': 64, 'model_dim': 128, 'num_heads': 4, 'ffn_dim': 512, 'epochs': 3, 'learning_rate': 0.0001, 'num_layers': 64, 'batch_size': 4} ===
+[1/2] Running normal mode...
+Running GELU (normal): nntrainer/build/Applications/GC_Test/jni/gelu_gc_test --seq_len 64 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 64 --batch_size 4
+[SUCCESS] Log saved to: gc_benchmark_results/logs/GELU_normal_20251215_102518_batch_size4_epochs3_ffn_dim512_learning_rate0.0001_model_dim128_num_heads4_num_layers64_seq_len64.log
+[2/2] Running checkpoint mode...
+Running GELU (checkpoint): nntrainer/build/Applications/GC_Test/jni/gelu_gc_test --seq_len 64 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 64 --batch_size 4 --enable-checkpoint
+[SUCCESS] Log saved to: gc_benchmark_results/logs/GELU_checkpoint_20251215_102730_batch_size4_epochs3_ffn_dim512_learning_rate0.0001_model_dim128_num_heads4_num_layers64_seq_len64.log
+[OK] Memory: 147 MB saved (34.1%)
+[OK] Time: 483842 μs overhead (8.9%)
+[OK] Loss: MATCH (diff=0.00000000)
+
+=== Testing SwiGLU: {'seq_len': 64, 'model_dim': 128, 'num_heads': 4, 'ffn_dim': 512, 'epochs': 3, 'learning_rate': 0.0001, 'num_layers': 64, 'batch_size': 4} ===
+[1/2] Running normal mode...
+Running SwiGLU (normal): nntrainer/build/Applications/GC_Test/jni/swiglu_gc_test --seq_len 64 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 64 --batch_size 4
+[SUCCESS] Log saved to: gc_benchmark_results/logs/SwiGLU_normal_20251215_102954_batch_size4_epochs3_ffn_dim512_learning_rate0.0001_model_dim128_num_heads4_num_layers64_seq_len64.log
+[2/2] Running checkpoint mode...
+Running SwiGLU (checkpoint): nntrainer/build/Applications/GC_Test/jni/swiglu_gc_test --seq_len 64 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 64 --batch_size 4 --enable-checkpoint
+[SUCCESS] Log saved to: gc_benchmark_results/logs/SwiGLU_checkpoint_20251215_103209_batch_size4_epochs3_ffn_dim512_learning_rate0.0001_model_dim128_num_heads4_num_layers64_seq_len64.log
+[OK] Memory: 211 MB saved (38.7%)
+[OK] Time: 763615 μs overhead (13.7%)
+[OK] Loss: MATCH (diff=0.00000000)
+
+================================================================================
+Benchmarking Sequence Lengths
+================================================================================
+
+=== Testing GELU: {'seq_len': 1024, 'model_dim': 128, 'num_heads': 4, 'ffn_dim': 512, 'epochs': 3, 'learning_rate': 0.0001, 'num_layers': 4, 'batch_size': 4} ===
+[1/2] Running normal mode...
+Running GELU (normal): nntrainer/build/Applications/GC_Test/jni/gelu_gc_test --seq_len 1024 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 4 --batch_size 4

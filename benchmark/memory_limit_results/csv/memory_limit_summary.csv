@@ -1,0 +1,5 @@
+memory_limit_mb,memory_limit_gb,model,mode,max_size_label,max_config_idx,model_dim,num_layers,peak_memory_mb,avg_total_latency_ms,training_loss
+8192.0,8.0,GELU,normal,480M,6,1024.0,16.0,3408.0,25222.949375,72.7113
+8192.0,8.0,GELU,checkpoint,600M,7,1024.0,20.0,3536.0,34082.2,83.7122
+8192.0,8.0,SwiGLU,normal,360M,5,768.0,20.0,3417.0,24182.215125,54.7307
+8192.0,8.0,SwiGLU,checkpoint,480M,6,1024.0,16.0,3640.0,30289.277875,62.9474

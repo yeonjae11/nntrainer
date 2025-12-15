@@ -1,0 +1,229 @@
+Command: nntrainer/build/Applications/GC_Test/jni/gelu_gc_test --seq_len 64 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 8 --batch_size 4 --enable-checkpoint
+Timestamp: 20251215_073803
+Return code: 0
+
+=== STDOUT ===
+[CONFIG] Parsed arguments:
+  seq_len=64, vocab_size=1000, model_dim=128
+  num_heads=4, num_layers=8, ffn_dim=512
+  batch_size=4, epochs=3, learning_rate=0.0001
+[DEBUG] Starting main function...
+[MEMORY] Program Start - Peak: 4274 MB, Current: 4274 MB, RSS: 12 MB
+[DEBUG] Creating model...
+[DEBUG] Starting model creation...
+[DEBUG] Model created successfully
+[DEBUG] Adding input layer...
+[DEBUG] Input layer added successfully
+[DEBUG] Adding simple embedding layer...
+[DEBUG] Embedding layer (FC) added successfully
+[DEBUG] Creating transformer layer 0
+[DEBUG] Adding ln_multiout1 for layer 0
+[DEBUG] Adding ln1 for layer 0
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 0
+[DEBUG] Adding multi_head_attention for layer 0
+[DEBUG] Adding add1 (residual after attention) for layer 0
+[DEBUG] Adding ln_multiout2 for layer 0
+[DEBUG] Adding ln2 for layer 0
+[DEBUG] Adding multi_out3 for layer 0
+[DEBUG] Adding FFN fc1 for layer 0
+[DEBUG] Adding FFN fc2 for layer 0
+[DEBUG] Adding add2 (residual after FFN) for layer 0
+[DEBUG] Creating transformer layer 1
+[DEBUG] Adding ln_multiout1 for layer 1
+[DEBUG] Adding ln1 for layer 1
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 1
+[DEBUG] Adding multi_head_attention for layer 1
+[DEBUG] Adding add1 (residual after attention) for layer 1
+[DEBUG] Adding ln_multiout2 for layer 1
+[DEBUG] Adding ln2 for layer 1
+[DEBUG] Adding multi_out3 for layer 1
+[DEBUG] Adding FFN fc1 for layer 1
+[DEBUG] Adding FFN fc2 for layer 1
+[DEBUG] Adding add2 (residual after FFN) for layer 1
+[DEBUG] Creating transformer layer 2
+[DEBUG] Adding ln_multiout1 for layer 2
+[DEBUG] Adding ln1 for layer 2
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 2
+[DEBUG] Adding multi_head_attention for layer 2
+[DEBUG] Adding add1 (residual after attention) for layer 2
+[DEBUG] Adding ln_multiout2 for layer 2
+[DEBUG] Adding ln2 for layer 2
+[DEBUG] Adding multi_out3 for layer 2
+[DEBUG] Adding FFN fc1 for layer 2
+[DEBUG] Adding FFN fc2 for layer 2
+[DEBUG] Adding add2 (residual after FFN) for layer 2
+[DEBUG] Creating transformer layer 3
+[DEBUG] Adding ln_multiout1 for layer 3
+[DEBUG] Adding ln1 for layer 3
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 3
+[DEBUG] Adding multi_head_attention for layer 3
+[DEBUG] Adding add1 (residual after attention) for layer 3
+[DEBUG] Adding ln_multiout2 for layer 3
+[DEBUG] Adding ln2 for layer 3
+[DEBUG] Adding multi_out3 for layer 3
+[DEBUG] Adding FFN fc1 for layer 3
+[DEBUG] Adding FFN fc2 for layer 3
+[DEBUG] Adding add2 (residual after FFN) for layer 3
+[DEBUG] Creating transformer layer 4
+[DEBUG] Adding ln_multiout1 for layer 4
+[DEBUG] Adding ln1 for layer 4
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 4
+[DEBUG] Adding multi_head_attention for layer 4
+[DEBUG] Adding add1 (residual after attention) for layer 4
+[DEBUG] Adding ln_multiout2 for layer 4
+[DEBUG] Adding ln2 for layer 4
+[DEBUG] Adding multi_out3 for layer 4
+[DEBUG] Adding FFN fc1 for layer 4
+[DEBUG] Adding FFN fc2 for layer 4
+[DEBUG] Adding add2 (residual after FFN) for layer 4
+[DEBUG] Creating transformer layer 5
+[DEBUG] Adding ln_multiout1 for layer 5
+[DEBUG] Adding ln1 for layer 5
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 5
+[DEBUG] Adding multi_head_attention for layer 5
+[DEBUG] Adding add1 (residual after attention) for layer 5
+[DEBUG] Adding ln_multiout2 for layer 5
+[DEBUG] Adding ln2 for layer 5
+[DEBUG] Adding multi_out3 for layer 5
+[DEBUG] Adding FFN fc1 for layer 5
+[DEBUG] Adding FFN fc2 for layer 5
+[DEBUG] Adding add2 (residual after FFN) for layer 5
+[DEBUG] Creating transformer layer 6
+[DEBUG] Adding ln_multiout1 for layer 6
+[DEBUG] Adding ln1 for layer 6
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 6
+[DEBUG] Adding multi_head_attention for layer 6
+[DEBUG] Adding add1 (residual after attention) for layer 6
+[DEBUG] Adding ln_multiout2 for layer 6
+[DEBUG] Adding ln2 for layer 6
+[DEBUG] Adding multi_out3 for layer 6
+[DEBUG] Adding FFN fc1 for layer 6
+[DEBUG] Adding FFN fc2 for layer 6
+[DEBUG] Adding add2 (residual after FFN) for layer 6
+[DEBUG] Creating transformer layer 7
+[DEBUG] Adding ln_multiout1 for layer 7
+[DEBUG] Adding ln1 for layer 7
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 7
+[DEBUG] Adding multi_head_attention for layer 7
+[DEBUG] Adding add1 (residual after attention) for layer 7
+[DEBUG] Adding ln_multiout2 for layer 7
+[DEBUG] Adding ln2 for layer 7
+[DEBUG] Adding multi_out3 for layer 7
+[DEBUG] Adding FFN fc1 for layer 7
+[DEBUG] Adding FFN fc2 for layer 7
+[DEBUG] Adding add2 (residual after FFN) for layer 7
+[DEBUG] Adding final layer normalization...
+[DEBUG] Final layer normalization added successfully
+[DEBUG] Skipping pooling2d layer for debugging...
+[DEBUG] Adding simple output projection...
+[DEBUG] Output projection added successfully
+
+[CHECKPOINT] Setting up gradient checkpointing for transformer blocks...
+[CHECKPOINT] Added checkpoint block for transformer layer 0 (11 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 1 (11 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 2 (11 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 3 (11 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 4 (11 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 5 (11 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 6 (11 layers)
+[CHECKPOINT] Added checkpoint block for transformer layer 7 (11 layers)
+[CHECKPOINT] Gradient checkpointing setup complete!
+[CHECKPOINT] Total checkpoint blocks: 8
+[CHECKPOINT] Expected memory savings: ~87%
+[DEBUG] Model creation completed successfully!
+[DEBUG] Model created successfully!
+[TIMING] Model Creation took: 11 ms
+[MEMORY] After Model Creation - Peak: 4275 MB, Current: 4275 MB, RSS: 15 MB
+[DEBUG] Setting model properties...
+[DEBUG] Model properties set successfully
+[DEBUG] Creating optimizer...
+[DEBUG] Optimizer set successfully
+[TIMING] Model Configuration took: 0 ms
+[DEBUG] Compiling model...
+[DEBUG] Model compiled with status: 0
+[TIMING] Model Compilation took: 7 ms
+[MEMORY] After Compilation - Peak: 4275 MB, Current: 4275 MB, RSS: 15 MB
+[DEBUG] Initializing model...
+[DEBUG] Model initialized with status: 0
+[TIMING] Model Initialization took: 51 ms
+[MEMORY] After Initialization - Peak: 4294 MB, Current: 4294 MB, RSS: 34 MB
+[DEBUG] Creating data generator...
+[DEBUG] Data generator created successfully
+[DEBUG] Setting dataset...
+[DEBUG] Dataset set successfully
+[TIMING] Data Setup took: 0 ms
+[DEBUG] Starting training...
+[INFO] Iteration stats are printed from neuralnet.cpp (once per batch)
+#1/3 [          0           ]  ( Training Loss: 0.268125 )
+ [ITER] #1 - Total: 726343 μs, Forward: 86425 μs, Backward: 639917 μs, Memory: 54 MB
+#1/3 [          1           ]  ( Training Loss: 8.20738 )
+ [ITER] #2 - Total: 686851 μs, Forward: 75645 μs, Backward: 611205 μs, Memory: 54 MB
+#1/3 [          2           ]  ( Training Loss: 1.25716 )
+ [ITER] #3 - Total: 691797 μs, Forward: 82640 μs, Backward: 609157 μs, Memory: 54 MB
+#1/3 [          3           ]  ( Training Loss: 0.306419 )
+ [ITER] #4 - Total: 742172 μs, Forward: 80787 μs, Backward: 661385 μs, Memory: 54 MB
+#1/3 [          4           ]  ( Training Loss: 1.91366 )
+ [ITER] #5 - Total: 709943 μs, Forward: 77504 μs, Backward: 632437 μs, Memory: 54 MB
+#1/3 [          5           ]  ( Training Loss: 1.94194 )
+ [ITER] #6 - Total: 763141 μs, Forward: 78813 μs, Backward: 684327 μs, Memory: 54 MB
+#1/3 [          6           ]  ( Training Loss: 1.02643 )
+ [ITER] #7 - Total: 727031 μs, Forward: 84350 μs, Backward: 642679 μs, Memory: 54 MB
+#1/3 [          7           ]  ( Training Loss: 0.248141 )
+ [ITER] #8 - Total: 690895 μs, Forward: 78229 μs, Backward: 612665 μs, Memory: 55 MB
+#1/3 - Training Loss: 1.89616
+#2/3 [          0           ]  ( Training Loss: 7.60193e-05 )
+ [ITER] #9 - Total: 692675 μs, Forward: 81235 μs, Backward: 611440 μs, Memory: 55 MB
+#2/3 [          1           ]  ( Training Loss: 0.177567 )
+ [ITER] #10 - Total: 683785 μs, Forward: 76965 μs, Backward: 606820 μs, Memory: 55 MB
+#2/3 [          2           ]  ( Training Loss: 0.477494 )
+ [ITER] #11 - Total: 703297 μs, Forward: 76300 μs, Backward: 626996 μs, Memory: 55 MB
+#2/3 [          3           ]  ( Training Loss: 0.650326 )
+ [ITER] #12 - Total: 829300 μs, Forward: 87480 μs, Backward: 741819 μs, Memory: 55 MB
+#2/3 [          4           ]  ( Training Loss: 0.618299 )
+ [ITER] #13 - Total: 689519 μs, Forward: 82384 μs, Backward: 607134 μs, Memory: 55 MB
+#2/3 [          5           ]  ( Training Loss: 0.439009 )
+ [ITER] #14 - Total: 705025 μs, Forward: 75699 μs, Backward: 629325 μs, Memory: 55 MB
+#2/3 [          6           ]  ( Training Loss: 0.220918 )
+ [ITER] #15 - Total: 750538 μs, Forward: 88142 μs, Backward: 662395 μs, Memory: 55 MB
+#2/3 [          7           ]  ( Training Loss: 0.0588089 )
+ [ITER] #16 - Total: 703682 μs, Forward: 77685 μs, Backward: 625996 μs, Memory: 55 MB
+#2/3 - Training Loss: 0.330312
+#3/3 [          0           ]  ( Training Loss: 0.000132097 )
+ [ITER] #17 - Total: 683657 μs, Forward: 76711 μs, Backward: 606945 μs, Memory: 55 MB
+#3/3 [          1           ]  ( Training Loss: 0.0381602 )
+ [ITER] #18 - Total: 742703 μs, Forward: 75621 μs, Backward: 667081 μs, Memory: 55 MB
+#3/3 [          2           ]  ( Training Loss: 0.126844 )
+ [ITER] #19 - Total: 712460 μs, Forward: 81498 μs, Backward: 630961 μs, Memory: 55 MB
+#3/3 [          3           ]  ( Training Loss: 0.208903 )
+ [ITER] #20 - Total: 697229 μs, Forward: 78909 μs, Backward: 618319 μs, Memory: 55 MB
+#3/3 [          4           ]  ( Training Loss: 0.243404 )
+ [ITER] #21 - Total: 707355 μs, Forward: 77560 μs, Backward: 629794 μs, Memory: 55 MB
+#3/3 [          5           ]  ( Training Loss: 0.219814 )
+ [ITER] #22 - Total: 679555 μs, Forward: 74093 μs, Backward: 605460 μs, Memory: 55 MB
+#3/3 [          6           ]  ( Training Loss: 0.155054 )
+ [ITER] #23 - Total: 680298 μs, Forward: 75089 μs, Backward: 605208 μs, Memory: 55 MB
+#3/3 [          7           ]  ( Training Loss: 0.0797996 )
+ [ITER] #24 - Total: 732620 μs, Forward: 83653 μs, Backward: 648966 μs, Memory: 55 MB
+#3/3 - Training Loss: 0.134014
+[DEBUG] Training completed successfully
+[TIMING] Training took: 17161 ms
+[MEMORY] After Training - Peak: 4577 MB, Current: 4508 MB, RSS: 49 MB
+
+=== PERFORMANCE SUMMARY ===
+Model Configuration:
+  - Sequence Length: 64
+  - Vocab Size: 1000
+  - Model Dimension: 128
+  - Number of Heads: 4
+  - Number of Layers: 8
+  - FFN Dimension: 512
+  - Batch Size: 4
+  - Epochs: 3
+
+Approximate Model Parameters (GELU FFN):
+  - Embedding: 8192
+  - Attention: 524288
+  - GELU FFN: 1048576 (2 projections: fc1+fc2)
+  - Total: 1581056 (~6 MB)
+
+=== STDERR ===

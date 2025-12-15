@@ -1,0 +1,890 @@
+Command: nntrainer/build/Applications/GC_Test/jni/gelu_gc_test --seq_len 64 --model_dim 128 --num_heads 4 --ffn_dim 512 --epochs 3 --learning_rate 0.0001 --num_layers 64 --batch_size 4
+Timestamp: 20251215_102518
+Return code: 0
+
+=== STDOUT ===
+[CONFIG] Parsed arguments:
+  seq_len=64, vocab_size=1000, model_dim=128
+  num_heads=4, num_layers=64, ffn_dim=512
+  batch_size=4, epochs=3, learning_rate=0.0001
+[DEBUG] Starting main function...
+[MEMORY] Program Start - Peak: 4274 MB, Current: 4274 MB, RSS: 12 MB
+[DEBUG] Creating model...
+[DEBUG] Starting model creation...
+[DEBUG] Model created successfully
+[DEBUG] Adding input layer...
+[DEBUG] Input layer added successfully
+[DEBUG] Adding simple embedding layer...
+[DEBUG] Embedding layer (FC) added successfully
+[DEBUG] Creating transformer layer 0
+[DEBUG] Adding ln_multiout1 for layer 0
+[DEBUG] Adding ln1 for layer 0
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 0
+[DEBUG] Adding multi_head_attention for layer 0
+[DEBUG] Adding add1 (residual after attention) for layer 0
+[DEBUG] Adding ln_multiout2 for layer 0
+[DEBUG] Adding ln2 for layer 0
+[DEBUG] Adding multi_out3 for layer 0
+[DEBUG] Adding FFN fc1 for layer 0
+[DEBUG] Adding FFN fc2 for layer 0
+[DEBUG] Adding add2 (residual after FFN) for layer 0
+[DEBUG] Creating transformer layer 1
+[DEBUG] Adding ln_multiout1 for layer 1
+[DEBUG] Adding ln1 for layer 1
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 1
+[DEBUG] Adding multi_head_attention for layer 1
+[DEBUG] Adding add1 (residual after attention) for layer 1
+[DEBUG] Adding ln_multiout2 for layer 1
+[DEBUG] Adding ln2 for layer 1
+[DEBUG] Adding multi_out3 for layer 1
+[DEBUG] Adding FFN fc1 for layer 1
+[DEBUG] Adding FFN fc2 for layer 1
+[DEBUG] Adding add2 (residual after FFN) for layer 1
+[DEBUG] Creating transformer layer 2
+[DEBUG] Adding ln_multiout1 for layer 2
+[DEBUG] Adding ln1 for layer 2
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 2
+[DEBUG] Adding multi_head_attention for layer 2
+[DEBUG] Adding add1 (residual after attention) for layer 2
+[DEBUG] Adding ln_multiout2 for layer 2
+[DEBUG] Adding ln2 for layer 2
+[DEBUG] Adding multi_out3 for layer 2
+[DEBUG] Adding FFN fc1 for layer 2
+[DEBUG] Adding FFN fc2 for layer 2
+[DEBUG] Adding add2 (residual after FFN) for layer 2
+[DEBUG] Creating transformer layer 3
+[DEBUG] Adding ln_multiout1 for layer 3
+[DEBUG] Adding ln1 for layer 3
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 3
+[DEBUG] Adding multi_head_attention for layer 3
+[DEBUG] Adding add1 (residual after attention) for layer 3
+[DEBUG] Adding ln_multiout2 for layer 3
+[DEBUG] Adding ln2 for layer 3
+[DEBUG] Adding multi_out3 for layer 3
+[DEBUG] Adding FFN fc1 for layer 3
+[DEBUG] Adding FFN fc2 for layer 3
+[DEBUG] Adding add2 (residual after FFN) for layer 3
+[DEBUG] Creating transformer layer 4
+[DEBUG] Adding ln_multiout1 for layer 4
+[DEBUG] Adding ln1 for layer 4
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 4
+[DEBUG] Adding multi_head_attention for layer 4
+[DEBUG] Adding add1 (residual after attention) for layer 4
+[DEBUG] Adding ln_multiout2 for layer 4
+[DEBUG] Adding ln2 for layer 4
+[DEBUG] Adding multi_out3 for layer 4
+[DEBUG] Adding FFN fc1 for layer 4
+[DEBUG] Adding FFN fc2 for layer 4
+[DEBUG] Adding add2 (residual after FFN) for layer 4
+[DEBUG] Creating transformer layer 5
+[DEBUG] Adding ln_multiout1 for layer 5
+[DEBUG] Adding ln1 for layer 5
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 5
+[DEBUG] Adding multi_head_attention for layer 5
+[DEBUG] Adding add1 (residual after attention) for layer 5
+[DEBUG] Adding ln_multiout2 for layer 5
+[DEBUG] Adding ln2 for layer 5
+[DEBUG] Adding multi_out3 for layer 5
+[DEBUG] Adding FFN fc1 for layer 5
+[DEBUG] Adding FFN fc2 for layer 5
+[DEBUG] Adding add2 (residual after FFN) for layer 5
+[DEBUG] Creating transformer layer 6
+[DEBUG] Adding ln_multiout1 for layer 6
+[DEBUG] Adding ln1 for layer 6
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 6
+[DEBUG] Adding multi_head_attention for layer 6
+[DEBUG] Adding add1 (residual after attention) for layer 6
+[DEBUG] Adding ln_multiout2 for layer 6
+[DEBUG] Adding ln2 for layer 6
+[DEBUG] Adding multi_out3 for layer 6
+[DEBUG] Adding FFN fc1 for layer 6
+[DEBUG] Adding FFN fc2 for layer 6
+[DEBUG] Adding add2 (residual after FFN) for layer 6
+[DEBUG] Creating transformer layer 7
+[DEBUG] Adding ln_multiout1 for layer 7
+[DEBUG] Adding ln1 for layer 7
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 7
+[DEBUG] Adding multi_head_attention for layer 7
+[DEBUG] Adding add1 (residual after attention) for layer 7
+[DEBUG] Adding ln_multiout2 for layer 7
+[DEBUG] Adding ln2 for layer 7
+[DEBUG] Adding multi_out3 for layer 7
+[DEBUG] Adding FFN fc1 for layer 7
+[DEBUG] Adding FFN fc2 for layer 7
+[DEBUG] Adding add2 (residual after FFN) for layer 7
+[DEBUG] Creating transformer layer 8
+[DEBUG] Adding ln_multiout1 for layer 8
+[DEBUG] Adding ln1 for layer 8
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 8
+[DEBUG] Adding multi_head_attention for layer 8
+[DEBUG] Adding add1 (residual after attention) for layer 8
+[DEBUG] Adding ln_multiout2 for layer 8
+[DEBUG] Adding ln2 for layer 8
+[DEBUG] Adding multi_out3 for layer 8
+[DEBUG] Adding FFN fc1 for layer 8
+[DEBUG] Adding FFN fc2 for layer 8
+[DEBUG] Adding add2 (residual after FFN) for layer 8
+[DEBUG] Creating transformer layer 9
+[DEBUG] Adding ln_multiout1 for layer 9
+[DEBUG] Adding ln1 for layer 9
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 9
+[DEBUG] Adding multi_head_attention for layer 9
+[DEBUG] Adding add1 (residual after attention) for layer 9
+[DEBUG] Adding ln_multiout2 for layer 9
+[DEBUG] Adding ln2 for layer 9
+[DEBUG] Adding multi_out3 for layer 9
+[DEBUG] Adding FFN fc1 for layer 9
+[DEBUG] Adding FFN fc2 for layer 9
+[DEBUG] Adding add2 (residual after FFN) for layer 9
+[DEBUG] Creating transformer layer 10
+[DEBUG] Adding ln_multiout1 for layer 10
+[DEBUG] Adding ln1 for layer 10
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 10
+[DEBUG] Adding multi_head_attention for layer 10
+[DEBUG] Adding add1 (residual after attention) for layer 10
+[DEBUG] Adding ln_multiout2 for layer 10
+[DEBUG] Adding ln2 for layer 10
+[DEBUG] Adding multi_out3 for layer 10
+[DEBUG] Adding FFN fc1 for layer 10
+[DEBUG] Adding FFN fc2 for layer 10
+[DEBUG] Adding add2 (residual after FFN) for layer 10
+[DEBUG] Creating transformer layer 11
+[DEBUG] Adding ln_multiout1 for layer 11
+[DEBUG] Adding ln1 for layer 11
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 11
+[DEBUG] Adding multi_head_attention for layer 11
+[DEBUG] Adding add1 (residual after attention) for layer 11
+[DEBUG] Adding ln_multiout2 for layer 11
+[DEBUG] Adding ln2 for layer 11
+[DEBUG] Adding multi_out3 for layer 11
+[DEBUG] Adding FFN fc1 for layer 11
+[DEBUG] Adding FFN fc2 for layer 11
+[DEBUG] Adding add2 (residual after FFN) for layer 11
+[DEBUG] Creating transformer layer 12
+[DEBUG] Adding ln_multiout1 for layer 12
+[DEBUG] Adding ln1 for layer 12
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 12
+[DEBUG] Adding multi_head_attention for layer 12
+[DEBUG] Adding add1 (residual after attention) for layer 12
+[DEBUG] Adding ln_multiout2 for layer 12
+[DEBUG] Adding ln2 for layer 12
+[DEBUG] Adding multi_out3 for layer 12
+[DEBUG] Adding FFN fc1 for layer 12
+[DEBUG] Adding FFN fc2 for layer 12
+[DEBUG] Adding add2 (residual after FFN) for layer 12
+[DEBUG] Creating transformer layer 13
+[DEBUG] Adding ln_multiout1 for layer 13
+[DEBUG] Adding ln1 for layer 13
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 13
+[DEBUG] Adding multi_head_attention for layer 13
+[DEBUG] Adding add1 (residual after attention) for layer 13
+[DEBUG] Adding ln_multiout2 for layer 13
+[DEBUG] Adding ln2 for layer 13
+[DEBUG] Adding multi_out3 for layer 13
+[DEBUG] Adding FFN fc1 for layer 13
+[DEBUG] Adding FFN fc2 for layer 13
+[DEBUG] Adding add2 (residual after FFN) for layer 13
+[DEBUG] Creating transformer layer 14
+[DEBUG] Adding ln_multiout1 for layer 14
+[DEBUG] Adding ln1 for layer 14
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 14
+[DEBUG] Adding multi_head_attention for layer 14
+[DEBUG] Adding add1 (residual after attention) for layer 14
+[DEBUG] Adding ln_multiout2 for layer 14
+[DEBUG] Adding ln2 for layer 14
+[DEBUG] Adding multi_out3 for layer 14
+[DEBUG] Adding FFN fc1 for layer 14
+[DEBUG] Adding FFN fc2 for layer 14
+[DEBUG] Adding add2 (residual after FFN) for layer 14
+[DEBUG] Creating transformer layer 15
+[DEBUG] Adding ln_multiout1 for layer 15
+[DEBUG] Adding ln1 for layer 15
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 15
+[DEBUG] Adding multi_head_attention for layer 15
+[DEBUG] Adding add1 (residual after attention) for layer 15
+[DEBUG] Adding ln_multiout2 for layer 15
+[DEBUG] Adding ln2 for layer 15
+[DEBUG] Adding multi_out3 for layer 15
+[DEBUG] Adding FFN fc1 for layer 15
+[DEBUG] Adding FFN fc2 for layer 15
+[DEBUG] Adding add2 (residual after FFN) for layer 15
+[DEBUG] Creating transformer layer 16
+[DEBUG] Adding ln_multiout1 for layer 16
+[DEBUG] Adding ln1 for layer 16
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 16
+[DEBUG] Adding multi_head_attention for layer 16
+[DEBUG] Adding add1 (residual after attention) for layer 16
+[DEBUG] Adding ln_multiout2 for layer 16
+[DEBUG] Adding ln2 for layer 16
+[DEBUG] Adding multi_out3 for layer 16
+[DEBUG] Adding FFN fc1 for layer 16
+[DEBUG] Adding FFN fc2 for layer 16
+[DEBUG] Adding add2 (residual after FFN) for layer 16
+[DEBUG] Creating transformer layer 17
+[DEBUG] Adding ln_multiout1 for layer 17
+[DEBUG] Adding ln1 for layer 17
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 17
+[DEBUG] Adding multi_head_attention for layer 17
+[DEBUG] Adding add1 (residual after attention) for layer 17
+[DEBUG] Adding ln_multiout2 for layer 17
+[DEBUG] Adding ln2 for layer 17
+[DEBUG] Adding multi_out3 for layer 17
+[DEBUG] Adding FFN fc1 for layer 17
+[DEBUG] Adding FFN fc2 for layer 17
+[DEBUG] Adding add2 (residual after FFN) for layer 17
+[DEBUG] Creating transformer layer 18
+[DEBUG] Adding ln_multiout1 for layer 18
+[DEBUG] Adding ln1 for layer 18
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 18
+[DEBUG] Adding multi_head_attention for layer 18
+[DEBUG] Adding add1 (residual after attention) for layer 18
+[DEBUG] Adding ln_multiout2 for layer 18
+[DEBUG] Adding ln2 for layer 18
+[DEBUG] Adding multi_out3 for layer 18
+[DEBUG] Adding FFN fc1 for layer 18
+[DEBUG] Adding FFN fc2 for layer 18
+[DEBUG] Adding add2 (residual after FFN) for layer 18
+[DEBUG] Creating transformer layer 19
+[DEBUG] Adding ln_multiout1 for layer 19
+[DEBUG] Adding ln1 for layer 19
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 19
+[DEBUG] Adding multi_head_attention for layer 19
+[DEBUG] Adding add1 (residual after attention) for layer 19
+[DEBUG] Adding ln_multiout2 for layer 19
+[DEBUG] Adding ln2 for layer 19
+[DEBUG] Adding multi_out3 for layer 19
+[DEBUG] Adding FFN fc1 for layer 19
+[DEBUG] Adding FFN fc2 for layer 19
+[DEBUG] Adding add2 (residual after FFN) for layer 19
+[DEBUG] Creating transformer layer 20
+[DEBUG] Adding ln_multiout1 for layer 20
+[DEBUG] Adding ln1 for layer 20
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 20
+[DEBUG] Adding multi_head_attention for layer 20
+[DEBUG] Adding add1 (residual after attention) for layer 20
+[DEBUG] Adding ln_multiout2 for layer 20
+[DEBUG] Adding ln2 for layer 20
+[DEBUG] Adding multi_out3 for layer 20
+[DEBUG] Adding FFN fc1 for layer 20
+[DEBUG] Adding FFN fc2 for layer 20
+[DEBUG] Adding add2 (residual after FFN) for layer 20
+[DEBUG] Creating transformer layer 21
+[DEBUG] Adding ln_multiout1 for layer 21
+[DEBUG] Adding ln1 for layer 21
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 21
+[DEBUG] Adding multi_head_attention for layer 21
+[DEBUG] Adding add1 (residual after attention) for layer 21
+[DEBUG] Adding ln_multiout2 for layer 21
+[DEBUG] Adding ln2 for layer 21
+[DEBUG] Adding multi_out3 for layer 21
+[DEBUG] Adding FFN fc1 for layer 21
+[DEBUG] Adding FFN fc2 for layer 21
+[DEBUG] Adding add2 (residual after FFN) for layer 21
+[DEBUG] Creating transformer layer 22
+[DEBUG] Adding ln_multiout1 for layer 22
+[DEBUG] Adding ln1 for layer 22
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 22
+[DEBUG] Adding multi_head_attention for layer 22
+[DEBUG] Adding add1 (residual after attention) for layer 22
+[DEBUG] Adding ln_multiout2 for layer 22
+[DEBUG] Adding ln2 for layer 22
+[DEBUG] Adding multi_out3 for layer 22
+[DEBUG] Adding FFN fc1 for layer 22
+[DEBUG] Adding FFN fc2 for layer 22
+[DEBUG] Adding add2 (residual after FFN) for layer 22
+[DEBUG] Creating transformer layer 23
+[DEBUG] Adding ln_multiout1 for layer 23
+[DEBUG] Adding ln1 for layer 23
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 23
+[DEBUG] Adding multi_head_attention for layer 23
+[DEBUG] Adding add1 (residual after attention) for layer 23
+[DEBUG] Adding ln_multiout2 for layer 23
+[DEBUG] Adding ln2 for layer 23
+[DEBUG] Adding multi_out3 for layer 23
+[DEBUG] Adding FFN fc1 for layer 23
+[DEBUG] Adding FFN fc2 for layer 23
+[DEBUG] Adding add2 (residual after FFN) for layer 23
+[DEBUG] Creating transformer layer 24
+[DEBUG] Adding ln_multiout1 for layer 24
+[DEBUG] Adding ln1 for layer 24
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 24
+[DEBUG] Adding multi_head_attention for layer 24
+[DEBUG] Adding add1 (residual after attention) for layer 24
+[DEBUG] Adding ln_multiout2 for layer 24
+[DEBUG] Adding ln2 for layer 24
+[DEBUG] Adding multi_out3 for layer 24
+[DEBUG] Adding FFN fc1 for layer 24
+[DEBUG] Adding FFN fc2 for layer 24
+[DEBUG] Adding add2 (residual after FFN) for layer 24
+[DEBUG] Creating transformer layer 25
+[DEBUG] Adding ln_multiout1 for layer 25
+[DEBUG] Adding ln1 for layer 25
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 25
+[DEBUG] Adding multi_head_attention for layer 25
+[DEBUG] Adding add1 (residual after attention) for layer 25
+[DEBUG] Adding ln_multiout2 for layer 25
+[DEBUG] Adding ln2 for layer 25
+[DEBUG] Adding multi_out3 for layer 25
+[DEBUG] Adding FFN fc1 for layer 25
+[DEBUG] Adding FFN fc2 for layer 25
+[DEBUG] Adding add2 (residual after FFN) for layer 25
+[DEBUG] Creating transformer layer 26
+[DEBUG] Adding ln_multiout1 for layer 26
+[DEBUG] Adding ln1 for layer 26
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 26
+[DEBUG] Adding multi_head_attention for layer 26
+[DEBUG] Adding add1 (residual after attention) for layer 26
+[DEBUG] Adding ln_multiout2 for layer 26
+[DEBUG] Adding ln2 for layer 26
+[DEBUG] Adding multi_out3 for layer 26
+[DEBUG] Adding FFN fc1 for layer 26
+[DEBUG] Adding FFN fc2 for layer 26
+[DEBUG] Adding add2 (residual after FFN) for layer 26
+[DEBUG] Creating transformer layer 27
+[DEBUG] Adding ln_multiout1 for layer 27
+[DEBUG] Adding ln1 for layer 27
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 27
+[DEBUG] Adding multi_head_attention for layer 27
+[DEBUG] Adding add1 (residual after attention) for layer 27
+[DEBUG] Adding ln_multiout2 for layer 27
+[DEBUG] Adding ln2 for layer 27
+[DEBUG] Adding multi_out3 for layer 27
+[DEBUG] Adding FFN fc1 for layer 27
+[DEBUG] Adding FFN fc2 for layer 27
+[DEBUG] Adding add2 (residual after FFN) for layer 27
+[DEBUG] Creating transformer layer 28
+[DEBUG] Adding ln_multiout1 for layer 28
+[DEBUG] Adding ln1 for layer 28
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 28
+[DEBUG] Adding multi_head_attention for layer 28
+[DEBUG] Adding add1 (residual after attention) for layer 28
+[DEBUG] Adding ln_multiout2 for layer 28
+[DEBUG] Adding ln2 for layer 28
+[DEBUG] Adding multi_out3 for layer 28
+[DEBUG] Adding FFN fc1 for layer 28
+[DEBUG] Adding FFN fc2 for layer 28
+[DEBUG] Adding add2 (residual after FFN) for layer 28
+[DEBUG] Creating transformer layer 29
+[DEBUG] Adding ln_multiout1 for layer 29
+[DEBUG] Adding ln1 for layer 29
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 29
+[DEBUG] Adding multi_head_attention for layer 29
+[DEBUG] Adding add1 (residual after attention) for layer 29
+[DEBUG] Adding ln_multiout2 for layer 29
+[DEBUG] Adding ln2 for layer 29
+[DEBUG] Adding multi_out3 for layer 29
+[DEBUG] Adding FFN fc1 for layer 29
+[DEBUG] Adding FFN fc2 for layer 29
+[DEBUG] Adding add2 (residual after FFN) for layer 29
+[DEBUG] Creating transformer layer 30
+[DEBUG] Adding ln_multiout1 for layer 30
+[DEBUG] Adding ln1 for layer 30
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 30
+[DEBUG] Adding multi_head_attention for layer 30
+[DEBUG] Adding add1 (residual after attention) for layer 30
+[DEBUG] Adding ln_multiout2 for layer 30
+[DEBUG] Adding ln2 for layer 30
+[DEBUG] Adding multi_out3 for layer 30
+[DEBUG] Adding FFN fc1 for layer 30
+[DEBUG] Adding FFN fc2 for layer 30
+[DEBUG] Adding add2 (residual after FFN) for layer 30
+[DEBUG] Creating transformer layer 31
+[DEBUG] Adding ln_multiout1 for layer 31
+[DEBUG] Adding ln1 for layer 31
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 31
+[DEBUG] Adding multi_head_attention for layer 31
+[DEBUG] Adding add1 (residual after attention) for layer 31
+[DEBUG] Adding ln_multiout2 for layer 31
+[DEBUG] Adding ln2 for layer 31
+[DEBUG] Adding multi_out3 for layer 31
+[DEBUG] Adding FFN fc1 for layer 31
+[DEBUG] Adding FFN fc2 for layer 31
+[DEBUG] Adding add2 (residual after FFN) for layer 31
+[DEBUG] Creating transformer layer 32
+[DEBUG] Adding ln_multiout1 for layer 32
+[DEBUG] Adding ln1 for layer 32
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 32
+[DEBUG] Adding multi_head_attention for layer 32
+[DEBUG] Adding add1 (residual after attention) for layer 32
+[DEBUG] Adding ln_multiout2 for layer 32
+[DEBUG] Adding ln2 for layer 32
+[DEBUG] Adding multi_out3 for layer 32
+[DEBUG] Adding FFN fc1 for layer 32
+[DEBUG] Adding FFN fc2 for layer 32
+[DEBUG] Adding add2 (residual after FFN) for layer 32
+[DEBUG] Creating transformer layer 33
+[DEBUG] Adding ln_multiout1 for layer 33
+[DEBUG] Adding ln1 for layer 33
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 33
+[DEBUG] Adding multi_head_attention for layer 33
+[DEBUG] Adding add1 (residual after attention) for layer 33
+[DEBUG] Adding ln_multiout2 for layer 33
+[DEBUG] Adding ln2 for layer 33
+[DEBUG] Adding multi_out3 for layer 33
+[DEBUG] Adding FFN fc1 for layer 33
+[DEBUG] Adding FFN fc2 for layer 33
+[DEBUG] Adding add2 (residual after FFN) for layer 33
+[DEBUG] Creating transformer layer 34
+[DEBUG] Adding ln_multiout1 for layer 34
+[DEBUG] Adding ln1 for layer 34
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 34
+[DEBUG] Adding multi_head_attention for layer 34
+[DEBUG] Adding add1 (residual after attention) for layer 34
+[DEBUG] Adding ln_multiout2 for layer 34
+[DEBUG] Adding ln2 for layer 34
+[DEBUG] Adding multi_out3 for layer 34
+[DEBUG] Adding FFN fc1 for layer 34
+[DEBUG] Adding FFN fc2 for layer 34
+[DEBUG] Adding add2 (residual after FFN) for layer 34
+[DEBUG] Creating transformer layer 35
+[DEBUG] Adding ln_multiout1 for layer 35
+[DEBUG] Adding ln1 for layer 35
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 35
+[DEBUG] Adding multi_head_attention for layer 35
+[DEBUG] Adding add1 (residual after attention) for layer 35
+[DEBUG] Adding ln_multiout2 for layer 35
+[DEBUG] Adding ln2 for layer 35
+[DEBUG] Adding multi_out3 for layer 35
+[DEBUG] Adding FFN fc1 for layer 35
+[DEBUG] Adding FFN fc2 for layer 35
+[DEBUG] Adding add2 (residual after FFN) for layer 35
+[DEBUG] Creating transformer layer 36
+[DEBUG] Adding ln_multiout1 for layer 36
+[DEBUG] Adding ln1 for layer 36
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 36
+[DEBUG] Adding multi_head_attention for layer 36
+[DEBUG] Adding add1 (residual after attention) for layer 36
+[DEBUG] Adding ln_multiout2 for layer 36
+[DEBUG] Adding ln2 for layer 36
+[DEBUG] Adding multi_out3 for layer 36
+[DEBUG] Adding FFN fc1 for layer 36
+[DEBUG] Adding FFN fc2 for layer 36
+[DEBUG] Adding add2 (residual after FFN) for layer 36
+[DEBUG] Creating transformer layer 37
+[DEBUG] Adding ln_multiout1 for layer 37
+[DEBUG] Adding ln1 for layer 37
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 37
+[DEBUG] Adding multi_head_attention for layer 37
+[DEBUG] Adding add1 (residual after attention) for layer 37
+[DEBUG] Adding ln_multiout2 for layer 37
+[DEBUG] Adding ln2 for layer 37
+[DEBUG] Adding multi_out3 for layer 37
+[DEBUG] Adding FFN fc1 for layer 37
+[DEBUG] Adding FFN fc2 for layer 37
+[DEBUG] Adding add2 (residual after FFN) for layer 37
+[DEBUG] Creating transformer layer 38
+[DEBUG] Adding ln_multiout1 for layer 38
+[DEBUG] Adding ln1 for layer 38
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 38
+[DEBUG] Adding multi_head_attention for layer 38
+[DEBUG] Adding add1 (residual after attention) for layer 38
+[DEBUG] Adding ln_multiout2 for layer 38
+[DEBUG] Adding ln2 for layer 38
+[DEBUG] Adding multi_out3 for layer 38
+[DEBUG] Adding FFN fc1 for layer 38
+[DEBUG] Adding FFN fc2 for layer 38
+[DEBUG] Adding add2 (residual after FFN) for layer 38
+[DEBUG] Creating transformer layer 39
+[DEBUG] Adding ln_multiout1 for layer 39
+[DEBUG] Adding ln1 for layer 39
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 39
+[DEBUG] Adding multi_head_attention for layer 39
+[DEBUG] Adding add1 (residual after attention) for layer 39
+[DEBUG] Adding ln_multiout2 for layer 39
+[DEBUG] Adding ln2 for layer 39
+[DEBUG] Adding multi_out3 for layer 39
+[DEBUG] Adding FFN fc1 for layer 39
+[DEBUG] Adding FFN fc2 for layer 39
+[DEBUG] Adding add2 (residual after FFN) for layer 39
+[DEBUG] Creating transformer layer 40
+[DEBUG] Adding ln_multiout1 for layer 40
+[DEBUG] Adding ln1 for layer 40
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 40
+[DEBUG] Adding multi_head_attention for layer 40
+[DEBUG] Adding add1 (residual after attention) for layer 40
+[DEBUG] Adding ln_multiout2 for layer 40
+[DEBUG] Adding ln2 for layer 40
+[DEBUG] Adding multi_out3 for layer 40
+[DEBUG] Adding FFN fc1 for layer 40
+[DEBUG] Adding FFN fc2 for layer 40
+[DEBUG] Adding add2 (residual after FFN) for layer 40
+[DEBUG] Creating transformer layer 41
+[DEBUG] Adding ln_multiout1 for layer 41
+[DEBUG] Adding ln1 for layer 41
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 41
+[DEBUG] Adding multi_head_attention for layer 41
+[DEBUG] Adding add1 (residual after attention) for layer 41
+[DEBUG] Adding ln_multiout2 for layer 41
+[DEBUG] Adding ln2 for layer 41
+[DEBUG] Adding multi_out3 for layer 41
+[DEBUG] Adding FFN fc1 for layer 41
+[DEBUG] Adding FFN fc2 for layer 41
+[DEBUG] Adding add2 (residual after FFN) for layer 41
+[DEBUG] Creating transformer layer 42
+[DEBUG] Adding ln_multiout1 for layer 42
+[DEBUG] Adding ln1 for layer 42
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 42
+[DEBUG] Adding multi_head_attention for layer 42
+[DEBUG] Adding add1 (residual after attention) for layer 42
+[DEBUG] Adding ln_multiout2 for layer 42
+[DEBUG] Adding ln2 for layer 42
+[DEBUG] Adding multi_out3 for layer 42
+[DEBUG] Adding FFN fc1 for layer 42
+[DEBUG] Adding FFN fc2 for layer 42
+[DEBUG] Adding add2 (residual after FFN) for layer 42
+[DEBUG] Creating transformer layer 43
+[DEBUG] Adding ln_multiout1 for layer 43
+[DEBUG] Adding ln1 for layer 43
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 43
+[DEBUG] Adding multi_head_attention for layer 43
+[DEBUG] Adding add1 (residual after attention) for layer 43
+[DEBUG] Adding ln_multiout2 for layer 43
+[DEBUG] Adding ln2 for layer 43
+[DEBUG] Adding multi_out3 for layer 43
+[DEBUG] Adding FFN fc1 for layer 43
+[DEBUG] Adding FFN fc2 for layer 43
+[DEBUG] Adding add2 (residual after FFN) for layer 43
+[DEBUG] Creating transformer layer 44
+[DEBUG] Adding ln_multiout1 for layer 44
+[DEBUG] Adding ln1 for layer 44
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 44
+[DEBUG] Adding multi_head_attention for layer 44
+[DEBUG] Adding add1 (residual after attention) for layer 44
+[DEBUG] Adding ln_multiout2 for layer 44
+[DEBUG] Adding ln2 for layer 44
+[DEBUG] Adding multi_out3 for layer 44
+[DEBUG] Adding FFN fc1 for layer 44
+[DEBUG] Adding FFN fc2 for layer 44
+[DEBUG] Adding add2 (residual after FFN) for layer 44
+[DEBUG] Creating transformer layer 45
+[DEBUG] Adding ln_multiout1 for layer 45
+[DEBUG] Adding ln1 for layer 45
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 45
+[DEBUG] Adding multi_head_attention for layer 45
+[DEBUG] Adding add1 (residual after attention) for layer 45
+[DEBUG] Adding ln_multiout2 for layer 45
+[DEBUG] Adding ln2 for layer 45
+[DEBUG] Adding multi_out3 for layer 45
+[DEBUG] Adding FFN fc1 for layer 45
+[DEBUG] Adding FFN fc2 for layer 45
+[DEBUG] Adding add2 (residual after FFN) for layer 45
+[DEBUG] Creating transformer layer 46
+[DEBUG] Adding ln_multiout1 for layer 46
+[DEBUG] Adding ln1 for layer 46
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 46
+[DEBUG] Adding multi_head_attention for layer 46
+[DEBUG] Adding add1 (residual after attention) for layer 46
+[DEBUG] Adding ln_multiout2 for layer 46
+[DEBUG] Adding ln2 for layer 46
+[DEBUG] Adding multi_out3 for layer 46
+[DEBUG] Adding FFN fc1 for layer 46
+[DEBUG] Adding FFN fc2 for layer 46
+[DEBUG] Adding add2 (residual after FFN) for layer 46
+[DEBUG] Creating transformer layer 47
+[DEBUG] Adding ln_multiout1 for layer 47
+[DEBUG] Adding ln1 for layer 47
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 47
+[DEBUG] Adding multi_head_attention for layer 47
+[DEBUG] Adding add1 (residual after attention) for layer 47
+[DEBUG] Adding ln_multiout2 for layer 47
+[DEBUG] Adding ln2 for layer 47
+[DEBUG] Adding multi_out3 for layer 47
+[DEBUG] Adding FFN fc1 for layer 47
+[DEBUG] Adding FFN fc2 for layer 47
+[DEBUG] Adding add2 (residual after FFN) for layer 47
+[DEBUG] Creating transformer layer 48
+[DEBUG] Adding ln_multiout1 for layer 48
+[DEBUG] Adding ln1 for layer 48
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 48
+[DEBUG] Adding multi_head_attention for layer 48
+[DEBUG] Adding add1 (residual after attention) for layer 48
+[DEBUG] Adding ln_multiout2 for layer 48
+[DEBUG] Adding ln2 for layer 48
+[DEBUG] Adding multi_out3 for layer 48
+[DEBUG] Adding FFN fc1 for layer 48
+[DEBUG] Adding FFN fc2 for layer 48
+[DEBUG] Adding add2 (residual after FFN) for layer 48
+[DEBUG] Creating transformer layer 49
+[DEBUG] Adding ln_multiout1 for layer 49
+[DEBUG] Adding ln1 for layer 49
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 49
+[DEBUG] Adding multi_head_attention for layer 49
+[DEBUG] Adding add1 (residual after attention) for layer 49
+[DEBUG] Adding ln_multiout2 for layer 49
+[DEBUG] Adding ln2 for layer 49
+[DEBUG] Adding multi_out3 for layer 49
+[DEBUG] Adding FFN fc1 for layer 49
+[DEBUG] Adding FFN fc2 for layer 49
+[DEBUG] Adding add2 (residual after FFN) for layer 49
+[DEBUG] Creating transformer layer 50
+[DEBUG] Adding ln_multiout1 for layer 50
+[DEBUG] Adding ln1 for layer 50
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 50
+[DEBUG] Adding multi_head_attention for layer 50
+[DEBUG] Adding add1 (residual after attention) for layer 50
+[DEBUG] Adding ln_multiout2 for layer 50
+[DEBUG] Adding ln2 for layer 50
+[DEBUG] Adding multi_out3 for layer 50
+[DEBUG] Adding FFN fc1 for layer 50
+[DEBUG] Adding FFN fc2 for layer 50
+[DEBUG] Adding add2 (residual after FFN) for layer 50
+[DEBUG] Creating transformer layer 51
+[DEBUG] Adding ln_multiout1 for layer 51
+[DEBUG] Adding ln1 for layer 51
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 51
+[DEBUG] Adding multi_head_attention for layer 51
+[DEBUG] Adding add1 (residual after attention) for layer 51
+[DEBUG] Adding ln_multiout2 for layer 51
+[DEBUG] Adding ln2 for layer 51
+[DEBUG] Adding multi_out3 for layer 51
+[DEBUG] Adding FFN fc1 for layer 51
+[DEBUG] Adding FFN fc2 for layer 51
+[DEBUG] Adding add2 (residual after FFN) for layer 51
+[DEBUG] Creating transformer layer 52
+[DEBUG] Adding ln_multiout1 for layer 52
+[DEBUG] Adding ln1 for layer 52
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 52
+[DEBUG] Adding multi_head_attention for layer 52
+[DEBUG] Adding add1 (residual after attention) for layer 52
+[DEBUG] Adding ln_multiout2 for layer 52
+[DEBUG] Adding ln2 for layer 52
+[DEBUG] Adding multi_out3 for layer 52
+[DEBUG] Adding FFN fc1 for layer 52
+[DEBUG] Adding FFN fc2 for layer 52
+[DEBUG] Adding add2 (residual after FFN) for layer 52
+[DEBUG] Creating transformer layer 53
+[DEBUG] Adding ln_multiout1 for layer 53
+[DEBUG] Adding ln1 for layer 53
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 53
+[DEBUG] Adding multi_head_attention for layer 53
+[DEBUG] Adding add1 (residual after attention) for layer 53
+[DEBUG] Adding ln_multiout2 for layer 53
+[DEBUG] Adding ln2 for layer 53
+[DEBUG] Adding multi_out3 for layer 53
+[DEBUG] Adding FFN fc1 for layer 53
+[DEBUG] Adding FFN fc2 for layer 53
+[DEBUG] Adding add2 (residual after FFN) for layer 53
+[DEBUG] Creating transformer layer 54
+[DEBUG] Adding ln_multiout1 for layer 54
+[DEBUG] Adding ln1 for layer 54
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 54
+[DEBUG] Adding multi_head_attention for layer 54
+[DEBUG] Adding add1 (residual after attention) for layer 54
+[DEBUG] Adding ln_multiout2 for layer 54
+[DEBUG] Adding ln2 for layer 54
+[DEBUG] Adding multi_out3 for layer 54
+[DEBUG] Adding FFN fc1 for layer 54
+[DEBUG] Adding FFN fc2 for layer 54
+[DEBUG] Adding add2 (residual after FFN) for layer 54
+[DEBUG] Creating transformer layer 55
+[DEBUG] Adding ln_multiout1 for layer 55
+[DEBUG] Adding ln1 for layer 55
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 55
+[DEBUG] Adding multi_head_attention for layer 55
+[DEBUG] Adding add1 (residual after attention) for layer 55
+[DEBUG] Adding ln_multiout2 for layer 55
+[DEBUG] Adding ln2 for layer 55
+[DEBUG] Adding multi_out3 for layer 55
+[DEBUG] Adding FFN fc1 for layer 55
+[DEBUG] Adding FFN fc2 for layer 55
+[DEBUG] Adding add2 (residual after FFN) for layer 55
+[DEBUG] Creating transformer layer 56
+[DEBUG] Adding ln_multiout1 for layer 56
+[DEBUG] Adding ln1 for layer 56
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 56
+[DEBUG] Adding multi_head_attention for layer 56
+[DEBUG] Adding add1 (residual after attention) for layer 56
+[DEBUG] Adding ln_multiout2 for layer 56
+[DEBUG] Adding ln2 for layer 56
+[DEBUG] Adding multi_out3 for layer 56
+[DEBUG] Adding FFN fc1 for layer 56
+[DEBUG] Adding FFN fc2 for layer 56
+[DEBUG] Adding add2 (residual after FFN) for layer 56
+[DEBUG] Creating transformer layer 57
+[DEBUG] Adding ln_multiout1 for layer 57
+[DEBUG] Adding ln1 for layer 57
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 57
+[DEBUG] Adding multi_head_attention for layer 57
+[DEBUG] Adding add1 (residual after attention) for layer 57
+[DEBUG] Adding ln_multiout2 for layer 57
+[DEBUG] Adding ln2 for layer 57
+[DEBUG] Adding multi_out3 for layer 57
+[DEBUG] Adding FFN fc1 for layer 57
+[DEBUG] Adding FFN fc2 for layer 57
+[DEBUG] Adding add2 (residual after FFN) for layer 57
+[DEBUG] Creating transformer layer 58
+[DEBUG] Adding ln_multiout1 for layer 58
+[DEBUG] Adding ln1 for layer 58
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 58
+[DEBUG] Adding multi_head_attention for layer 58
+[DEBUG] Adding add1 (residual after attention) for layer 58
+[DEBUG] Adding ln_multiout2 for layer 58
+[DEBUG] Adding ln2 for layer 58
+[DEBUG] Adding multi_out3 for layer 58
+[DEBUG] Adding FFN fc1 for layer 58
+[DEBUG] Adding FFN fc2 for layer 58
+[DEBUG] Adding add2 (residual after FFN) for layer 58
+[DEBUG] Creating transformer layer 59
+[DEBUG] Adding ln_multiout1 for layer 59
+[DEBUG] Adding ln1 for layer 59
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 59
+[DEBUG] Adding multi_head_attention for layer 59
+[DEBUG] Adding add1 (residual after attention) for layer 59
+[DEBUG] Adding ln_multiout2 for layer 59
+[DEBUG] Adding ln2 for layer 59
+[DEBUG] Adding multi_out3 for layer 59
+[DEBUG] Adding FFN fc1 for layer 59
+[DEBUG] Adding FFN fc2 for layer 59
+[DEBUG] Adding add2 (residual after FFN) for layer 59
+[DEBUG] Creating transformer layer 60
+[DEBUG] Adding ln_multiout1 for layer 60
+[DEBUG] Adding ln1 for layer 60
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 60
+[DEBUG] Adding multi_head_attention for layer 60
+[DEBUG] Adding add1 (residual after attention) for layer 60
+[DEBUG] Adding ln_multiout2 for layer 60
+[DEBUG] Adding ln2 for layer 60
+[DEBUG] Adding multi_out3 for layer 60
+[DEBUG] Adding FFN fc1 for layer 60
+[DEBUG] Adding FFN fc2 for layer 60
+[DEBUG] Adding add2 (residual after FFN) for layer 60
+[DEBUG] Creating transformer layer 61
+[DEBUG] Adding ln_multiout1 for layer 61
+[DEBUG] Adding ln1 for layer 61
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 61
+[DEBUG] Adding multi_head_attention for layer 61
+[DEBUG] Adding add1 (residual after attention) for layer 61
+[DEBUG] Adding ln_multiout2 for layer 61
+[DEBUG] Adding ln2 for layer 61
+[DEBUG] Adding multi_out3 for layer 61
+[DEBUG] Adding FFN fc1 for layer 61
+[DEBUG] Adding FFN fc2 for layer 61
+[DEBUG] Adding add2 (residual after FFN) for layer 61
+[DEBUG] Creating transformer layer 62
+[DEBUG] Adding ln_multiout1 for layer 62
+[DEBUG] Adding ln1 for layer 62
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 62
+[DEBUG] Adding multi_head_attention for layer 62
+[DEBUG] Adding add1 (residual after attention) for layer 62
+[DEBUG] Adding ln_multiout2 for layer 62
+[DEBUG] Adding ln2 for layer 62
+[DEBUG] Adding multi_out3 for layer 62
+[DEBUG] Adding FFN fc1 for layer 62
+[DEBUG] Adding FFN fc2 for layer 62
+[DEBUG] Adding add2 (residual after FFN) for layer 62
+[DEBUG] Creating transformer layer 63
+[DEBUG] Adding ln_multiout1 for layer 63
+[DEBUG] Adding ln1 for layer 63
+[DEBUG] Adding multi_out1 (Q,K,V) for layer 63
+[DEBUG] Adding multi_head_attention for layer 63
+[DEBUG] Adding add1 (residual after attention) for layer 63
+[DEBUG] Adding ln_multiout2 for layer 63
+[DEBUG] Adding ln2 for layer 63
+[DEBUG] Adding multi_out3 for layer 63
+[DEBUG] Adding FFN fc1 for layer 63
+[DEBUG] Adding FFN fc2 for layer 63
+[DEBUG] Adding add2 (residual after FFN) for layer 63
+[DEBUG] Adding final layer normalization...
+[DEBUG] Final layer normalization added successfully
+[DEBUG] Skipping pooling2d layer for debugging...
+[DEBUG] Adding simple output projection...
+[DEBUG] Output projection added successfully
+
+[INFO] Gradient checkpointing is DISABLED
+[DEBUG] Model creation completed successfully!
+[DEBUG] Model created successfully!
+[TIMING] Model Creation took: 78 ms
+[MEMORY] After Model Creation - Peak: 4276 MB, Current: 4276 MB, RSS: 15 MB
+[DEBUG] Setting model properties...
+[DEBUG] Model properties set successfully
+[DEBUG] Creating optimizer...
+[DEBUG] Optimizer set successfully
+[TIMING] Model Configuration took: 0 ms
+[DEBUG] Compiling model...
+[DEBUG] Model compiled with status: 0
+[TIMING] Model Compilation took: 34 ms
+[MEMORY] After Compilation - Peak: 4276 MB, Current: 4276 MB, RSS: 16 MB
+[DEBUG] Initializing model...
+[DEBUG] Model initialized with status: 0
+[TIMING] Model Initialization took: 563 ms
+[MEMORY] After Initialization - Peak: 4430 MB, Current: 4430 MB, RSS: 169 MB
+[DEBUG] Creating data generator...
+[DEBUG] Data generator created successfully
+[DEBUG] Setting dataset...
+[DEBUG] Dataset set successfully
+[TIMING] Data Setup took: 0 ms
+[DEBUG] Starting training...
+[INFO] Iteration stats are printed from neuralnet.cpp (once per batch)
+#1/3 [          0           ]  ( Training Loss: 9.73031 )
+ [ITER] #1 - Total: 6359274 μs, Forward: 1366663 μs, Backward: 4992610 μs, Memory: 431 MB
+#1/3 [          1           ]  ( Training Loss: 14.4745 )
+ [ITER] #2 - Total: 5361590 μs, Forward: 745383 μs, Backward: 4616206 μs, Memory: 431 MB
+#1/3 [          2           ]  ( Training Loss: 4.76887 )
+ [ITER] #3 - Total: 5179855 μs, Forward: 719641 μs, Backward: 4460213 μs, Memory: 431 MB
+#1/3 [          3           ]  ( Training Loss: 0.126847 )
+ [ITER] #4 - Total: 5095758 μs, Forward: 627246 μs, Backward: 4468511 μs, Memory: 431 MB
+#1/3 [          4           ]  ( Training Loss: 0.976778 )
+ [ITER] #5 - Total: 5128300 μs, Forward: 620237 μs, Backward: 4508062 μs, Memory: 431 MB
+#1/3 [          5           ]  ( Training Loss: 2.39738 )
+ [ITER] #6 - Total: 5266520 μs, Forward: 634767 μs, Backward: 4631752 μs, Memory: 431 MB
+#1/3 [          6           ]  ( Training Loss: 2.23032 )
+ [ITER] #7 - Total: 5244921 μs, Forward: 691116 μs, Backward: 4553805 μs, Memory: 431 MB
+#1/3 [          7           ]  ( Training Loss: 1.23688 )
+ [ITER] #8 - Total: 5282293 μs, Forward: 668954 μs, Backward: 4613338 μs, Memory: 431 MB
+#1/3 - Training Loss: 4.49273
+#2/3 [          0           ]  ( Training Loss: 0.367069 )
+ [ITER] #9 - Total: 5124018 μs, Forward: 615482 μs, Backward: 4508536 μs, Memory: 431 MB
+#2/3 [          1           ]  ( Training Loss: 0.0099732 )
+ [ITER] #10 - Total: 5188295 μs, Forward: 640070 μs, Backward: 4548225 μs, Memory: 431 MB
+#2/3 [          2           ]  ( Training Loss: 0.108491 )
+ [ITER] #11 - Total: 5237772 μs, Forward: 718996 μs, Backward: 4518776 μs, Memory: 431 MB
+#2/3 [          3           ]  ( Training Loss: 0.407321 )
+ [ITER] #12 - Total: 5583459 μs, Forward: 860872 μs, Backward: 4722586 μs, Memory: 431 MB
+#2/3 [          4           ]  ( Training Loss: 0.656168 )
+ [ITER] #13 - Total: 5297976 μs, Forward: 710242 μs, Backward: 4587733 μs, Memory: 431 MB
+#2/3 [          5           ]  ( Training Loss: 0.72491 )
+ [ITER] #14 - Total: 5130170 μs, Forward: 638402 μs, Backward: 4491767 μs, Memory: 431 MB
+#2/3 [          6           ]  ( Training Loss: 0.615101 )
+ [ITER] #15 - Total: 5068492 μs, Forward: 621133 μs, Backward: 4447358 μs, Memory: 431 MB
+#2/3 [          7           ]  ( Training Loss: 0.406625 )
+ [ITER] #16 - Total: 5257591 μs, Forward: 661119 μs, Backward: 4596471 μs, Memory: 431 MB
+#2/3 - Training Loss: 0.411957
+#3/3 [          0           ]  ( Training Loss: 0.195311 )
+ [ITER] #17 - Total: 5235074 μs, Forward: 635468 μs, Backward: 4599606 μs, Memory: 431 MB
+#3/3 [          1           ]  ( Training Loss: 0.0508526 )
+ [ITER] #18 - Total: 5232836 μs, Forward: 654176 μs, Backward: 4578659 μs, Memory: 431 MB
+#3/3 [          2           ]  ( Training Loss: 0.00017044 )
+ [ITER] #19 - Total: 5351856 μs, Forward: 681882 μs, Backward: 4669973 μs, Memory: 431 MB
+#3/3 [          3           ]  ( Training Loss: 0.0307847 )
+ [ITER] #20 - Total: 5256062 μs, Forward: 717034 μs, Backward: 4539027 μs, Memory: 431 MB
+#3/3 [          4           ]  ( Training Loss: 0.105895 )
+ [ITER] #21 - Total: 5482966 μs, Forward: 626040 μs, Backward: 4856924 μs, Memory: 431 MB
+#3/3 [          5           ]  ( Training Loss: 0.183047 )
+ [ITER] #22 - Total: 5455121 μs, Forward: 722089 μs, Backward: 4733031 μs, Memory: 431 MB
+#3/3 [          6           ]  ( Training Loss: 0.229699 )
+ [ITER] #23 - Total: 6569511 μs, Forward: 642223 μs, Backward: 5927288 μs, Memory: 431 MB
+#3/3 [          7           ]  ( Training Loss: 0.231599 )
+ [ITER] #24 - Total: 6870251 μs, Forward: 1171154 μs, Backward: 5699096 μs, Memory: 431 MB
+#3/3 - Training Loss: 0.12842
+[DEBUG] Training completed successfully
+[TIMING] Training took: 130592 ms
+[MEMORY] After Training - Peak: 4969 MB, Current: 4695 MB, RSS: 237 MB
+
+=== PERFORMANCE SUMMARY ===
+Model Configuration:
+  - Sequence Length: 64
+  - Vocab Size: 1000
+  - Model Dimension: 128
+  - Number of Heads: 4
+  - Number of Layers: 64
+  - FFN Dimension: 512
+  - Batch Size: 4
+  - Epochs: 3
+
+Approximate Model Parameters (GELU FFN):
+  - Embedding: 8192
+  - Attention: 4194304
+  - GELU FFN: 8388608 (2 projections: fc1+fc2)
+  - Total: 12591104 (~48 MB)
+
+=== STDERR ===
