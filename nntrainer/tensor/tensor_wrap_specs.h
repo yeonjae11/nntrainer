@@ -58,14 +58,6 @@ enum class TensorLifespan {
   FORWARD_DERIV_LIFESPAN = 0b011, /**< Forward + deriv lifespan */
   FORWARD_RECOMPUTE_LIFESPAN = 0b10000, /**< Forward to recompute lifespan for
                                 checkpoint block boundaries */
-  RECOMPUTE_GRAD_LIFESPAN = 0b10100, /**  */
-  RECOMPUTE_DERIV_LIFESPAN = 0b10010, /**< Recompute to deriv lifespan for
-                                checkpointed layers */
-  RECOMPUTE_AGRAD_LIFESPAN = 0b11000,
-  RECOMPUTE_GRAD_DERIV_LIFESPAN = 0b10110,
-  RECOMPUTE_GRAD_AGRAD_LIFESPAN = 0b11100,
-  RECOMPUTE_DERIV_AGRAD_LIFESPAN = 0b11010,
-  RECOMPUTE_GRAD_DERIV_AGRAD_LIFESPAN = 0b11110,
   BACKWARD_FUNC_LIFESPAN =
     CALC_GRAD_DERIV_AGRAD_LIFESPAN, /**< Alias of CALC_GRAD_DERIV_AGRAD_LIFESPAN
                                      */
@@ -80,6 +72,23 @@ enum class TensorLifespan {
   VIRTUAL = 0b11111111,     /**< virtual lifespan, tensor exists but does not
                                allocate memory */
 };
+
+/**
+ * @brief Promote tensor lifespan from initial forward to recompute forward
+ * @details Converts FORWARD_FUNC_LIFESPAN to FORWARD_RECOMPUTE_LIFESPAN
+ *          while preserving other lifespan bits (CALC_GRAD, CALC_DERIV, etc.)
+ * @param span Original tensor lifespan
+ * @return Promoted tensor lifespan with FORWARD_RECOMPUTE instead of FORWARD_FUNC
+ */
+constexpr TensorLifespan promoteToRecompute(TensorLifespan span) {
+  auto mask = static_cast<unsigned>(span);
+  if (mask & static_cast<unsigned>(TensorLifespan::FORWARD_FUNC_LIFESPAN)) {
+    mask &= ~static_cast<unsigned>(TensorLifespan::FORWARD_FUNC_LIFESPAN);
+    mask |= static_cast<unsigned>(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN);
+    return static_cast<TensorLifespan>(mask);
+  }
+  return span;
+}
 
 /**
  * @brief Specification of the Weight as a tensor wrapper

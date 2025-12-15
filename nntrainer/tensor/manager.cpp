@@ -724,21 +724,22 @@ Manager::requestInputs(const GraphNode &node,
   // during recompute forward and backward, not initial forward
   // First layer in block: initial_inputs = inputs, so needs initial forward too
   if (is_checkpoint_layer && !is_first_in_checkpoint_block) {
+    var_common_spec.ls = promoteToRecompute(var_common_spec.ls);
     // Convert to recompute-based lifespan (removes initial forward)
-    if (var_common_spec.ls == TensorLifespan::FORWARD_GRAD_LIFESPAN) {
-      // FORWARD_RECOMPUTE + CALC_GRAD = recompute forward + backward
-      var_common_spec.ls = static_cast<TensorLifespan>(
-        static_cast<int>(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN) |
-        static_cast<int>(TensorLifespan::CALC_GRAD_LIFESPAN));
-    } else if (var_common_spec.ls == TensorLifespan::FORWARD_FUNC_LIFESPAN) {
-      // Only recompute forward needed
-      var_common_spec.ls = TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN;
-    } else if (var_common_spec.ls == TensorLifespan::FORWARD_DERIV_LIFESPAN) {
-      // FORWARD_RECOMPUTE + CALC_DERIV = recompute forward + calcDerivative
-      var_common_spec.ls = static_cast<TensorLifespan>(
-        static_cast<int>(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN) |
-        static_cast<int>(TensorLifespan::CALC_DERIV_LIFESPAN));
-    }
+    // if (var_common_spec.ls == TensorLifespan::FORWARD_GRAD_LIFESPAN) {
+    //   // FORWARD_RECOMPUTE + CALC_GRAD = recompute forward + backward
+    //   var_common_spec.ls = static_cast<TensorLifespan>(
+    //     static_cast<int>(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN) |
+    //     static_cast<int>(TensorLifespan::CALC_GRAD_LIFESPAN));
+    // } else if (var_common_spec.ls == TensorLifespan::FORWARD_FUNC_LIFESPAN) {
+    //   // Only recompute forward needed
+    //   var_common_spec.ls = TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN;
+    // } else if (var_common_spec.ls == TensorLifespan::FORWARD_DERIV_LIFESPAN) {
+    //   // FORWARD_RECOMPUTE + CALC_DERIV = recompute forward + calcDerivative
+    //   var_common_spec.ls = static_cast<TensorLifespan>(
+    //     static_cast<int>(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN) |
+    //     static_cast<int>(TensorLifespan::CALC_DERIV_LIFESPAN));
+    // }
   }
 
   std::vector<Var_Grad *> ret;

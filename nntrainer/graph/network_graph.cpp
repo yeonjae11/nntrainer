@@ -59,26 +59,6 @@ namespace nntrainer {
 
 namespace {
 
-constexpr unsigned lifespanMask(TensorLifespan span) {
-  return static_cast<unsigned>(span);
-}
-
-constexpr unsigned FORWARD_MASK =
-  lifespanMask(TensorLifespan::FORWARD_FUNC_LIFESPAN);
-
-constexpr unsigned FORWARD_RECOMPUTE_MASK =
-  lifespanMask(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN);
-
-constexpr TensorLifespan promoteToRecompute(TensorLifespan span) {
-  auto mask = lifespanMask(span);
-  if (mask & FORWARD_MASK) {
-    mask &= ~FORWARD_MASK;
-    mask |= FORWARD_RECOMPUTE_MASK;
-    return static_cast<TensorLifespan>(mask);
-  }
-  return span;
-}
-
 std::string lifespanToString(TensorLifespan ls, 
                              const std::tuple<unsigned, unsigned, unsigned, unsigned, unsigned> &exec_order) {
   unsigned mask = static_cast<unsigned>(ls);
@@ -87,27 +67,27 @@ std::string lifespanToString(TensorLifespan ls,
   
   auto [forward, recompute, calc_grad, calc_deriv, apply_grad] = exec_order;
   
-  if (mask & lifespanMask(TensorLifespan::FORWARD_FUNC_LIFESPAN)) {
+  if (mask & static_cast<unsigned>(TensorLifespan::FORWARD_FUNC_LIFESPAN)) {
     components.push_back("FORWARD_FUNC");
     active_orders.push_back(forward);
   }
-  if (mask & lifespanMask(TensorLifespan::CALC_DERIV_LIFESPAN)) {
+  if (mask & static_cast<unsigned>(TensorLifespan::CALC_DERIV_LIFESPAN)) {
     components.push_back("CALC_DERIV");
     active_orders.push_back(calc_deriv);
   }
-  if (mask & lifespanMask(TensorLifespan::CALC_GRAD_LIFESPAN)) {
+  if (mask & static_cast<unsigned>(TensorLifespan::CALC_GRAD_LIFESPAN)) {
     components.push_back("CALC_GRAD");
     active_orders.push_back(calc_grad);
   }
-  if (mask & lifespanMask(TensorLifespan::CALC_AGRAD_LIFESPAN)) {
+  if (mask & static_cast<unsigned>(TensorLifespan::CALC_AGRAD_LIFESPAN)) {
     components.push_back("CALC_AGRAD");
     active_orders.push_back(apply_grad);
   }
-  if (mask & lifespanMask(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN)) {
+  if (mask & static_cast<unsigned>(TensorLifespan::FORWARD_RECOMPUTE_LIFESPAN)) {
     components.push_back("FORWARD_RECOMPUTE");
     active_orders.push_back(recompute);
   }
-  if (mask & lifespanMask(TensorLifespan::FORWARD_INFER_LIFESPAN)) {
+  if (mask & static_cast<unsigned>(TensorLifespan::FORWARD_INFER_LIFESPAN)) {
     components.push_back("FORWARD_INFER");
     active_orders.push_back(forward);
   }
@@ -1073,39 +1053,39 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   // Note: We only need to extend for checkpoint blocks that have a PREVIOUS checkpoint block.
   // The first checkpoint block in the model doesn't need this extension because there's no
   // previous checkpointed block waiting to use its gradient.
-  if (lnode->isCheckpointed() && lnode->isFirstInCheckpointBlock()) {
-    // Find the previous layer (boundary layer of previous block)
-    auto input_conns = lnode->getInputConnections();
-    for (const auto &conn : input_conns) {
-      auto prev_node = getLayerNode(conn);  // conn is already a string (layer name)
-      if (prev_node) {
-        // Only extend if the previous layer is also part of a checkpoint block
-        // (i.e., this is not the first checkpoint block in the model)
-        // The previous layer should be the last layer of the previous checkpoint block
-        if (!prev_node->getCheckpointBlockId().empty()) {
-          // Get the calcDerivative order of the previous layer
-          auto prev_exec_order = prev_node->getExecutionOrder();
-          unsigned int prev_calc_deriv_order = std::get<3>(prev_exec_order);
+  // if (lnode->isCheckpointed() && lnode->isFirstInCheckpointBlock()) {
+  //   // Find the previous layer (boundary layer of previous block)
+  //   auto input_conns = lnode->getInputConnections();
+  //   for (const auto &conn : input_conns) {
+  //     auto prev_node = getLayerNode(conn);  // conn is already a string (layer name)
+  //     if (prev_node) {
+  //       // Only extend if the previous layer is also part of a checkpoint block
+  //       // (i.e., this is not the first checkpoint block in the model)
+  //       // The previous layer should be the last layer of the previous checkpoint block
+  //       if (!prev_node->getCheckpointBlockId().empty()) {
+  //         // Get the calcDerivative order of the previous layer
+  //         auto prev_exec_order = prev_node->getExecutionOrder();
+  //         unsigned int prev_calc_deriv_order = std::get<3>(prev_exec_order);
           
-          // Extend the input gradient's lifespan to include the previous layer's calcDerivative
-          // This is done by extending the SOURCE tensor (output_grad of prev layer) which
-          // the input_grad references via READ_ONLY_VIEW
-          for (size_t i = 0; i < inputs.size(); i++) {
-            std::string grad_name = inputs[i]->getGradientName();
-            try {
-              tensor_manager->expandTensorLifespan(
-                grad_name,
-                {prev_calc_deriv_order},
-                TensorLifespan::CALC_DERIV_LIFESPAN,
-                false);
-            } catch (const std::exception &e) {
-              // Gradient not found in pool, skip
-            }
-          }
-        }
-      }
-    }
-  }
+  //         // Extend the input gradient's lifespan to include the previous layer's calcDerivative
+  //         // This is done by extending the SOURCE tensor (output_grad of prev layer) which
+  //         // the input_grad references via READ_ONLY_VIEW
+  //         for (size_t i = 0; i < inputs.size(); i++) {
+  //           std::string grad_name = inputs[i]->getGradientName();
+  //           try {
+  //             tensor_manager->expandTensorLifespan(
+  //               grad_name,
+  //               {prev_calc_deriv_order},
+  //               TensorLifespan::CALC_DERIV_LIFESPAN,
+  //               false);
+  //           } catch (const std::exception &e) {
+  //             // Gradient not found in pool, skip
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   /** In-Place optimizations */
   /**
@@ -1116,8 +1096,8 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   auto out_specs = init_context.getOutSpecs();
   
   // Gradient checkpointing: Prepare for two sets of outputs
-  std::vector<Var_Grad *> checkpoint_initial_outputs;
-  std::vector<Var_Grad *> checkpoint_recompute_outputs;
+  // std::vector<Var_Grad *> checkpoint_initial_outputs;
+  // std::vector<Var_Grad *> checkpoint_recompute_outputs;
 
   /// @note try move inplace control to finalize
   bool shared_var = false, shared_grad = false;
@@ -1220,18 +1200,18 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   bool needs_initial_outputs = is_checkpointed_layer;
   if (!needs_initial_outputs) {
     // Check if any input comes from a checkpointed layer
-    for (unsigned int i = 0; i < lnode->getNumInputConnections(); ++i) {
-      auto input_conn_name = lnode->getInputConnectionName(i);
-      if (!input_conn_name.empty()) {
-        auto prev_layer = getLayerNode(input_conn_name);
-        if (prev_layer && prev_layer->isCheckpointed()) {
-          needs_initial_outputs = true;
-          printf("[CHECKPOINT] Layer '%s' (non-checkpointed) needs initial_outputs because it receives from checkpointed layer '%s'\n",
-                  lnode->getName().c_str(), prev_layer->getName().c_str());
-          break;
-        }
-      }
-    }
+    // for (unsigned int i = 0; i < lnode->getNumInputConnections(); ++i) {
+    //   auto input_conn_name = lnode->getInputConnectionName(i);
+    //   if (!input_conn_name.empty()) {
+    //     auto prev_layer = getLayerNode(input_conn_name);
+    //     if (prev_layer && prev_layer->isCheckpointed()) {
+    //       needs_initial_outputs = true;
+    //       printf("[CHECKPOINT] Layer '%s' (non-checkpointed) needs initial_outputs because it receives from checkpointed layer '%s'\n",
+    //               lnode->getName().c_str(), prev_layer->getName().c_str());
+    //       break;
+    //     }
+    //   }
+    // }
 
     // If any of the consumers are checkpointed, we also need initial outputs
     if (!needs_initial_outputs) {
@@ -1326,10 +1306,12 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   if (needs_initial_outputs) {
     printf("[CHECKPOINT] Layer '%s' (checkpointed=%d) - allocating initial outputs\n", 
             lnode->getName().c_str(), is_checkpointed_layer);
-    if (lnode->isCheckpointed() && is_last_checkpoint_layer) {
+    if (!lnode->isCheckpointed() || is_last_checkpoint_layer) {
       initial_outputs = outputs;
       printf("[CHECKPOINT] Layer '%s' is last in checkpoint block - sharing recompute outputs as initial outputs\n",
              lnode->getName().c_str());
+    } else if (lnode->isCheckpointed() && (lnode->getInPlaceType() != InPlaceType::NONE)) {
+      initial_outputs.clear();
     } else {
       auto initial_out_specs = out_specs;
       const unsigned int terminal_forward_order =
@@ -1493,21 +1475,21 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
   auto tensors_spec = init_context.getTensorsSpec();
   std::vector<Var_Grad *> initial_tensors;
   
-  if (lnode->isCheckpointed()) {
+  if (lnode->isCheckpointed() && tensors_spec.size() > 0) {
     // Check if any intermediate tensors are used in backward
-    bool has_backward_tensors = false;
-    for (auto &spec : tensors_spec) {
-      auto &[dim, init, need_grad, name, lifespan, engine] = spec;
-      // If tensor has gradient or used in CALC_GRAD/CALC_DERIV, it's needed in backward
-      if (need_grad || 
-          lifespan == TensorLifespan::CALC_GRAD_LIFESPAN ||
-          lifespan == TensorLifespan::CALC_DERIV_LIFESPAN) {
-        has_backward_tensors = true;
-        break;
-      }
-    }
+    // bool has_backward_tensors = false;
+    // for (auto &spec : tensors_spec) {
+    //   auto &[dim, init, need_grad, name, lifespan, engine] = spec;
+    //   // If tensor has gradient or used in CALC_GRAD/CALC_DERIV, it's needed in backward
+    //   if (need_grad || 
+    //       lifespan == TensorLifespan::CALC_GRAD_LIFESPAN ||
+    //       lifespan == TensorLifespan::CALC_DERIV_LIFESPAN) {
+    //     has_backward_tensors = true;
+    //     break;
+    //   }
+    // }
     
-    if (has_backward_tensors) {
+    // if (has_backward_tensors) {
       // Dual allocation for intermediate tensors (like outputs)
       std::vector<InitLayerContext::TensorSpec> initial_tensors_spec;
       initial_tensors_spec.reserve(tensors_spec.size());
@@ -1536,25 +1518,25 @@ NetworkGraph::finalizeContext(const std::shared_ptr<LayerNode> &lnode,
       // Recompute tensors: change lifespan to be available during backward
       for (auto &spec : tensors_spec) {
         auto &lifespan = std::get<4>(spec);
-        if (lifespan == TensorLifespan::FORWARD_GRAD_LIFESPAN) {
-          lifespan = TensorLifespan::CALC_DERIV_LIFESPAN;
-        }
+        // if (lifespan == TensorLifespan::FORWARD_GRAD_LIFESPAN) {
+        //   lifespan = TensorLifespan::CALC_DERIV_LIFESPAN;
+        // }
         lifespan = promoteToRecompute(lifespan);
       }
       
       ml_logd("Layer '%s' has intermediate tensors used in backward - dual allocation",
               lnode->getName().c_str());
-    } else {
-      // No backward usage: just make them short-lived
-      for (auto &spec : tensors_spec) {
-        auto &[dim, init, need_grad, name, lifespan, engine] = spec;
-        if (lifespan == TensorLifespan::FORWARD_GRAD_LIFESPAN) {
-          lifespan = TensorLifespan::FORWARD_FUNC_LIFESPAN;
-        }
-      }
-      ml_logd("Layer '%s' intermediate tensors are short-lived (not used in backward)",
-              lnode->getName().c_str());
-    }
+    // } else {
+    //   // No backward usage: just make them short-lived
+    //   for (auto &spec : tensors_spec) {
+    //     auto &[dim, init, need_grad, name, lifespan, engine] = spec;
+    //     if (lifespan == TensorLifespan::FORWARD_GRAD_LIFESPAN) {
+    //       lifespan = TensorLifespan::FORWARD_FUNC_LIFESPAN;
+    //     }
+    //   }
+    //   ml_logd("Layer '%s' intermediate tensors are short-lived (not used in backward)",
+    //           lnode->getName().c_str());
+    // }
   }
 
   // Gradient checkpointing: Saved inputs will be set in initialize() 
@@ -1936,16 +1918,16 @@ int NetworkGraph::initialize(ExecutionMode mode,
     std::vector<Var_Grad *> initial_outputs =
       lnode->getRunContext().getInitialOutputs();
 
-    auto reuse_recorded_initial_inputs = [&]() {
-      auto init_it = initial_input_map.find(lnode->getName());
-      if (init_it != initial_input_map.end() && !init_it->second.empty()) {
-        initial_outputs = init_it->second;
-        printf("[CHECKPOINT] Layer '%s' - reusing recorded initial inputs for connections\n",
-               lnode->getName().c_str());
-        return true;
-      }
-      return false;
-    };
+    // auto reuse_recorded_initial_inputs = [&]() {
+    //   auto init_it = initial_input_map.find(lnode->getName());
+    //   if (init_it != initial_input_map.end() && !init_it->second.empty()) {
+    //     initial_outputs = init_it->second;
+    //     printf("[CHECKPOINT] Layer '%s' - reusing recorded initial inputs for connections\n",
+    //            lnode->getName().c_str());
+    //     return true;
+    //   }
+    //   return false;
+    // };
 
     // For checkpointed in-place layers, use initial_inputs instead of initial_outputs
     // This is because getOutput() returns initial_inputs for in-place layers
@@ -1998,9 +1980,9 @@ int NetworkGraph::initialize(ExecutionMode mode,
       }
     }
 
-    if (initial_outputs.empty()) {
-      reuse_recorded_initial_inputs();
-    }
+    // if (initial_outputs.empty()) {
+    //   reuse_recorded_initial_inputs();
+    // }
 
     for (auto i = 0u, num_node = lnode->getNumOutputConnections(); i < num_node;
          ++i) {
