@@ -21,9 +21,11 @@
 #include <stack>
 #include <vector>
 
+#include <checkpoint_block.h>
 #include <graph_core.h>
 #include <layer_node.h>
 #include <manager.h>
+#include <tensor.h>
 
 namespace nntrainer {
 using ExecutionMode = ml::train::ExecutionMode;
@@ -198,6 +200,20 @@ public:
   static void applyGradients(LayerNode *node,
                              const std::function<void(Weight &)> &apply_func);
 
+  /**
+   * @brief Apply checkpoint blocks to the graph
+   * @param checkpoint_blocks Vector of checkpoint blocks to apply
+   * @note This should be called before compile()
+   */
+  void applyCheckpointBlocks(const std::vector<CheckpointBlock> &checkpoint_blocks);
+
+  /**
+   * @brief Recompute forward pass for a checkpoint block
+   * @param block_id Checkpoint block identifier
+   * @note This is called during backwarding to restore activations
+   */
+  void recomputeCheckpointBlock(const std::string &block_id);
+  
   /**
    * @brief     forwarding network graph
    * @param[in] training true if forwarding is on training
